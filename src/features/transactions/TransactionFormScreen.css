@@ -1,0 +1,87 @@
+.transaction-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.transaction-form__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.transaction-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.transaction-form__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.transaction-form__datetime {
+  flex-direction: row;
+  gap: var(--space-3);
+}
+
+.transaction-form__field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.transaction-form__field input {
+  min-height: var(--touch-target);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface);
+}
+
+.transaction-form__error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.transaction-form__footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+}
+
+.transaction-form__submit {
+  flex: 1;
+  min-height: 52px;
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-orange);
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.transaction-form__submit:disabled {
+  opacity: 0.6;
+}
+
+.transaction-form__delete {
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+  color: var(--color-danger);
+  font-weight: 600;
+}

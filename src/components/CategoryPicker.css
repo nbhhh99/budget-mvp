@@ -1,0 +1,24 @@
+.category-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.category-picker__chip {
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  min-height: 44px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--color-surface-alt);
+}
+
+.category-picker__chip--selected {
+  color: var(--color-text);
+}
+
+.category-picker__empty {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}

@@ -1,0 +1,44 @@
+.reset-screen__body {
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.reset-screen__warning {
+  background-color: var(--color-orange-soft);
+  color: var(--color-danger);
+  border-radius: var(--radius-control);
+  padding: var(--space-4);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin-bottom: var(--space-4);
+}
+
+.reset-screen__field {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: var(--space-4);
+}
+
+.reset-screen__field input {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-target);
+  margin-top: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface);
+}
+
+.reset-screen__button {
+  width: 100%;
+  min-height: var(--touch-target);
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-danger);
+  color: white;
+  font-weight: 700;
+}
+
+.reset-screen__button:disabled {
+  opacity: 0.4;
+}

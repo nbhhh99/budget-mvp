@@ -1,0 +1,40 @@
+.amount-input__field-wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  border-bottom: 2px solid var(--color-border);
+  padding: var(--space-3) 0;
+}
+
+.amount-input__field-wrap--error {
+  border-bottom-color: var(--color-danger);
+}
+
+.amount-input__field {
+  border: none;
+  background: none;
+  font-size: 2.4rem;
+  font-weight: 700;
+  text-align: right;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+
+.amount-input__field:focus {
+  outline: none;
+}
+
+.amount-input__suffix {
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.amount-input__error {
+  margin: var(--space-2) 0 0;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  text-align: center;
+}

@@ -1,0 +1,30 @@
+.screen-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.screen-header__back {
+  width: var(--touch-target);
+  height: var(--touch-target);
+  border: none;
+  background: none;
+  font-size: 1.4rem;
+  border-radius: var(--radius-control);
+}
+
+.screen-header__back:active {
+  background-color: var(--color-surface-alt);
+}
+
+.screen-header__title {
+  flex: 1;
+  text-align: center;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.screen-header__spacer {
+  width: var(--touch-target);
+}

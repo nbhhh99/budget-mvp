@@ -1,0 +1,40 @@
+.type-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.type-selector__button {
+  min-height: 44px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: var(--space-1);
+}
+
+.type-selector__button--active.type-selector__button--income {
+  background-color: var(--color-mint-soft);
+  border-color: var(--color-income);
+  color: var(--color-text);
+}
+
+.type-selector__button--active.type-selector__button--expense {
+  background-color: var(--color-orange-soft);
+  border-color: var(--color-expense);
+  color: var(--color-text);
+}
+
+.type-selector__button--active.type-selector__button--saving {
+  background-color: var(--color-yellow-soft);
+  border-color: var(--color-saving);
+  color: var(--color-text);
+}
+
+.type-selector__button--active.type-selector__button--transfer {
+  background-color: var(--color-surface);
+  border-color: var(--color-transfer);
+  color: var(--color-text);
+}

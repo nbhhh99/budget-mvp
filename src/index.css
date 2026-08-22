@@ -1,0 +1,83 @@
+:root {
+  --color-bg: #fbf7ec;
+  --color-surface: #ffffff;
+  --color-surface-alt: #fff9ec;
+  --color-border: #eee3cb;
+
+  --color-mint: #8fd9c4;
+  --color-mint-soft: #e3f5ee;
+  --color-yellow: #ffd966;
+  --color-yellow-soft: #fff6da;
+  --color-orange: #f5a65b;
+  --color-orange-soft: #fdeadb;
+
+  --color-income: #6fbfa8;
+  --color-expense: #f08a4b;
+  --color-saving: #7aa7d9;
+  --color-transfer: #b9b0a0;
+
+  --color-text: #33302a;
+  --color-text-muted: #7a7468;
+  --color-danger: #e2604f;
+
+  --radius-card: 18px;
+  --radius-control: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --touch-target: 48px;
+
+  --shadow-card: 0 1px 2px rgba(51, 48, 42, 0.06);
+
+  font-family:
+    'Pretendard',
+    -apple-system,
+    'Apple SD Gothic Neo',
+    'Malgun Gothic',
+    sans-serif;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+.route-loading {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-6);
+}
