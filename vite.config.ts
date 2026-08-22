@@ -2,8 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// GitHub Pages 프로젝트 사이트는 /<repo-name>/ 하위 경로로 서빙되므로,
+// 프로덕션 빌드에서만 base를 바꾼다 (개발 서버는 그대로 루트에서 동작).
+const isBuild = process.env.NODE_ENV === 'production'
+
 // https://vite.dev/config/
 export default defineConfig({
+  base: isBuild ? '/budget-mvp/' : '/',
   plugins: [
     react(),
     VitePWA({
@@ -17,7 +22,6 @@ export default defineConfig({
         theme_color: '#FBF7EC',
         background_color: '#FBF7EC',
         display: 'standalone',
-        start_url: '/',
         icons: [
           {
             src: 'icons/icon.svg',
