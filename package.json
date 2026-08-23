@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "collect:briefing": "tsx scripts/collect-briefing/index.ts"
   },
   "dependencies": {
     "dexie": "^4.4.5",
@@ -26,6 +27,7 @@
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
     "prettier": "^3.9.6",
+    "tsx": "^4.23.12",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vite-plugin-pwa": "^1.3.0",

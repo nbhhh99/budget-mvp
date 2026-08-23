@@ -43,6 +43,14 @@ export async function updateCategory(
   await db.categories.update(id, patch)
 }
 
+// 재무 브리핑 개인화용 자산 유형 태깅. undefined를 넘기면 태그를 지운다.
+export async function setCategoryAssetType(
+  id: string,
+  assetType: Category['assetType'],
+): Promise<void> {
+  await db.categories.update(id, { assetType })
+}
+
 export async function setCategoryHidden(id: string, hidden: boolean): Promise<void> {
   await db.categories.update(id, { hidden })
 }

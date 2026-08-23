@@ -7,6 +7,7 @@ const DEFAULT_SETTINGS: Settings = {
   onboardingCompleted: false,
   lockPinHash: '',
   lockPinLength: 0,
+  assetTypeMigrationApplied: false,
 }
 
 export async function getSettings(): Promise<Settings> {

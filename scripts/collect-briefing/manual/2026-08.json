@@ -1,0 +1,107 @@
+[
+  {
+    "id": "kr-base-rate-2026-08",
+    "region": "korea",
+    "category": "interest_rate",
+    "title": "한국은행 기준금리 2.75%",
+    "factSummary": "한국은행 금융통화위원회는 2026년 7월 16일 기준금리를 연 2.50%에서 2.75%로 0.25%포인트 인상했습니다. 다음 금융통화위원회는 8월 27일로 예정되어 있습니다.",
+    "value": 2.75,
+    "unit": "%",
+    "previousValue": 2.5,
+    "comparisonBasis": "none",
+    "referenceDate": "2026-07-16",
+    "significance": "기준금리는 은행의 예금·대출 금리, 시장금리 전반에 영향을 줄 수 있는 정책금리입니다. 다만 예금·대출 금리가 기준금리와 항상 같은 폭·같은 시점에 움직이는 것은 아닙니다.",
+    "assetImplications": [
+      {
+        "assetTypes": ["cash_deposit"],
+        "explanation": "예금 금리에 영향을 줄 수 있습니다. 예금 만기·재가입 시점의 적용금리를 비교해볼 수 있습니다."
+      },
+      {
+        "assetTypes": ["debt"],
+        "explanation": "변동금리 대출을 이용 중이라면, 다음 금리 조정일에 상환 부담이 달라질 수 있습니다."
+      }
+    ],
+    "checklist": [
+      "보유 중인 예금의 만기일과 재가입 시 적용금리를 확인해볼 수 있습니다.",
+      "변동금리 대출이 있다면 다음 금리 조정일을 확인해볼 수 있습니다."
+    ],
+    "sources": [
+      {
+        "organization": "한국은행",
+        "title": "기준금리 추이 (통화정책방향 결정회의 일정 및 자료)",
+        "url": "https://www.bok.or.kr/portal/singl/baseRate/list.do?dataSeCd=01&menuNo=200643",
+        "publishedAt": "2026-07-16",
+        "accessedAt": "2026-08-23"
+      }
+    ],
+    "tags": ["base_rate", "통화정책"]
+  },
+  {
+    "id": "ecb-rate-2026-08",
+    "region": "global",
+    "category": "interest_rate",
+    "title": "ECB(유럽중앙은행) 정책금리 동결",
+    "factSummary": "유럽중앙은행(ECB)은 2026년 7월 23일 예금금리 2.25%, 주요 재융자금리 2.40%, 한계대출금리 2.65%를 모두 동결했습니다.",
+    "value": 2.25,
+    "unit": "%",
+    "previousValue": 2.25,
+    "comparisonBasis": "none",
+    "referenceDate": "2026-07-23",
+    "significance": "ECB 정책금리는 유로존 경기와 유로화 가치에 영향을 줄 수 있으며, 국내 투자자에게는 주로 해외 분산투자 자산의 가치와 관련이 있습니다.",
+    "assetImplications": [
+      {
+        "assetTypes": ["foreign_stock", "etf"],
+        "explanation": "유럽 관련 해외주식·ETF를 보유하고 있다면 참고할 수 있는 정보입니다."
+      }
+    ],
+    "checklist": ["유럽 관련 해외 자산이 있다면 관련 소식을 함께 확인해볼 수 있습니다."],
+    "sources": [
+      {
+        "organization": "European Central Bank",
+        "title": "Monetary policy decisions, 23 July 2026",
+        "url": "https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.mp260723~29f24d99bc.en.html",
+        "publishedAt": "2026-07-23",
+        "accessedAt": "2026-08-23"
+      }
+    ],
+    "tags": ["ecb_rate", "통화정책"]
+  },
+  {
+    "id": "kr-deposit-protection-limit-2026",
+    "region": "korea",
+    "category": "deposit_protection",
+    "title": "예금자보호 한도 1억원으로 상향",
+    "factSummary": "예금보험공사의 보호 한도가 2025년 9월 1일부터 기존 5천만원에서 1억원(원금과 이자 합산)으로 상향되어 시행 중입니다. 별도 신청 없이 은행·저축은행·증권사·보험사 등에 자동 적용됩니다.",
+    "value": 100000000,
+    "unit": "원",
+    "previousValue": 50000000,
+    "comparisonBasis": "none",
+    "referenceDate": "2025-09-01",
+    "significance": "한 금융회사당 보호받는 예금(원금+이자) 한도가 커진 것으로, 여러 금융회사에 자금을 나눠 예치할 때 참고할 수 있는 기준선이 달라졌습니다.",
+    "assetImplications": [
+      {
+        "assetTypes": ["cash_deposit"],
+        "explanation": "한 금융회사에 1억원을 초과하는 예금을 보유하고 있다면, 초과분은 보호 대상이 아닐 수 있어 분산 여부를 점검해볼 수 있습니다."
+      }
+    ],
+    "checklist": ["한 금융회사에 보유한 예금 합계(원금+이자)가 1억원을 넘는지 확인해볼 수 있습니다."],
+    "policyStatus": "active",
+    "effectiveDate": "2025-09-01",
+    "sources": [
+      {
+        "organization": "예금보험공사",
+        "title": "예금자보호제도 FAQ",
+        "url": "https://www.kdic.or.kr/sp/dpstrprot/ProtSystFaq/selectScrn.do",
+        "accessedAt": "2026-08-23"
+      },
+      {
+        "organization": "대한민국 정책브리핑(문화체육관광부)",
+        "title": "9월 1일부터 예금보호한도 1억 원으로 상향",
+        "url": "https://www.korea.kr/news/policyNewsView.do?newsId=148943235",
+        "publishedAt": "2025-08-01",
+        "accessedAt": "2026-08-23"
+      }
+    ],
+    "tags": ["예금자보호", "deposit_insurance"]
+  }
+]

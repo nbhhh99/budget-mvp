@@ -9,6 +9,7 @@ import { TransactionFormScreen } from './features/transactions/TransactionFormSc
 import { MonthlyListScreen } from './features/transactions/MonthlyListScreen'
 import { BudgetScreen } from './features/budgets/BudgetScreen'
 import { AssetsScreen } from './features/assets/AssetsScreen'
+import { BriefingScreen } from './features/briefing/BriefingScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
 import { CategoryManagementScreen } from './features/categories/CategoryManagementScreen'
 import { LockSettingsScreen } from './features/settings/LockSettingsScreen'
@@ -40,6 +41,7 @@ function App() {
                 }
               />
               <Route path="budgets" element={<BudgetScreen />} />
+              <Route path="briefing" element={<BriefingScreen />} />
               <Route
                 path="assets"
                 element={

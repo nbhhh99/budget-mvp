@@ -21,6 +21,18 @@ export function HomeScreen() {
   return (
     <div className="home-screen">
       <div className="home-screen__brand">가계부</div>
+
+      <Link to="/briefing" className="home-screen__briefing-banner">
+        <span className="home-screen__briefing-banner-icon">🗞️</span>
+        <span className="home-screen__briefing-banner-text">
+          <span className="home-screen__briefing-banner-title">이번 달 재무 브리핑</span>
+          <span className="home-screen__briefing-banner-desc">
+            국내외 경제·제도 소식을 내 자산 구성에 맞춰 정리했어요
+          </span>
+        </span>
+        <span className="home-screen__briefing-banner-arrow">›</span>
+      </Link>
+
       <div className="home-screen__grid">
         {NAV_BUTTONS.map((btn) => (
           <Link

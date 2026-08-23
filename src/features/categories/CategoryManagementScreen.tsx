@@ -5,7 +5,7 @@ import { ColorSwatchPicker } from '../../components/ColorSwatchPicker'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { useToast } from '../../components/toast/useToast'
 import { categoriesRepo } from '../../db'
-import type { Category, CategoryGroup } from '../../types/models'
+import type { AssetType, Category, CategoryGroup } from '../../types/models'
 import { CATEGORY_PALETTE } from '../../constants/palette'
 import './CategoryManagementScreen.css'
 
@@ -16,6 +16,36 @@ const GROUP_LABEL: Record<CategoryGroup, string> = {
   saving: '저축·투자',
   transfer: '계좌 간 이체',
 }
+
+// 재무 브리핑(§4) 개인화용 자산 유형. 그룹별로 의미 있는 선택지만 보여준다.
+const ASSET_TYPE_LABEL: Record<AssetType, string> = {
+  cash_deposit: '현금·예금',
+  savings: '적금',
+  domestic_stock: '국내 주식',
+  foreign_stock: '해외 주식',
+  etf: 'ETF',
+  bond: '채권',
+  pension: '연금',
+  real_estate: '부동산',
+  foreign_currency: '외화',
+  crypto: '가상자산',
+  debt: '대출·부채',
+  other: '기타',
+}
+const SAVING_ASSET_TYPES: AssetType[] = [
+  'cash_deposit',
+  'savings',
+  'domestic_stock',
+  'foreign_stock',
+  'etf',
+  'bond',
+  'pension',
+  'real_estate',
+  'foreign_currency',
+  'crypto',
+  'other',
+]
+const EXPENSE_ASSET_TYPES: AssetType[] = ['debt']
 
 type EditorState = { mode: 'new' } | { mode: 'edit'; category: Category } | null
 
@@ -80,14 +110,22 @@ export function CategoryManagementScreen() {
     refresh()
   }
 
-  async function handleSave(input: { name: string; color: string }) {
+  async function handleSave(input: { name: string; color: string; assetType?: AssetType }) {
     if (editor?.mode === 'edit') {
       await categoriesRepo.updateCategory(editor.category.id, {
         name: input.name,
         color: input.color,
       })
+      await categoriesRepo.setCategoryAssetType(editor.category.id, input.assetType)
     } else {
-      await categoriesRepo.addCategory({ group, name: input.name, color: input.color })
+      const created = await categoriesRepo.addCategory({
+        group,
+        name: input.name,
+        color: input.color,
+      })
+      if (input.assetType) {
+        await categoriesRepo.setCategoryAssetType(created.id, input.assetType)
+      }
     }
     setEditor(null)
     refresh()
@@ -157,8 +195,10 @@ export function CategoryManagementScreen() {
             <li key={category.id} className="category-mgmt__row">
               {editor?.mode === 'edit' && editor.category.id === category.id ? (
                 <CategoryEditorForm
+                  group={group}
                   initialName={category.name}
                   initialColor={category.color}
+                  initialAssetType={category.assetType}
                   onSave={handleSave}
                   onCancel={() => setEditor(null)}
                 />
@@ -211,6 +251,7 @@ export function CategoryManagementScreen() {
         {editor?.mode === 'new' ? (
           <div className="category-mgmt__new-form">
             <CategoryEditorForm
+              group={group}
               initialName=""
               initialColor={CATEGORY_PALETTE[visible.length % CATEGORY_PALETTE.length]}
               onSave={handleSave}
@@ -344,18 +385,26 @@ export function CategoryManagementScreen() {
 }
 
 function CategoryEditorForm({
+  group,
   initialName,
   initialColor,
+  initialAssetType,
   onSave,
   onCancel,
 }: {
+  group: CategoryGroup
   initialName: string
   initialColor: string
-  onSave: (input: { name: string; color: string }) => void
+  initialAssetType?: AssetType
+  onSave: (input: { name: string; color: string; assetType?: AssetType }) => void
   onCancel: () => void
 }) {
   const [name, setName] = useState(initialName)
   const [color, setColor] = useState(initialColor)
+  const [assetType, setAssetType] = useState<AssetType | ''>(initialAssetType ?? '')
+
+  const assetTypeOptions =
+    group === 'saving' ? SAVING_ASSET_TYPES : group === 'expense' ? EXPENSE_ASSET_TYPES : []
 
   return (
     <div className="category-editor">
@@ -368,6 +417,22 @@ function CategoryEditorForm({
         autoFocus
       />
       <ColorSwatchPicker value={color} onChange={setColor} />
+      {assetTypeOptions.length > 0 && (
+        <label className="category-editor__asset-type">
+          <span>재무 브리핑 자산 유형 (선택)</span>
+          <select
+            value={assetType}
+            onChange={(e) => setAssetType(e.target.value as AssetType | '')}
+          >
+            <option value="">지정 안 함</option>
+            {assetTypeOptions.map((type) => (
+              <option key={type} value={type}>
+                {ASSET_TYPE_LABEL[type]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <div className="category-editor__actions">
         <button type="button" className="category-editor__cancel" onClick={onCancel}>
           취소
@@ -376,7 +441,9 @@ function CategoryEditorForm({
           type="button"
           className="category-editor__save"
           disabled={!name.trim()}
-          onClick={() => onSave({ name: name.trim(), color })}
+          onClick={() =>
+            onSave({ name: name.trim(), color, assetType: assetType === '' ? undefined : assetType })
+          }
         >
           저장
         </button>

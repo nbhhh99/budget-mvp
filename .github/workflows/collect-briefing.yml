@@ -1,0 +1,60 @@
+name: Collect Financial Briefing Data
+
+# 공식 지표는 기관별로 발표일이 달라서 매월 1회보다 주기적으로 확인하는 편이
+# 안전하다. 매주 월요일 09:00 KST(00:00 UTC)에 실행하고, 필요하면 수동으로도
+# 실행할 수 있게 workflow_dispatch를 둔다.
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      yearMonth:
+        description: '수집 대상 연월 (YYYY-MM, 비우면 이번 달)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Run collector
+        env:
+          BOK_ECOS_API_KEY: ${{ secrets.BOK_ECOS_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          KOSIS_API_KEY: ${{ secrets.KOSIS_API_KEY }}
+        run: npm run collect:briefing -- "${{ inputs.yearMonth }}"
+
+      - name: Validate collected data
+        run: npm run test -- --run src/domain/briefingFixtures.test.ts src/domain/briefingSchema.test.ts
+
+      # 자동 수집 결과는 절대 main에 바로 반영하지 않는다 — 항상 draft 상태 PR로
+      # 열어서, 사람이 문구를 검수하고 status를 "reviewed"로 바꾼 뒤에만 병합한다
+      # (§10). PR이 main에 머지되면 기존 deploy.yml이 그대로 빌드·배포한다.
+      - name: Open a draft PR if anything changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore(briefing): 자동 수집 결과 갱신 (검수 필요)'
+          branch: briefing-draft/${{ inputs.yearMonth || 'auto' }}-${{ github.run_id }}
+          title: '[재무 브리핑] 자동 수집 결과 검토 필요'
+          body: |
+            GitHub Actions가 공식 자료를 자동으로 수집한 결과입니다.
+
+            - `public/data/briefings/*.json`의 새 항목은 모두 `status: "draft"`입니다.
+            - 이 PR을 머지하기 전에, 각 항목의 문구·수치·출처를 직접 확인하고
+              문제가 없으면 해당 파일의 `status`를 `"reviewed"`로 바꿔주세요.
+            - `reviewed`로 바뀌지 않은 항목은 앱 기본 화면에 노출되지 않습니다.
+            - 이미 검수(reviewed)된 달의 파일은 이 스크립트가 덮어쓰지 않습니다.
+          labels: briefing-draft

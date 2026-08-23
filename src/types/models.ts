@@ -29,6 +29,22 @@ export interface Transaction {
   importSourceId?: string
 }
 
+// 재무 브리핑 개인화에 쓰는 자산 유형. saving 그룹 카테고리뿐 아니라, expense 그룹의
+// "이자"처럼 대출 신호를 나타내는 카테고리에도 'debt'를 붙일 수 있다.
+export type AssetType =
+  | 'cash_deposit'
+  | 'savings'
+  | 'domestic_stock'
+  | 'foreign_stock'
+  | 'etf'
+  | 'bond'
+  | 'pension'
+  | 'real_estate'
+  | 'foreign_currency'
+  | 'crypto'
+  | 'debt'
+  | 'other'
+
 export interface Category {
   id: string
   group: CategoryGroup
@@ -38,6 +54,7 @@ export interface Category {
   icon?: string
   hidden: boolean
   isFixed?: boolean // 지출 카테고리의 고정/변동 구분 (§15 통계용, expense 그룹에서만 사용)
+  assetType?: AssetType // 재무 브리핑 개인화용 (선택, 미설정이면 일반 브리핑만 적용)
   createdAt: string
 }
 
@@ -70,4 +87,78 @@ export interface Settings {
   lastBackupAt?: string
   lockPinHash: string // 빈 문자열이면 잠금 미설정. 평문이 아닌 SHA-256 해시만 저장한다.
   lockPinLength: number // 자릿수를 알면 그만큼 입력됐을 때 자동으로 확인할 수 있다. 0이면 알 수 없음(과거 데이터).
+  assetTypeMigrationApplied: boolean // 카테고리 이름 기반 자산유형 1회성 제안을 이미 적용했는지
+}
+
+// ── 이번 달 재무 브리핑 ──────────────────────────────────────────
+// 공식 기관 자료를 정리한 일반 정보. 투자 추천이 아니며, 매수·매도 시점을 제시하지 않는다.
+
+export type BriefingRegion = 'korea' | 'global'
+
+export type BriefingCategory =
+  | 'interest_rate'
+  | 'inflation'
+  | 'exchange_rate'
+  | 'growth'
+  | 'employment'
+  | 'household_debt'
+  | 'deposit_protection'
+  | 'pension'
+  | 'tax'
+  | 'financial_policy'
+  | 'other'
+
+export type BriefingPolicyStatus = 'active' | 'scheduled' | 'under_review' | 'ending'
+
+export interface BriefingSource {
+  organization: string
+  title: string
+  url: string
+  publishedAt?: string // 'YYYY-MM-DD'
+  accessedAt: string // 'YYYY-MM-DD', 이 자료를 확인한 날짜
+}
+
+export interface AssetImplication {
+  assetTypes: AssetType[]
+  explanation: string
+}
+
+export interface BriefingItem {
+  id: string
+  region: BriefingRegion
+  category: BriefingCategory
+  title: string
+  factSummary: string // "무슨 일이 있었나"
+  value?: number
+  unit?: string
+  previousValue?: number
+  comparisonBasis?: 'month_over_month' | 'year_over_year' | 'none' // 전월비/전년동월비 구분
+  referenceDate: string // 'YYYY-MM-DD', 기준일
+  significance: string // "왜 중요한가"
+  assetImplications: AssetImplication[] // "내 자산과의 관련성"
+  checklist: string[] // "확인할 사항"
+  policyStatus?: BriefingPolicyStatus
+  effectiveDate?: string // 'YYYY-MM-DD'
+  sources: BriefingSource[]
+  tags: string[]
+}
+
+export interface FinancialBriefing {
+  yearMonth: string // 'YYYY-MM'
+  generatedAt: string // ISO datetime
+  reviewedAt?: string // ISO datetime, reviewed 상태로 바뀐 시각
+  status: 'draft' | 'reviewed'
+  summary: string
+  items: BriefingItem[]
+}
+
+export interface BriefingIndexEntry {
+  yearMonth: string
+  status: 'draft' | 'reviewed'
+  updatedAt: string
+}
+
+export interface BriefingIndex {
+  latestReviewed: string | null // 'YYYY-MM', reviewed 상태 중 최신. 없으면 null
+  entries: BriefingIndexEntry[]
 }

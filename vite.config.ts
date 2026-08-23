@@ -49,8 +49,13 @@ export default defineConfig({
           },
         ],
       },
+      // data/briefings/*.json도 정적 파일로 함께 프리캐시한다 — 재무 브리핑은
+      // GitHub Actions가 만들어 커밋한 정적 JSON이라 build 시점에 dist/에 존재하고,
+      // 새 브리핑이 배포될 때마다 서비스워커 버전도 함께 갱신되므로 별도 런타임
+      // 캐싱 규칙 없이도 오프라인에서 마지막으로 배포된 브리핑을 읽을 수 있다
+      // (§6·§8 오프라인 저장본 요구사항).
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,json}'],
       },
       devOptions: {
         enabled: true,
