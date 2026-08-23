@@ -8,6 +8,7 @@ const MENU_ITEMS = [
   { to: '/settings/categories', label: '분류 관리', ready: true },
   { to: '/settings/backup', label: '백업 / 복원', ready: true },
   { to: '/settings/csv', label: 'CSV 가져오기 / 내보내기', ready: true },
+  { to: '/settings/lock', label: '잠금 설정', ready: true },
   { to: '/settings/reset', label: '전체 초기화', ready: true },
 ]
 

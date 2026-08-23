@@ -68,4 +68,5 @@ export interface Settings {
   lastUsedTransactionType?: TransactionType
   onboardingCompleted: boolean
   lastBackupAt?: string
+  lockPinHash: string // 빈 문자열이면 잠금 미설정. 평문이 아닌 SHA-256 해시만 저장한다.
 }

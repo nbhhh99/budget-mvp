@@ -1,0 +1,62 @@
+.lock-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-5);
+  gap: var(--space-2);
+}
+
+.lock-gate__icon {
+  font-size: 2.4rem;
+  margin-bottom: var(--space-2);
+}
+
+.lock-gate__title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.lock-gate__desc {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.lock-gate__form {
+  width: 100%;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lock-gate__input {
+  min-height: var(--touch-target);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface);
+  text-align: center;
+  font-size: 1.1rem;
+  letter-spacing: 0.3em;
+}
+
+.lock-gate__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.lock-gate__submit {
+  min-height: var(--touch-target);
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-orange);
+  color: white;
+  font-weight: 600;
+}
+
+.lock-gate__submit:disabled {
+  opacity: 0.5;
+}

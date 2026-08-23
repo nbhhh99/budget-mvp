@@ -1,0 +1,99 @@
+.lock-settings__body {
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.lock-settings__desc {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0 0 var(--space-4);
+}
+
+.lock-settings__status {
+  font-size: 0.95rem;
+  margin: 0 0 var(--space-4);
+}
+
+.lock-settings__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lock-settings__actions button {
+  min-height: var(--touch-target);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface);
+  font-weight: 600;
+}
+
+.lock-settings__danger-text {
+  color: var(--color-danger);
+}
+
+.lock-settings__primary {
+  width: 100%;
+  min-height: var(--touch-target);
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-orange);
+  color: white;
+  font-weight: 700;
+}
+
+.lock-settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lock-settings__field {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.lock-settings__field input {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-target);
+  margin-top: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface);
+  letter-spacing: 0.2em;
+}
+
+.lock-settings__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.lock-settings__form-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.lock-settings__form-actions button {
+  flex: 1;
+  min-height: var(--touch-target);
+  border: none;
+  border-radius: var(--radius-control);
+  font-weight: 600;
+}
+
+.lock-settings__form-actions button[type='button'] {
+  background-color: var(--color-surface-alt);
+}
+
+.lock-settings__form-actions .lock-settings__primary {
+  background-color: var(--color-orange);
+  color: white;
+}
+
+.lock-settings__form-actions .lock-settings__danger {
+  background-color: var(--color-danger);
+  color: white;
+}

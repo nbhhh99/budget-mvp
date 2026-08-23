@@ -54,4 +54,17 @@ describe('validateBackupFile', () => {
     const result = validateBackupFile({ schemaVersion: BACKUP_SCHEMA_VERSION })
     expect(result.valid).toBe(false)
   })
+
+  it('accepts an older backup that has no assetValuations array (added later)', () => {
+    const file = validBackup()
+    expect('assetValuations' in file.data).toBe(false)
+    expect(validateBackupFile(file).valid).toBe(true)
+  })
+
+  it('rejects a file where assetValuations is present but not an array', () => {
+    const file = { ...validBackup(), data: { ...validBackup().data, assetValuations: 'oops' } }
+    const result = validateBackupFile(file)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some((e) => e.includes('assetValuations'))).toBe(true)
+  })
 })

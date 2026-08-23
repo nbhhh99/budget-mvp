@@ -1,8 +1,15 @@
 import { db } from './schema'
 import { seedDefaultsIfEmpty } from './init'
-import type { Category, MonthlyBudget, MonthlyMeta, Settings, Transaction } from '../types/models'
+import type {
+  AssetValuation,
+  Category,
+  MonthlyBudget,
+  MonthlyMeta,
+  Settings,
+  Transaction,
+} from '../types/models'
 
-export const BACKUP_SCHEMA_VERSION = 1
+export const BACKUP_SCHEMA_VERSION = 2
 
 export interface BackupFile {
   schemaVersion: number
@@ -13,22 +20,25 @@ export interface BackupFile {
     monthlyBudgets: MonthlyBudget[]
     monthlyMeta: MonthlyMeta[]
     settings: Settings[]
+    assetValuations?: AssetValuation[] // schemaVersion 1 백업에는 없을 수 있다
   }
 }
 
 export async function buildBackupFile(): Promise<BackupFile> {
-  const [transactions, categories, monthlyBudgets, monthlyMeta, settings] = await Promise.all([
-    db.transactions.toArray(),
-    db.categories.toArray(),
-    db.monthlyBudgets.toArray(),
-    db.monthlyMeta.toArray(),
-    db.settings.toArray(),
-  ])
+  const [transactions, categories, monthlyBudgets, monthlyMeta, settings, assetValuations] =
+    await Promise.all([
+      db.transactions.toArray(),
+      db.categories.toArray(),
+      db.monthlyBudgets.toArray(),
+      db.monthlyMeta.toArray(),
+      db.settings.toArray(),
+      db.assetValuations.toArray(),
+    ])
 
   return {
     schemaVersion: BACKUP_SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
-    data: { transactions, categories, monthlyBudgets, monthlyMeta, settings },
+    data: { transactions, categories, monthlyBudgets, monthlyMeta, settings, assetValuations },
   }
 }
 
@@ -70,6 +80,10 @@ export function validateBackupFile(input: unknown): BackupValidationResult {
       errors.push(`백업 파일의 "${key}" 항목이 올바르지 않습니다.`)
     }
   }
+  // assetValuations는 schemaVersion 1 백업에는 없을 수 있으므로, 있을 때만 배열인지 확인한다.
+  if (data.assetValuations !== undefined && !Array.isArray(data.assetValuations)) {
+    errors.push('백업 파일의 "assetValuations" 항목이 올바르지 않습니다.')
+  }
 
   if (errors.length > 0) {
     return { valid: false, errors }
@@ -86,7 +100,7 @@ export function validateBackupFile(input: unknown): BackupValidationResult {
 export async function restoreFromBackup(file: BackupFile): Promise<void> {
   await db.transaction(
     'rw',
-    [db.transactions, db.categories, db.monthlyBudgets, db.monthlyMeta, db.settings],
+    [db.transactions, db.categories, db.monthlyBudgets, db.monthlyMeta, db.settings, db.assetValuations],
     async () => {
       await Promise.all([
         db.transactions.clear(),
@@ -94,6 +108,7 @@ export async function restoreFromBackup(file: BackupFile): Promise<void> {
         db.monthlyBudgets.clear(),
         db.monthlyMeta.clear(),
         db.settings.clear(),
+        db.assetValuations.clear(),
       ])
       await Promise.all([
         db.transactions.bulkAdd(file.data.transactions),
@@ -101,6 +116,7 @@ export async function restoreFromBackup(file: BackupFile): Promise<void> {
         db.monthlyBudgets.bulkAdd(file.data.monthlyBudgets),
         db.monthlyMeta.bulkAdd(file.data.monthlyMeta),
         db.settings.bulkAdd(file.data.settings),
+        db.assetValuations.bulkAdd(file.data.assetValuations ?? []),
       ])
     },
   )
@@ -110,7 +126,7 @@ export async function restoreFromBackup(file: BackupFile): Promise<void> {
 export async function resetAllData(): Promise<void> {
   await db.transaction(
     'rw',
-    [db.transactions, db.categories, db.monthlyBudgets, db.monthlyMeta, db.settings],
+    [db.transactions, db.categories, db.monthlyBudgets, db.monthlyMeta, db.settings, db.assetValuations],
     async () => {
       await Promise.all([
         db.transactions.clear(),
@@ -118,6 +134,7 @@ export async function resetAllData(): Promise<void> {
         db.monthlyBudgets.clear(),
         db.monthlyMeta.clear(),
         db.settings.clear(),
+        db.assetValuations.clear(),
       ])
     },
   )
