@@ -7,31 +7,6 @@
   gap: var(--space-4);
 }
 
-.home-screen__briefing-banner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: var(--touch-target);
-  border-radius: var(--radius-card);
-  background-color: var(--color-mint-soft);
-  box-shadow: var(--shadow-card);
-  padding: var(--space-2) var(--space-4) var(--space-3);
-  text-decoration: none;
-}
-
-.home-screen__briefing-banner-image {
-  display: block;
-  width: 100%;
-  height: 96px;
-  object-fit: contain;
-}
-
-.home-screen__briefing-banner-label {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--color-text);
-}
-
 .home-screen__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
