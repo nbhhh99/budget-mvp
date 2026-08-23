@@ -7,23 +7,15 @@
   gap: var(--space-4);
 }
 
-.home-screen__brand {
-  display: block;
-  height: 64px;
-  width: 64px;
-  margin: 0 auto;
-  border-radius: var(--radius-control);
-  box-shadow: var(--shadow-card);
-  object-fit: cover;
-}
-
 .home-screen__briefing-banner {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-height: var(--touch-target);
   border-radius: var(--radius-card);
   background-color: var(--color-mint-soft);
   box-shadow: var(--shadow-card);
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-4) var(--space-3);
   text-decoration: none;
 }
 
@@ -34,6 +26,12 @@
   object-fit: contain;
 }
 
+.home-screen__briefing-banner-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
 .home-screen__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -41,10 +39,11 @@
 }
 
 .home-screen__button {
-  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-1);
   min-height: 140px;
   border-radius: var(--radius-card);
   text-decoration: none;
@@ -54,16 +53,14 @@
 
 .home-screen__button-image {
   width: 100%;
-  height: 100%;
-  max-height: 110px;
+  max-height: 92px;
   object-fit: contain;
 }
 
-.home-screen__lock {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  font-size: 0.85rem;
+.home-screen__button-label {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--color-text);
 }
 
 .home-screen__button--expense {
@@ -71,7 +68,7 @@
 }
 
 .home-screen__button--stats {
-  background-color: var(--color-mint-soft);
+  background-color: var(--color-lavender-soft);
 }
 
 .home-screen__button--list {
@@ -79,5 +76,5 @@
 }
 
 .home-screen__button--assets {
-  background-color: var(--color-blue-soft);
+  background-color: var(--color-mint-soft);
 }
