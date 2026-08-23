@@ -1,11 +1,133 @@
 .home-screen {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+}
+
+/* ── 배경 장식 (동전·잎사귀·별·점선·블러 원형) ───────────────────── */
+
+.home-screen__decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home-screen__decor-item {
+  position: absolute;
+  opacity: 0.06;
+}
+
+.home-screen__decor-item--coin {
+  top: 6%;
+  left: 5%;
+  color: var(--color-mint);
+}
+
+.home-screen__decor-item--leaf {
+  bottom: 16%;
+  right: 6%;
+  color: var(--color-mint);
+  transform: rotate(-15deg);
+}
+
+.home-screen__decor-item--star {
+  top: 16%;
+  right: 10%;
+  color: var(--color-yellow);
+  opacity: 0.08;
+}
+
+.home-screen__decor-item--dots {
+  bottom: 34%;
+  left: 3%;
+  color: var(--color-orange);
+  transform: rotate(-18deg);
+}
+
+.home-screen__decor-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(28px);
+  opacity: 0.08;
+}
+
+.home-screen__decor-blob--1 {
+  width: 150px;
+  height: 150px;
+  top: -40px;
+  right: -30px;
+  background-color: var(--color-lavender-soft);
+}
+
+.home-screen__decor-blob--2 {
+  width: 130px;
+  height: 130px;
+  bottom: 8%;
+  left: -40px;
+  background-color: var(--color-mint-soft);
+}
+
+/* ── 실제 콘텐츠 (장식 위에 표시) ───────────────────────────────── */
+
+.home-screen__content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-height: 100%;
   padding: var(--space-6) var(--space-5);
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
+
+.home-screen__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.home-screen__title-group {
+  min-width: 0;
+}
+
+.home-screen__title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-screen__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.home-screen__edit-button {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text-muted);
+}
+
+.home-screen__edit-button:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+/* ── 기능 버튼 4개 ──────────────────────────────────────────────── */
 
 .home-screen__grid {
   display: grid;
@@ -24,12 +146,62 @@
   text-decoration: none;
   box-shadow: var(--shadow-card);
   padding: var(--space-3);
+  animation: home-card-enter 320ms ease-out backwards;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+.home-screen__grid > a:nth-child(1) {
+  animation-delay: 0ms;
+}
+.home-screen__grid > a:nth-child(2) {
+  animation-delay: 80ms;
+}
+.home-screen__grid > a:nth-child(3) {
+  animation-delay: 160ms;
+}
+.home-screen__grid > a:nth-child(4) {
+  animation-delay: 240ms;
+}
+
+@keyframes home-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-screen__button:active {
+  transform: scale(0.98);
+}
+
+.home-screen__button:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .home-screen__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(51, 48, 42, 0.1);
+  }
+
+  .home-screen__button:hover .home-screen__button-image {
+    transform: translateY(-2px);
+  }
 }
 
 .home-screen__button-image {
   width: 100%;
   max-height: 92px;
   object-fit: contain;
+  transition: transform 150ms ease;
 }
 
 .home-screen__button-label {
@@ -52,4 +224,64 @@
 
 .home-screen__button--assets {
   background-color: var(--color-mint-soft);
+}
+
+/* ── 하단 오늘의 문구 ───────────────────────────────────────────── */
+
+.home-screen__quote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  animation: home-quote-fade 400ms ease-out;
+}
+
+@keyframes home-quote-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.home-screen__quote-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.home-screen__quote-text {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── 접근성: 애니메이션 최소화 ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .home-screen__button {
+    animation: none;
+    transition: none;
+  }
+
+  .home-screen__button:hover,
+  .home-screen__button:active {
+    transform: none;
+  }
+
+  .home-screen__button-image {
+    transition: none;
+  }
+
+  .home-screen__button:hover .home-screen__button-image {
+    transform: none;
+  }
+
+  .home-screen__quote {
+    animation: none;
+  }
 }

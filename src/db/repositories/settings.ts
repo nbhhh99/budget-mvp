@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS: Settings = {
   lockPinHash: '',
   lockPinLength: 0,
   assetTypeMigrationApplied: false,
+  householdName: '',
 }
 
 export async function getSettings(): Promise<Settings> {

@@ -1,0 +1,114 @@
+.household-name-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(51, 48, 42, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+
+.household-name-sheet {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  padding: var(--space-3) var(--space-5) max(var(--space-5), env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-card);
+  animation: household-sheet-up 220ms ease-out;
+}
+
+@keyframes household-sheet-up {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.household-name-sheet__grip {
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background-color: var(--color-border);
+  margin: 0 auto var(--space-4);
+}
+
+.household-name-sheet__title {
+  margin: 0 0 var(--space-4);
+  font-size: 1.05rem;
+}
+
+.household-name-sheet__field {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.household-name-sheet__label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.household-name-sheet__field input {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-target);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface-alt);
+  font-size: 1rem;
+}
+
+.household-name-sheet__hint {
+  margin: var(--space-2) 0 var(--space-4);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.household-name-sheet__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.household-name-sheet__cancel,
+.household-name-sheet__save {
+  flex: 1;
+  min-height: var(--touch-target);
+  border: none;
+  border-radius: var(--radius-control);
+  font-weight: 600;
+}
+
+.household-name-sheet__cancel {
+  background-color: var(--color-surface-alt);
+}
+
+.household-name-sheet__save {
+  background-color: var(--color-orange);
+  color: white;
+}
+
+@media (min-width: 560px) {
+  .household-name-sheet__backdrop {
+    align-items: center;
+    padding: var(--space-5);
+  }
+
+  .household-name-sheet {
+    border-radius: var(--radius-card);
+    padding: var(--space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .household-name-sheet {
+    animation: none;
+  }
+}
