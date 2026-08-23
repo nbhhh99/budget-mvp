@@ -6,7 +6,7 @@ import { HomeScreen } from './app/HomeScreen'
 import { TransactionFormScreen } from './features/transactions/TransactionFormScreen'
 import { MonthlyListScreen } from './features/transactions/MonthlyListScreen'
 import { BudgetScreen } from './features/budgets/BudgetScreen'
-import { MonthlySummaryScreen } from './features/summary/MonthlySummaryScreen'
+import { AssetsScreen } from './features/assets/AssetsScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
 import { CategoryManagementScreen } from './features/categories/CategoryManagementScreen'
 import { BackupScreen } from './features/backup/BackupScreen'
@@ -29,8 +29,7 @@ function App() {
             <Route path="transactions/:id/edit" element={<TransactionFormScreen />} />
             <Route path="transactions" element={<MonthlyListScreen />} />
             <Route path="budgets" element={<BudgetScreen />} />
-            <Route path="summary" element={<MonthlySummaryScreen />} />
-            <Route path="closing" element={<MonthlySummaryScreen />} />
+            <Route path="assets" element={<AssetsScreen />} />
             <Route
               path="stats"
               element={

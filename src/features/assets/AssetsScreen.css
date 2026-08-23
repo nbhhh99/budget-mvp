@@ -1,0 +1,123 @@
+.assets-screen__body {
+  padding: 0 var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.assets-screen__total-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.assets-screen__total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.assets-screen__total-row strong {
+  font-size: 1.2rem;
+}
+
+.assets-screen__label {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.assets-screen__empty {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-5) 0;
+}
+
+.assets-screen__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.assets-screen__row {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-card);
+}
+
+.assets-screen__row-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.assets-screen__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.assets-screen__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assets-screen__hidden-tag {
+  margin-left: var(--space-2);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-alt);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.assets-screen__gain {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.assets-screen__gain--positive {
+  color: var(--color-income);
+}
+
+.assets-screen__gain--negative {
+  color: var(--color-danger);
+}
+
+.assets-screen__row-fields {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.assets-screen__field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.assets-screen__manage-link {
+  text-align: center;
+  padding: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}

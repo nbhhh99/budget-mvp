@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { ColorSwatchPicker } from '../../components/ColorSwatchPicker'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
@@ -18,10 +19,18 @@ const GROUP_LABEL: Record<CategoryGroup, string> = {
 
 type EditorState = { mode: 'new' } | { mode: 'edit'; category: Category } | null
 
+function isCategoryGroup(value: string | null): value is CategoryGroup {
+  return value !== null && (GROUPS as string[]).includes(value)
+}
+
 export function CategoryManagementScreen() {
   const { showToast } = useToast()
+  const [searchParams] = useSearchParams()
   const [categories, setCategories] = useState<Category[]>([])
-  const [group, setGroup] = useState<CategoryGroup>('expense')
+  const initialGroup = searchParams.get('group')
+  const [group, setGroup] = useState<CategoryGroup>(
+    isCategoryGroup(initialGroup) ? initialGroup : 'expense',
+  )
   const [loaded, setLoaded] = useState(false)
   const [editor, setEditor] = useState<EditorState>(null)
   const [showHidden, setShowHidden] = useState(false)

@@ -4,6 +4,7 @@ import { useInstallPrompt } from '../../pwa/useInstallPrompt'
 import './SettingsScreen.css'
 
 const MENU_ITEMS = [
+  { to: '/budgets', label: '예산 설정', ready: true },
   { to: '/settings/categories', label: '분류 관리', ready: true },
   { to: '/settings/backup', label: '백업 / 복원', ready: true },
   { to: '/settings/csv', label: 'CSV 가져오기 / 내보내기', ready: true },

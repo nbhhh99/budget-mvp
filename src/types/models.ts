@@ -56,6 +56,12 @@ export interface MonthlyMeta {
   closingNote?: string
 }
 
+export interface AssetValuation {
+  categoryId: string // PK, saving 그룹 카테고리 참조
+  currentValue: number
+  updatedAt: string
+}
+
 export interface Settings {
   id: 'settings' // 단일 행 고정 키
   largeAmountThreshold: number
