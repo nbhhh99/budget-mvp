@@ -69,4 +69,5 @@ export interface Settings {
   onboardingCompleted: boolean
   lastBackupAt?: string
   lockPinHash: string // 빈 문자열이면 잠금 미설정. 평문이 아닌 SHA-256 해시만 저장한다.
+  lockPinLength: number // 자릿수를 알면 그만큼 입력됐을 때 자동으로 확인할 수 있다. 0이면 알 수 없음(과거 데이터).
 }

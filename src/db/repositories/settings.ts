@@ -6,6 +6,7 @@ const DEFAULT_SETTINGS: Settings = {
   largeAmountThreshold: 1_000_000,
   onboardingCompleted: false,
   lockPinHash: '',
+  lockPinLength: 0,
 }
 
 export async function getSettings(): Promise<Settings> {

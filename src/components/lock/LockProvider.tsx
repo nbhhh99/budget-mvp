@@ -7,6 +7,7 @@ import { hashPin } from '../../utils/pinHash'
 // (즉 JS가 새로 로드되면) 다시 잠긴 상태로 시작하는 것이 자연스러운 동작이다.
 export function LockProvider({ children }: { children: ReactNode }) {
   const [pinHash, setPinHash] = useState('')
+  const [pinLength, setPinLength] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const [unlocked, setUnlocked] = useState(false)
 
@@ -16,6 +17,7 @@ export function LockProvider({ children }: { children: ReactNode }) {
       const settings = await settingsRepo.getSettings()
       if (cancelled) return
       setPinHash(settings.lockPinHash ?? '')
+      setPinLength(settings.lockPinLength ?? 0)
       setLoaded(true)
     }
     load()
@@ -37,8 +39,9 @@ export function LockProvider({ children }: { children: ReactNode }) {
 
   const setPin = useCallback(async (pin: string) => {
     const hash = await hashPin(pin)
-    await settingsRepo.updateSettings({ lockPinHash: hash })
+    await settingsRepo.updateSettings({ lockPinHash: hash, lockPinLength: pin.length })
     setPinHash(hash)
+    setPinLength(pin.length)
     setUnlocked(true)
   }, [])
 
@@ -47,8 +50,9 @@ export function LockProvider({ children }: { children: ReactNode }) {
       const inputHash = await hashPin(currentPin)
       if (inputHash !== pinHash) return false
       const newHash = await hashPin(newPin)
-      await settingsRepo.updateSettings({ lockPinHash: newHash })
+      await settingsRepo.updateSettings({ lockPinHash: newHash, lockPinLength: newPin.length })
       setPinHash(newHash)
+      setPinLength(newPin.length)
       return true
     },
     [pinHash],
@@ -58,8 +62,9 @@ export function LockProvider({ children }: { children: ReactNode }) {
     async (currentPin: string) => {
       const inputHash = await hashPin(currentPin)
       if (inputHash !== pinHash) return false
-      await settingsRepo.updateSettings({ lockPinHash: '' })
+      await settingsRepo.updateSettings({ lockPinHash: '', lockPinLength: 0 })
       setPinHash('')
+      setPinLength(0)
       return true
     },
     [pinHash],
@@ -70,6 +75,7 @@ export function LockProvider({ children }: { children: ReactNode }) {
   const value: LockContextValue = {
     loaded,
     hasPin: Boolean(pinHash),
+    pinLength,
     unlocked,
     tryUnlock,
     setPin,

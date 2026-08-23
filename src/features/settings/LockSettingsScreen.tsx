@@ -26,7 +26,7 @@ export function LockSettingsScreen() {
 
   async function handleSetSubmit(e: FormEvent) {
     e.preventDefault()
-    if (newPin.length < 4) return setError('숫자 4자리 이상 입력해 주세요.')
+    if (newPin.length < 4) return setError('숫자 4~8자리로 입력해 주세요.')
     if (newPin !== newPinConfirm) return setError('비밀번호가 서로 달라요.')
     await setPin(newPin)
     showToast({ message: '잠금 비밀번호를 설정했어요.' })
@@ -35,7 +35,7 @@ export function LockSettingsScreen() {
 
   async function handleChangeSubmit(e: FormEvent) {
     e.preventDefault()
-    if (newPin.length < 4) return setError('숫자 4자리 이상 입력해 주세요.')
+    if (newPin.length < 4) return setError('숫자 4~8자리로 입력해 주세요.')
     if (newPin !== newPinConfirm) return setError('새 비밀번호가 서로 달라요.')
     const ok = await changePin(currentPin, newPin)
     if (!ok) return setError('현재 비밀번호가 올바르지 않아요.')
@@ -137,8 +137,9 @@ function PinField({
         type="password"
         inputMode="numeric"
         pattern="[0-9]*"
+        maxLength={8}
         value={value}
-        onChange={(e) => onChange(e.target.value.replace(/\D/g, ''))}
+        onChange={(e) => onChange(e.target.value.replace(/\D/g, '').slice(0, 8))}
       />
     </label>
   )
