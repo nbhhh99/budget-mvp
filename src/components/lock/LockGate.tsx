@@ -5,8 +5,12 @@ import './LockGate.css'
 const MIN_PIN_LENGTH = 4
 const MAX_PIN_LENGTH = 8
 
+// 잠금 해제 상태는 이 컴포넌트 안에서만(로컬 state) 유지한다. 다른 잠긴 화면으로
+// 옮겨가거나, 같은 화면을 나갔다가 다시 들어오면 컴포넌트가 새로 마운트되면서
+// 잠금 해제 상태도 초기화되어 매번 비밀번호를 다시 물어본다.
 export function LockGate({ children }: { children: ReactNode }) {
-  const { loaded, hasPin, pinLength, unlocked, tryUnlock } = useLock()
+  const { loaded, hasPin, pinLength, tryUnlock } = useLock()
+  const [unlocked, setUnlocked] = useState(false)
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
   const [checking, setChecking] = useState(false)
@@ -28,7 +32,10 @@ export function LockGate({ children }: { children: ReactNode }) {
     setChecking(true)
     const ok = await tryUnlock(next)
     setChecking(false)
-    if (ok) return
+    if (ok) {
+      setUnlocked(true)
+      return
+    }
 
     const exhausted = pinLength > 0 ? next.length === pinLength : next.length >= MAX_PIN_LENGTH
     if (exhausted) {

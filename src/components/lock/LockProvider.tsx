@@ -3,13 +3,14 @@ import { LockContext, type LockContextValue } from './context'
 import { settingsRepo } from '../../db'
 import { hashPin } from '../../utils/pinHash'
 
-// 잠금 해제 상태는 메모리에만 두고 저장하지 않는다. 앱을 완전히 껐다 켜면
-// (즉 JS가 새로 로드되면) 다시 잠긴 상태로 시작하는 것이 자연스러운 동작이다.
+// 잠금 해제 여부는 여기서 전역으로 들고 있지 않는다 — 화면 하나를 풀었다고
+// 다른 잠긴 화면까지 같이 풀리면 안 되고, 같은 화면도 나갔다가 다시 들어오면
+// 다시 비밀번호를 물어봐야 한다. 그래서 unlocked 상태는 각 LockGate가 자기
+// 안에서만(로컬 state로) 들고, 여기서는 비밀번호 확인/설정 기능만 제공한다.
 export function LockProvider({ children }: { children: ReactNode }) {
   const [pinHash, setPinHash] = useState('')
   const [pinLength, setPinLength] = useState(0)
   const [loaded, setLoaded] = useState(false)
-  const [unlocked, setUnlocked] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -30,9 +31,7 @@ export function LockProvider({ children }: { children: ReactNode }) {
     async (pin: string) => {
       if (!pinHash) return true
       const inputHash = await hashPin(pin)
-      const ok = inputHash === pinHash
-      if (ok) setUnlocked(true)
-      return ok
+      return inputHash === pinHash
     },
     [pinHash],
   )
@@ -42,7 +41,6 @@ export function LockProvider({ children }: { children: ReactNode }) {
     await settingsRepo.updateSettings({ lockPinHash: hash, lockPinLength: pin.length })
     setPinHash(hash)
     setPinLength(pin.length)
-    setUnlocked(true)
   }, [])
 
   const changePin = useCallback(
@@ -70,18 +68,14 @@ export function LockProvider({ children }: { children: ReactNode }) {
     [pinHash],
   )
 
-  const lockNow = useCallback(() => setUnlocked(false), [])
-
   const value: LockContextValue = {
     loaded,
     hasPin: Boolean(pinHash),
     pinLength,
-    unlocked,
     tryUnlock,
     setPin,
     changePin,
     clearPin,
-    lockNow,
   }
 
   return <LockContext.Provider value={value}>{children}</LockContext.Provider>
