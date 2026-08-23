@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: Settings = {
   lockPinLength: 0,
   assetTypeMigrationApplied: false,
   householdName: '',
+  householdSubtitle: '',
 }
 
 // 카테고리·설정이 비어 있을 때만 기본값을 채운다 (최초 실행, 또는 초기화 직후).

@@ -5,11 +5,17 @@ import statsImage from '../assets/branding/btn-stats.webp'
 import transactionsListImage from '../assets/branding/btn-transactions.webp'
 import assetsImage from '../assets/branding/btn-assets.webp'
 import { settingsRepo } from '../db'
-import { getDailyQuote, resolveHouseholdTitle, sanitizeHouseholdName } from '../domain'
+import {
+  getDailyQuote,
+  resolveHouseholdSubtitle,
+  resolveHouseholdTitle,
+  sanitizeHouseholdName,
+  sanitizeHouseholdSubtitle,
+} from '../domain'
 import { DAILY_QUOTES } from '../content/dailyQuotes'
 import { todayDateString } from '../utils/date'
 import { useToast } from '../components/toast/useToast'
-import { HouseholdNameSheet } from './HouseholdNameSheet'
+import { HouseholdHeaderSheet } from './HouseholdHeaderSheet'
 import './HomeScreen.css'
 
 const NAV_BUTTONS = [
@@ -98,6 +104,7 @@ function HomeDecoration() {
 export function HomeScreen() {
   const { showToast } = useToast()
   const [householdName, setHouseholdName] = useState('')
+  const [householdSubtitle, setHouseholdSubtitle] = useState('')
   const [loaded, setLoaded] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
 
@@ -107,6 +114,7 @@ export function HomeScreen() {
       const settings = await settingsRepo.getSettings()
       if (cancelled) return
       setHouseholdName(settings.householdName ?? '')
+      setHouseholdSubtitle(settings.householdSubtitle ?? '')
       setLoaded(true)
     }
     load()
@@ -116,12 +124,18 @@ export function HomeScreen() {
   }, [])
 
   const title = resolveHouseholdTitle(householdName)
+  const subtitle = resolveHouseholdSubtitle(householdSubtitle)
   const quote = getDailyQuote(DAILY_QUOTES, todayDateString())
 
-  async function handleSaveName(value: string) {
-    const sanitized = sanitizeHouseholdName(value)
-    await settingsRepo.updateSettings({ householdName: sanitized })
-    setHouseholdName(sanitized)
+  async function handleSaveHeader(name: string, subtitleInput: string) {
+    const sanitizedName = sanitizeHouseholdName(name)
+    const sanitizedSubtitle = sanitizeHouseholdSubtitle(subtitleInput)
+    await settingsRepo.updateSettings({
+      householdName: sanitizedName,
+      householdSubtitle: sanitizedSubtitle,
+    })
+    setHouseholdName(sanitizedName)
+    setHouseholdSubtitle(sanitizedSubtitle)
     setSheetOpen(false)
     showToast({ message: '가계부 이름을 저장했어요.' })
   }
@@ -133,8 +147,8 @@ export function HomeScreen() {
       <div className="home-screen__content">
         <div className="home-screen__header">
           <div className="home-screen__title-group">
-            <h1 className="home-screen__title">{loaded ? title : ' '}</h1>
-            <p className="home-screen__subtitle">오늘도 내 돈을 차곡차곡 기록해요</p>
+            <h1 className="home-screen__title">{loaded ? title : ' '}</h1>
+            <p className="home-screen__subtitle">{loaded ? subtitle : ' '}</p>
           </div>
           <button
             type="button"
@@ -169,10 +183,11 @@ export function HomeScreen() {
         )}
       </div>
 
-      <HouseholdNameSheet
+      <HouseholdHeaderSheet
         open={sheetOpen}
-        initialValue={householdName}
-        onSave={handleSaveName}
+        initialName={householdName}
+        initialSubtitle={householdSubtitle}
+        onSave={handleSaveHeader}
         onCancel={() => setSheetOpen(false)}
       />
     </div>

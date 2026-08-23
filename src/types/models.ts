@@ -89,6 +89,7 @@ export interface Settings {
   lockPinLength: number // 자릿수를 알면 그만큼 입력됐을 때 자동으로 확인할 수 있다. 0이면 알 수 없음(과거 데이터).
   assetTypeMigrationApplied: boolean // 카테고리 이름 기반 자산유형 1회성 제안을 이미 적용했는지
   householdName: string // 홈 화면 상단 가계부 이름. 빈 문자열이면 기본 제목("나의 가계부")을 쓴다.
+  householdSubtitle: string // 가계부 이름 아래 보조 문구. 빈 문자열이면 기본 문구를 쓴다.
 }
 
 // ── 이번 달 재무 브리핑 ──────────────────────────────────────────
