@@ -162,3 +162,70 @@ export interface BriefingIndex {
   latestReviewed: string | null // 'YYYY-MM', reviewed 상태 중 최신. 없으면 null
   entries: BriefingIndexEntry[]
 }
+
+// ── 공부하기 (개념 카드 · 계산기 · 이번 달 돈 공부) ──────────────────
+// 자산 형성에 필요한 개념을 정리한 일반 정보. 금융상품 추천이나 투자 방향을
+// 단정하지 않는다. BriefingSource와 동일한 구조를 쓴다.
+
+export type LearningSource = BriefingSource
+
+export interface ConceptCard {
+  id: string
+  title: string
+  oneLineSummary: string
+  definition: string
+  example: string
+  whyItMatters: string
+  relatedAssetTypes: AssetType[]
+  checklist: string[]
+  sources: LearningSource[]
+  reviewedAt: string // 'YYYY-MM-DD'
+  estimatedMinutes: number
+  difficulty: 'basic' | 'intermediate'
+  relatedConceptIds?: string[] // "관련 개념" 섹션에서 이동할 다른 개념 카드
+}
+
+export interface LessonSection {
+  heading: string
+  body: string
+}
+
+export interface MonthlyMoneyLesson {
+  id: string
+  yearMonth: string
+  title: string
+  subtitle: string
+  relatedBriefingItemIds: string[]
+  learningGoals: string[]
+  sections: LessonSection[]
+  reflectionQuestion: string
+  relatedConceptIds: string[]
+  relatedCalculatorIds: string[]
+  sources: LearningSource[]
+  status: 'draft' | 'reviewed'
+  reviewedAt?: string
+}
+
+export interface MonthlyLessonIndexEntry {
+  yearMonth: string
+  status: 'draft' | 'reviewed'
+  updatedAt: string
+}
+
+export interface MonthlyLessonIndex {
+  latestReviewed: string | null
+  entries: MonthlyLessonIndexEntry[]
+}
+
+export type CalculatorId = 'compound_interest' | 'inflation_adjusted' | 'goal_savings' | 'savings_rate'
+
+export type LearningContentType = 'concept' | 'monthly_lesson'
+
+export interface LearningProgress {
+  contentId: string // PK (concept id 또는 monthly lesson id)
+  contentType: LearningContentType
+  status: 'unread' | 'reading' | 'read'
+  saved: boolean
+  lastOpenedAt?: string
+  completedAt?: string
+}

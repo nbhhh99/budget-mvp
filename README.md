@@ -38,19 +38,46 @@ src/
   components/  공용 UI 컴포넌트 (lock/ 잠금 기능 포함)
   db/          Dexie 스키마, repository, 백업/복원, 마이그레이션
   domain/      잔고·예산·통계·재무 브리핑 계산/검증 순수 함수 (단위 테스트 대상)
-  features/    화면 단위 기능 (transactions, budgets, assets, briefing, stats, categories, backup, settings)
+  features/    화면 단위 기능 (transactions, budgets, assets, briefing, learn, stats, categories, backup, settings)
   pwa/         서비스워커 등록, 설치 프롬프트
   utils/       날짜·금액 포맷 유틸
 scripts/
   collect-briefing/  재무 브리핑 데이터 수집 스크립트 (GitHub Actions에서 실행)
 public/
   data/briefings/    재무 브리핑 정적 JSON (YYYY-MM.json, index.json)
+  data/learning/     개념 카드(concepts.json), 이번 달 돈 공부(monthly/YYYY-MM.json, index.json)
+  illustrations/     "공부하기" 허브 카드 이미지
 ```
 
 ## 데이터 백업
 
 앱 데이터는 이 기기에만 저장되므로, 브라우저 데이터를 지우거나 앱을 삭제하면 사라질 수 있다.
 설정 → 백업/복원에서 주기적으로 JSON 백업을 받아두는 것을 권장한다.
+
+## 공부하기 (경제 흐름 · 개념 카드 · 숫자로 이해하기 · 이번 달 돈 공부)
+
+하단 탭 **공부하기**(`/learn`) 아래에 재무 브리핑과 자산교육 콘텐츠를 모아둔다. 투자 종목
+추천이나 매수·매도 시점 제안이 아니라 일반 정보/교육 목적이며, 개인화(자산 유형별 정렬)는
+카드를 숨기지 않고 순서만 바꾼다.
+
+- **경제 흐름** (`/learn/briefing`) — 아래 "이번 달 재무 브리핑" 절 참고. 예전 `/briefing`
+  경로는 `/learn/briefing`으로 자동 리다이렉트된다.
+- **개념 카드** (`/learn/concepts`) — `public/data/learning/concepts.json`에 정적으로
+  번들되는 15개 금융 개념(비상자금, 복리, 예금자보호, 연금저축·IRP 등). 시효성 있는
+  수치(세액공제 한도, 예금자보호 한도, 국민연금 보험료율 등)는 국세청(nts.go.kr)·
+  국민연금공단(nps.or.kr)·예금보험공사(kdic.or.kr) 공식 페이지를 직접 확인해 작성했고,
+  나머지 정의성 개념은 금융감독원 e-금융교육센터·한국은행 경제교육을 출처로 표기했다.
+  세법·연금 제도는 매년 바뀔 수 있어 `reviewedAt` 기준일을 주기적으로 재검토해야 한다.
+- **숫자로 이해하기** (`/learn/calculators`) — 복리/물가 반영/목표저축/저축률 계산기.
+  계산식은 `src/domain/learningCalculators.ts`의 순수 함수이며, 입력값은 저장되지 않는다.
+- **이번 달 돈 공부** (`/learn/monthly`) — 재무 브리핑의 한 항목을 골라 관련 개념을
+  깊이 설명하는 월간 콘텐츠. `public/data/learning/monthly/{yearMonth}.json` +
+  `index.json` 구조로, 재무 브리핑과 같은 `draft`/`reviewed` 원칙을 따른다(수동 작성,
+  별도 자동 수집 파이프라인 없음 — 시의성 있는 콘텐츠가 아니라 사람이 매달 직접 쓰는
+  성격이라 GitHub Actions 대상이 아니다).
+
+학습 진행 상태(안읽음/읽는 중/읽어봄, 저장 여부)는 기기의 Dexie `learningProgress` 테이블에만
+저장되고 외부로 전송되지 않는다.
 
 ## 이번 달 재무 브리핑
 

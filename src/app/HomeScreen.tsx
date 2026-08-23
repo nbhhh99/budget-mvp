@@ -16,7 +16,7 @@ const NAV_BUTTONS = [
 export function HomeScreen() {
   return (
     <div className="home-screen">
-      <Link to="/briefing" className="home-screen__briefing-banner">
+      <Link to="/learn/briefing" className="home-screen__briefing-banner">
         <img className="home-screen__briefing-banner-image" src={briefingImage} alt="" />
         <span className="home-screen__briefing-banner-label">국내외 경제 브리핑</span>
       </Link>

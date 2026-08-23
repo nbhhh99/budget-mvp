@@ -1,7 +1,14 @@
-import type { BriefingIndexEntry, FinancialBriefing } from '../types/models'
+import type { FinancialBriefing } from '../types/models'
+
+// yearMonth/status만 있으면 되는 최소 형태 — BriefingIndexEntry와 MonthlyLessonIndexEntry가
+// 둘 다 구조적으로 이 타입을 만족해서, 이번 달 돈 공부의 월 선택에도 그대로 재사용한다.
+interface YearMonthStatusEntry {
+  yearMonth: string
+  status: 'draft' | 'reviewed'
+}
 
 // §10: 기본 화면에는 reviewed 상태의 데이터만 표시한다.
-export function listReviewedYearMonths(entries: BriefingIndexEntry[]): string[] {
+export function listReviewedYearMonths(entries: YearMonthStatusEntry[]): string[] {
   return entries
     .filter((e) => e.status === 'reviewed')
     .map((e) => e.yearMonth)
@@ -9,13 +16,13 @@ export function listReviewedYearMonths(entries: BriefingIndexEntry[]): string[] 
     .reverse()
 }
 
-export function computeLatestReviewedYearMonth(entries: BriefingIndexEntry[]): string | null {
+export function computeLatestReviewedYearMonth(entries: YearMonthStatusEntry[]): string | null {
   const months = listReviewedYearMonths(entries)
   return months.length > 0 ? months[0] : null
 }
 
 export function getPreviousReviewedYearMonth(
-  entries: BriefingIndexEntry[],
+  entries: YearMonthStatusEntry[],
   currentYearMonth: string,
 ): string | null {
   const months = listReviewedYearMonths(entries) // 최신순

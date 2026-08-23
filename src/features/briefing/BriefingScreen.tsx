@@ -365,7 +365,7 @@ function BriefingCard({
                   {source.publishedAt ? ` (${source.publishedAt})` : ''}
                   <br />
                   <a href={source.url} target="_blank" rel="noopener noreferrer">
-                    원문 보기
+                    원문 보기 (새 창)
                   </a>
                   <span className="briefing-card__source-url"> {source.url}</span>
                 </li>

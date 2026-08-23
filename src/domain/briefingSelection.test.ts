@@ -35,7 +35,7 @@ describe('computeLatestReviewedYearMonth', () => {
   })
 
   it('returns null when nothing is reviewed', () => {
-    expect(computeLatestReviewedYearMonth([{ yearMonth: '2026-08', status: 'draft', updatedAt: '' }])).toBeNull()
+    expect(computeLatestReviewedYearMonth([{ yearMonth: '2026-08', status: 'draft' }])).toBeNull()
   })
 })
 

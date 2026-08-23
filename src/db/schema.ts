@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie'
 import type {
   AssetValuation,
   Category,
+  LearningProgress,
   MonthlyBudget,
   MonthlyMeta,
   Settings,
@@ -15,6 +16,7 @@ export class BudgetDB extends Dexie {
   monthlyMeta!: EntityTable<MonthlyMeta, 'yearMonth'>
   settings!: EntityTable<Settings, 'id'>
   assetValuations!: EntityTable<AssetValuation, 'categoryId'>
+  learningProgress!: EntityTable<LearningProgress, 'contentId'>
 
   constructor() {
     super('budget-mvp')
@@ -34,6 +36,16 @@ export class BudgetDB extends Dexie {
       monthlyMeta: 'yearMonth',
       settings: 'id',
       assetValuations: 'categoryId',
+    })
+
+    this.version(3).stores({
+      transactions: 'id, date, type, categoryId, [date+type], [categoryId+date]',
+      categories: 'id, group, order, hidden',
+      monthlyBudgets: 'id, yearMonth, categoryId, [yearMonth+categoryId]',
+      monthlyMeta: 'yearMonth',
+      settings: 'id',
+      assetValuations: 'categoryId',
+      learningProgress: 'contentId, contentType',
     })
   }
 }

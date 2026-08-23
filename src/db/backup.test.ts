@@ -67,4 +67,17 @@ describe('validateBackupFile', () => {
     expect(result.valid).toBe(false)
     expect(result.errors.some((e) => e.includes('assetValuations'))).toBe(true)
   })
+
+  it('accepts an older backup that has no learningProgress array (added later)', () => {
+    const file = validBackup()
+    expect('learningProgress' in file.data).toBe(false)
+    expect(validateBackupFile(file).valid).toBe(true)
+  })
+
+  it('rejects a file where learningProgress is present but not an array', () => {
+    const file = { ...validBackup(), data: { ...validBackup().data, learningProgress: 'oops' } }
+    const result = validateBackupFile(file)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some((e) => e.includes('learningProgress'))).toBe(true)
+  })
 })

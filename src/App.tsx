@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ToastProvider } from './components/toast/ToastProvider'
 import { LockProvider } from './components/lock/LockProvider'
 import { LockGate } from './components/lock/LockGate'
@@ -10,6 +10,12 @@ import { MonthlyListScreen } from './features/transactions/MonthlyListScreen'
 import { BudgetScreen } from './features/budgets/BudgetScreen'
 import { AssetsScreen } from './features/assets/AssetsScreen'
 import { BriefingScreen } from './features/briefing/BriefingScreen'
+import { LearnHomeScreen } from './features/learn/LearnHomeScreen'
+import { ConceptListScreen } from './features/learn/ConceptListScreen'
+import { ConceptDetailScreen } from './features/learn/ConceptDetailScreen'
+import { CalculatorListScreen } from './features/learn/CalculatorListScreen'
+import { CalculatorDetailScreen } from './features/learn/CalculatorDetailScreen'
+import { MonthlyLessonScreen } from './features/learn/MonthlyLessonScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
 import { CategoryManagementScreen } from './features/categories/CategoryManagementScreen'
 import { LockSettingsScreen } from './features/settings/LockSettingsScreen'
@@ -41,7 +47,15 @@ function App() {
                 }
               />
               <Route path="budgets" element={<BudgetScreen />} />
-              <Route path="briefing" element={<BriefingScreen />} />
+              <Route path="briefing" element={<Navigate to="/learn/briefing" replace />} />
+              <Route path="learn" element={<LearnHomeScreen />} />
+              <Route path="learn/briefing" element={<BriefingScreen />} />
+              <Route path="learn/concepts" element={<ConceptListScreen />} />
+              <Route path="learn/concepts/:conceptId" element={<ConceptDetailScreen />} />
+              <Route path="learn/calculators" element={<CalculatorListScreen />} />
+              <Route path="learn/calculators/:calculatorId" element={<CalculatorDetailScreen />} />
+              <Route path="learn/monthly" element={<MonthlyLessonScreen />} />
+              <Route path="learn/monthly/:yearMonth" element={<MonthlyLessonScreen />} />
               <Route
                 path="assets"
                 element={
