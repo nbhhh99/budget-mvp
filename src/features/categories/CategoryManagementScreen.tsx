@@ -26,6 +26,9 @@ export function CategoryManagementScreen() {
   const [editor, setEditor] = useState<EditorState>(null)
   const [showHidden, setShowHidden] = useState(false)
   const [deleteCandidate, setDeleteCandidate] = useState<Category | null>(null)
+  const [mergeCandidate, setMergeCandidate] = useState<Category | null>(null)
+  const [mergeTargetId, setMergeTargetId] = useState('')
+  const [merging, setMerging] = useState(false)
 
   async function refresh() {
     setCategories(await categoriesRepo.getAllCategories())
@@ -83,15 +86,36 @@ export function CategoryManagementScreen() {
 
   async function handleDelete() {
     if (!deleteCandidate) return
-    const deleted = await categoriesRepo.deleteCategoryIfUnused(deleteCandidate.id)
+    const candidate = deleteCandidate
+    const deleted = await categoriesRepo.deleteCategoryIfUnused(candidate.id)
     setDeleteCandidate(null)
     if (deleted) {
       showToast({ message: '삭제되었습니다.' })
       refresh()
     } else {
-      showToast({ message: '이미 사용된 분류라 삭제할 수 없어요. 숨김 상태로 유지됩니다.' })
+      setMergeTargetId('')
+      setMergeCandidate(candidate)
     }
   }
+
+  async function handleMergeConfirm() {
+    if (!mergeCandidate || !mergeTargetId) return
+    setMerging(true)
+    try {
+      await categoriesRepo.mergeAndDeleteCategory(mergeCandidate.id, mergeTargetId)
+      setMergeCandidate(null)
+      showToast({ message: '다른 분류로 합치고 삭제했습니다.' })
+      refresh()
+    } finally {
+      setMerging(false)
+    }
+  }
+
+  const mergeTargets = mergeCandidate
+    ? categories
+        .filter((c) => c.group === mergeCandidate.group && c.id !== mergeCandidate.id)
+        .sort((a, b) => a.order - b.order)
+    : []
 
   return (
     <div className="category-mgmt">
@@ -241,12 +265,71 @@ export function CategoryManagementScreen() {
       <ConfirmDialog
         open={deleteCandidate !== null}
         title="이 분류를 삭제할까요?"
-        message="이 분류를 사용한 거래나 예산이 있으면 삭제할 수 없습니다."
+        message="이 분류를 사용한 거래나 예산이 있으면, 다른 분류로 합친 뒤 삭제할 수 있도록 다음 단계로 안내합니다."
         confirmLabel="삭제"
         danger
         onConfirm={handleDelete}
         onCancel={() => setDeleteCandidate(null)}
       />
+
+      {mergeCandidate && (
+        <div
+          className="confirm-dialog__backdrop"
+          role="presentation"
+          onClick={() => !merging && setMergeCandidate(null)}
+        >
+          <div
+            className="confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-label="다른 분류로 합치고 삭제"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="confirm-dialog__title">"{mergeCandidate.name}"은 사용 중이에요</h2>
+            <p className="confirm-dialog__message">
+              이미 사용된 분류라 바로 삭제할 수 없어요. 대신 이 분류를 쓴 거래·예산을 다른 분류로
+              옮기고 나서 삭제할 수 있어요.
+            </p>
+            {mergeTargets.length === 0 ? (
+              <p className="confirm-dialog__message">
+                합칠 수 있는 다른 {GROUP_LABEL[mergeCandidate.group]} 분류가 없어요.
+              </p>
+            ) : (
+              <select
+                className="category-merge__select"
+                value={mergeTargetId}
+                onChange={(e) => setMergeTargetId(e.target.value)}
+              >
+                <option value="">합칠 분류 선택</option>
+                {mergeTargets.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                    {c.hidden ? ' (숨김)' : ''}
+                  </option>
+                ))}
+              </select>
+            )}
+            <div className="confirm-dialog__actions">
+              <button
+                type="button"
+                className="confirm-dialog__button"
+                disabled={merging}
+                onClick={() => setMergeCandidate(null)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className="confirm-dialog__button confirm-dialog__button--danger"
+                disabled={!mergeTargetId || merging}
+                onClick={handleMergeConfirm}
+              >
+                {merging ? '합치는 중…' : '합치고 삭제'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

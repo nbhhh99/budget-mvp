@@ -65,3 +65,26 @@ export async function deleteCategoryIfUnused(id: string): Promise<boolean> {
   await db.categories.delete(id)
   return true
 }
+
+// 중복 생성 등으로 더 이상 필요 없는 분류를, 사용 중이어도 다른 분류로 합친 뒤 삭제한다.
+export async function mergeAndDeleteCategory(sourceId: string, targetId: string): Promise<void> {
+  await db.transaction('rw', db.transactions, db.monthlyBudgets, db.categories, async () => {
+    await db.transactions.where('categoryId').equals(sourceId).modify({ categoryId: targetId })
+
+    const sourceBudgets = await db.monthlyBudgets.where('categoryId').equals(sourceId).toArray()
+    for (const budget of sourceBudgets) {
+      const targetBudget = await db.monthlyBudgets.get(`${budget.yearMonth}_${targetId}`)
+      if (!targetBudget) {
+        await db.monthlyBudgets.put({
+          id: `${budget.yearMonth}_${targetId}`,
+          yearMonth: budget.yearMonth,
+          categoryId: targetId,
+          planAmount: budget.planAmount,
+        })
+      }
+      await db.monthlyBudgets.delete(budget.id)
+    }
+
+    await db.categories.delete(sourceId)
+  })
+}
