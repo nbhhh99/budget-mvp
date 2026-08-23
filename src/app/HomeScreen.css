@@ -7,53 +7,31 @@
   gap: var(--space-4);
 }
 
+.home-screen__brand {
+  display: block;
+  height: 64px;
+  width: 64px;
+  margin: 0 auto;
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-card);
+  object-fit: cover;
+}
+
 .home-screen__briefing-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  display: block;
   min-height: var(--touch-target);
   border-radius: var(--radius-card);
   background-color: var(--color-mint-soft);
   box-shadow: var(--shadow-card);
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-4);
   text-decoration: none;
-  color: var(--color-text);
 }
 
-.home-screen__briefing-banner-icon {
-  font-size: 1.6rem;
-  flex-shrink: 0;
-}
-
-.home-screen__briefing-banner-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.home-screen__briefing-banner-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.home-screen__briefing-banner-desc {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-}
-
-.home-screen__briefing-banner-arrow {
-  font-size: 1.3rem;
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
-.home-screen__brand {
-  text-align: center;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
+.home-screen__briefing-banner-image {
+  display: block;
+  width: 100%;
+  height: 96px;
+  object-fit: contain;
 }
 
 .home-screen__grid {
@@ -63,34 +41,29 @@
 }
 
 .home-screen__button {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
   min-height: 140px;
   border-radius: var(--radius-card);
   text-decoration: none;
-  font-size: 1.02rem;
-  font-weight: 700;
-  color: var(--color-text);
   box-shadow: var(--shadow-card);
-  text-align: center;
   padding: var(--space-3);
 }
 
-.home-screen__button-icon {
-  font-size: 2rem;
-}
-
-.home-screen__button-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+.home-screen__button-image {
+  width: 100%;
+  height: 100%;
+  max-height: 110px;
+  object-fit: contain;
 }
 
 .home-screen__lock {
-  font-size: 0.75rem;
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  font-size: 0.85rem;
 }
 
 .home-screen__button--expense {

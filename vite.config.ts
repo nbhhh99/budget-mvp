@@ -13,7 +13,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
+      includeAssets: ['icons/favicon-32.png', 'icons/apple-touch-icon.png'],
       manifest: {
         name: '가계부',
         short_name: '가계부',
@@ -23,12 +23,6 @@ export default defineConfig({
         background_color: '#FBF7EC',
         display: 'standalone',
         icons: [
-          {
-            src: 'icons/icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'any',
-          },
           {
             src: 'icons/pwa-192x192.png',
             sizes: '192x192',
