@@ -233,7 +233,7 @@
   flex-direction: column;
   gap: 2px;
   border-radius: var(--radius-card);
-  background-color: var(--color-lavender-soft);
+  background-color: var(--color-blue-soft);
   box-shadow: var(--shadow-card);
   padding: var(--space-3) var(--space-4);
   text-decoration: none;
