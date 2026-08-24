@@ -12,6 +12,11 @@ const STATUS_LABEL: Record<LearningProgress['status'], string> = {
   read: '읽어봄',
 }
 
+const DIFFICULTY_LABEL: Record<ConceptCard['difficulty'], string> = {
+  basic: '기초',
+  intermediate: '중급',
+}
+
 export function ConceptDetailScreen() {
   const { conceptId } = useParams<{ conceptId: string }>()
   const [allConcepts, setAllConcepts] = useState<ConceptCard[] | null>(null)
@@ -71,6 +76,8 @@ export function ConceptDetailScreen() {
     setProgress(await learningProgressRepo.getLearningProgress(conceptId) ?? null)
   }
 
+  const isRead = progress?.status === 'read'
+
   return (
     <div className="concept-detail">
       <ScreenHeader title="개념 카드" />
@@ -82,10 +89,12 @@ export function ConceptDetailScreen() {
           <>
             <div className="concept-detail__header">
               <h1 className="concept-detail__title">{concept.title}</h1>
-              <div className="concept-detail__actions">
-                <button type="button" onClick={handleToggleRead} className="concept-detail__status-button">
-                  {progress?.status === 'read' ? '✓ 읽어봄' : STATUS_LABEL[progress?.status ?? 'unread']}
-                </button>
+              <div className="concept-detail__meta">
+                <span className="concept-detail__badge">⏱ 약 {concept.estimatedMinutes}분</span>
+                <span className="concept-detail__badge">{DIFFICULTY_LABEL[concept.difficulty]}</span>
+                <span className="concept-detail__badge concept-detail__badge--status">
+                  {isRead ? '✓ 읽어봄' : STATUS_LABEL[progress?.status ?? 'unread']}
+                </span>
                 <button
                   type="button"
                   onClick={handleToggleSaved}
@@ -98,34 +107,65 @@ export function ConceptDetailScreen() {
               </div>
             </div>
 
-            <section className="concept-detail__section">
-              <h2>한 줄 요약</h2>
-              <p>{concept.oneLineSummary}</p>
+            <section className="concept-detail__hero">
+              <span className="concept-detail__hero-icon" aria-hidden="true">
+                💬
+              </span>
+              <p className="concept-detail__hero-text">{concept.oneLineSummary}</p>
             </section>
+
             <section className="concept-detail__section">
-              <h2>쉽게 설명하면</h2>
+              <h2>
+                <span className="concept-detail__section-icon" aria-hidden="true">
+                  📖
+                </span>
+                쉽게 설명하면
+              </h2>
               <p>{concept.definition}</p>
             </section>
             <section className="concept-detail__section">
-              <h2>예시</h2>
+              <h2>
+                <span className="concept-detail__section-icon" aria-hidden="true">
+                  💡
+                </span>
+                예시
+              </h2>
               <p>{concept.example}</p>
             </section>
             <section className="concept-detail__section">
-              <h2>내 자산과 어떤 관련이 있나요?</h2>
+              <h2>
+                <span className="concept-detail__section-icon" aria-hidden="true">
+                  🔗
+                </span>
+                내 자산과 어떤 관련이 있나요?
+              </h2>
               <p>{concept.whyItMatters}</p>
             </section>
             {concept.checklist.length > 0 && (
               <section className="concept-detail__section">
-                <h2>확인해볼 것</h2>
-                <ul>
+                <h2>
+                  <span className="concept-detail__section-icon" aria-hidden="true">
+                    ✅
+                  </span>
+                  확인해볼 것
+                </h2>
+                <ul className="concept-detail__checklist">
                   {concept.checklist.map((item, i) => (
-                    <li key={i}>{item}</li>
+                    <li key={i}>
+                      <span aria-hidden="true">✓</span>
+                      {item}
+                    </li>
                   ))}
                 </ul>
               </section>
             )}
             <section className="concept-detail__section concept-detail__sources">
-              <h2>공식 출처</h2>
+              <h2>
+                <span className="concept-detail__section-icon" aria-hidden="true">
+                  📚
+                </span>
+                공식 출처
+              </h2>
               <ul>
                 {concept.sources.map((source, i) => (
                   <li key={i}>
@@ -152,6 +192,18 @@ export function ConceptDetailScreen() {
                 </ul>
               </section>
             )}
+
+            {/* 스크롤 위치와 무관하게 항상 보이는 완료 버튼 — 헤더까지 다시 스크롤하지
+                않아도 바로 다음 단계로 넘어갈 수 있게 한다. */}
+            <div className="concept-detail__footer">
+              <button
+                type="button"
+                onClick={handleToggleRead}
+                className={`concept-detail__done-button${isRead ? ' concept-detail__done-button--done' : ''}`}
+              >
+                {isRead ? '✓ 다 읽었어요' : '다 읽었어요'}
+              </button>
+            </div>
           </>
         )}
       </div>

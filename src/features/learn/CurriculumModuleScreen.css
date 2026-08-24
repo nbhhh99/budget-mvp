@@ -84,8 +84,15 @@
 }
 
 .curriculum-module__item-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-weight: 700;
   font-size: 0.9rem;
+}
+
+.curriculum-module__item-type-icon {
+  font-size: 1rem;
 }
 
 .curriculum-module__item-body {
@@ -94,17 +101,43 @@
 }
 
 .curriculum-module__item-preview {
-  margin: 0 0 var(--space-2);
+  margin: 4px 0 0;
   font-size: 0.82rem;
   color: var(--color-text-muted);
   line-height: 1.5;
 }
 
-.curriculum-module__item-link {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-saving);
+/* concept/calculator 항목: 카드 전체가 버튼 — 텍스트 링크가 아니라 눌리는
+   영역을 넓혀서(§ 사용자 피드백) 어디를 눌러야 이동하는지 헷갈리지 않게 한다. */
+.curriculum-module__item--link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
   text-decoration: none;
+  color: var(--color-text);
+}
+
+.curriculum-module__item--link:active {
+  background-color: var(--color-surface-alt);
+}
+
+.curriculum-module__item--link:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+.curriculum-module__item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.curriculum-module__item-chevron {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
 }
 
 .curriculum-module__nav {

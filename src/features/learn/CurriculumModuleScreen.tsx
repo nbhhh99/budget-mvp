@@ -10,13 +10,6 @@ import { QuizItem } from './curriculum/QuizItem'
 import { ChecklistItem } from './curriculum/ChecklistItem'
 import './CurriculumModuleScreen.css'
 
-const CALCULATOR_TITLES: Record<string, string> = {
-  compound_interest: '복리 계산기',
-  inflation_adjusted: '물가 반영 계산기',
-  goal_savings: '목표저축 계산기',
-  savings_rate: '저축률 계산기',
-}
-
 export function CurriculumModuleScreen() {
   const { moduleId } = useParams<{ moduleId: string }>()
   const navigate = useNavigate()
@@ -220,18 +213,80 @@ export function CurriculumModuleScreen() {
         <ul className="curriculum-module__items">
           {contents.map((item) => {
             const isDone = completedItemIds.includes(item.id)
+
+            // concept/calculator 항목은 기존 화면(개념 카드/계산기)으로 이동하는 게
+            // 전부라, 카드 전체를 눌러도 이동하도록 <li> 자체를 링크로 감싼다
+            // ("개념카드 보기" 글자만 눌러야 하는 문제를 없앤다).
+            if (item.type === 'concept' && item.linkedConceptId) {
+              const concept = concepts.find((c) => c.id === item.linkedConceptId)
+              return (
+                <li key={item.id} id={`item-${item.id}`}>
+                  <Link
+                    to={`/learn/concepts/${item.linkedConceptId}`}
+                    className="curriculum-module__item curriculum-module__item--link"
+                  >
+                    <span className="curriculum-module__item-check" aria-hidden="true">
+                      {isDone ? '✓' : '○'}
+                    </span>
+                    <span className="curriculum-module__item-main">
+                      <span className="curriculum-module__item-title">
+                        <span className="curriculum-module__item-type-icon" aria-hidden="true">
+                          📖
+                        </span>
+                        {item.title}
+                      </span>
+                      {concept && <span className="curriculum-module__item-preview">{concept.oneLineSummary}</span>}
+                    </span>
+                    <span className="curriculum-module__item-chevron" aria-hidden="true">
+                      ›
+                    </span>
+                  </Link>
+                </li>
+              )
+            }
+
+            if (item.type === 'calculator' && item.linkedCalculatorId) {
+              return (
+                <li key={item.id} id={`item-${item.id}`}>
+                  <Link
+                    to={`/learn/calculators/${item.linkedCalculatorId}`}
+                    className="curriculum-module__item curriculum-module__item--link"
+                  >
+                    <span className="curriculum-module__item-check" aria-hidden="true">
+                      {isDone ? '✓' : '○'}
+                    </span>
+                    <span className="curriculum-module__item-main">
+                      <span className="curriculum-module__item-title">
+                        <span className="curriculum-module__item-type-icon" aria-hidden="true">
+                          🧮
+                        </span>
+                        {item.title}
+                      </span>
+                    </span>
+                    <span className="curriculum-module__item-chevron" aria-hidden="true">
+                      ›
+                    </span>
+                  </Link>
+                </li>
+              )
+            }
+
             return (
               <li key={item.id} id={`item-${item.id}`} className="curriculum-module__item">
                 <div className="curriculum-module__item-header">
                   <span className="curriculum-module__item-check" aria-hidden="true">
                     {isDone ? '✓' : '○'}
                   </span>
-                  <span className="curriculum-module__item-title">{item.title}</span>
+                  <span className="curriculum-module__item-title">
+                    <span className="curriculum-module__item-type-icon" aria-hidden="true">
+                      {item.type === 'quiz' ? '❓' : '✅'}
+                    </span>
+                    {item.title}
+                  </span>
                 </div>
                 <ContentItemBody
                   item={item}
                   isDone={isDone}
-                  concepts={concepts}
                   onQuizOrChecklistComplete={handleQuizOrChecklistComplete}
                 />
               </li>
@@ -266,33 +321,10 @@ export function CurriculumModuleScreen() {
 interface ContentItemBodyProps {
   item: LearningContent
   isDone: boolean
-  concepts: ConceptCard[]
   onQuizOrChecklistComplete: (contentId: string, contentType: 'quiz' | 'checklist') => void
 }
 
-function ContentItemBody({ item, isDone, concepts, onQuizOrChecklistComplete }: ContentItemBodyProps) {
-  if (item.type === 'concept' && item.linkedConceptId) {
-    const concept = concepts.find((c) => c.id === item.linkedConceptId)
-    return (
-      <div className="curriculum-module__item-body">
-        {concept && <p className="curriculum-module__item-preview">{concept.oneLineSummary}</p>}
-        <Link to={`/learn/concepts/${item.linkedConceptId}`} className="curriculum-module__item-link">
-          개념 카드 보기 ›
-        </Link>
-      </div>
-    )
-  }
-
-  if (item.type === 'calculator' && item.linkedCalculatorId) {
-    return (
-      <div className="curriculum-module__item-body">
-        <Link to={`/learn/calculators/${item.linkedCalculatorId}`} className="curriculum-module__item-link">
-          {CALCULATOR_TITLES[item.linkedCalculatorId] ?? '계산기'}로 이동 ›
-        </Link>
-      </div>
-    )
-  }
-
+function ContentItemBody({ item, isDone, onQuizOrChecklistComplete }: ContentItemBodyProps) {
   if (item.type === 'quiz' && item.quiz) {
     return (
       <div className="curriculum-module__item-body">
