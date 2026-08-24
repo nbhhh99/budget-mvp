@@ -39,6 +39,82 @@ describe('CONCEPTS (돈 개념 사전)', () => {
   })
 })
 
+// 이전에 '검토 중' 스텁이었던 26개 개념이 실제 콘텐츠로 채워졌는지 확인하는
+// 회귀 테스트. 이 목록에서 하나라도 빠지면(또는 다시 in_review가 되면) 실패한다.
+const FILLED_STUB_IDS = [
+  'equal-principal-and-interest',
+  'equal-principal',
+  'bullet-repayment',
+  'downside-risk',
+  'compound-return',
+  'rebalancing',
+  'market-cap',
+  'stock-index',
+  'commodity',
+  'foreign-currency-asset',
+  'fund-distribution',
+  'protection-insurance',
+  'savings-insurance',
+  'renewable-insurance',
+  'non-renewable-insurance',
+  'waiting-period',
+  'reduction-period',
+  'surrender-value',
+  'tax-deferral',
+  'gain-loss-offset',
+  'oil-shock',
+  'business-cycle',
+  'fiscal-deficit',
+  'trade-balance',
+  'foreign-reserves',
+  'asset-bubble',
+]
+
+describe('26개 완성 대상 개념(이전 in_review 스텁)', () => {
+  it('has exactly the expected 26 ids, each present in CONCEPTS', () => {
+    expect(FILLED_STUB_IDS).toHaveLength(26)
+    const ids = new Set(CONCEPTS.map((c) => c.id))
+    for (const id of FILLED_STUB_IDS) {
+      expect(ids.has(id), id).toBe(true)
+    }
+  })
+
+  it('none of the 26 are still in_review', () => {
+    for (const id of FILLED_STUB_IDS) {
+      const concept = CONCEPTS.find((c) => c.id === id)
+      expect(concept?.status, id).toBe('reviewed')
+    }
+  })
+
+  it('all 26 have a non-empty shortDefinition and body', () => {
+    for (const id of FILLED_STUB_IDS) {
+      const concept = CONCEPTS.find((c) => c.id === id)
+      expect(concept?.shortDefinition.trim(), id).not.toBe('')
+      expect(concept?.body.trim(), id).not.toBe('')
+    }
+  })
+
+  it('all 26 have at least 2 keyPoints', () => {
+    for (const id of FILLED_STUB_IDS) {
+      const concept = CONCEPTS.find((c) => c.id === id)
+      expect(concept?.keyPoints.length ?? 0, id).toBeGreaterThanOrEqual(2)
+    }
+  })
+
+  it('all 26 have at least one official sourceId and a reviewedAt date', () => {
+    for (const id of FILLED_STUB_IDS) {
+      const concept = CONCEPTS.find((c) => c.id === id)
+      expect(concept?.sourceIds.length ?? 0, id).toBeGreaterThanOrEqual(1)
+      expect(concept?.reviewedAt, id).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    }
+  })
+
+  it('no card anywhere in CONCEPTS is in_review anymore (all 26 stubs were the only ones)', () => {
+    const stillInReview = CONCEPTS.filter((c) => c.status === 'in_review').map((c) => c.id)
+    expect(stillInReview).toEqual([])
+  })
+})
+
 describe('LEARNING_SOURCES', () => {
   it('has no duplicate ids', () => {
     const ids = LEARNING_SOURCES.map((s) => s.id)
