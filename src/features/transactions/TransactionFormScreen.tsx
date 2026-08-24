@@ -63,7 +63,11 @@ export function TransactionFormScreen() {
           setMemo(existing.memo ?? '')
           setPaymentMethod(existing.paymentMethod ?? '')
         }
-      } else if (!preset?.presetType && settings.lastUsedTransactionType) {
+      } else if (
+        !preset?.presetType &&
+        settings.lastUsedTransactionType &&
+        settings.lastUsedTransactionType !== 'transfer'
+      ) {
         setType(settings.lastUsedTransactionType)
       }
       if (!cancelled) setLoaded(true)
