@@ -1,5 +1,5 @@
 import { db } from '../schema'
-import { LEARNING_CONTENTS } from '../../content/curriculum'
+import { ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_VERSION } from '../../content/economicHistory'
 import { isModuleComplete } from '../../domain/curriculum'
 import type { CurriculumProgress, LearningContentType } from '../../types/models'
 import * as learningProgressRepo from './learningProgress'
@@ -10,6 +10,13 @@ export async function getCurriculumProgress(curriculumId: string): Promise<Curri
 
 export async function getAllCurriculumProgress(): Promise<CurriculumProgress[]> {
   return db.curriculumProgress.toArray()
+}
+
+// 과거(차근차근 돈 공부) 진행 기록에는 curriculumVersion이 없어 이 필터를 거치면
+// 자동으로 제외된다 — 물리적으로 지우지 않고도 새 커리큘럼과 완전히 분리된다(§11).
+export async function getCurriculumProgressForVersion(version: string): Promise<CurriculumProgress[]> {
+  const all = await db.curriculumProgress.toArray()
+  return all.filter((p) => p.curriculumVersion === version)
 }
 
 // curriculumId가 기본키라 put()이 upsert이므로, 과정당 레코드가 항상 하나만
@@ -26,28 +33,22 @@ export async function ensureStarted(curriculumId: string): Promise<CurriculumPro
     completedItemIds: [],
     startedAt: new Date().toISOString(),
     lastViewedAt: new Date().toISOString(),
+    curriculumVersion: ECONOMIC_HISTORY_VERSION,
   }
   await db.curriculumProgress.add(created)
   return created
 }
 
-// 공통 완료 처리 함수(§13) — 커리큘럼 화면뿐 아니라 기존 개념 카드/계산기 화면에서도
-// 이 함수 하나만 호출한다. 1) 범용 learningProgress 테이블에 'read'로 기록하고,
-// 2) 이 콘텐츠를 필수 항목으로 쓰는 모든 과정의 진행 레코드에 반영한다.
-// 같은 콘텐츠가 여러 과정에서 재사용되어도(예: 개념 카드 공유) 진행 레코드가
-// 중복 생성되지 않는다.
+// 공통 완료 처리 함수 — 차근차근 경제사 화면(본문 읽기/확인 문제)에서 호출한다.
+// 콘텐츠 항목의 id를 그대로 contentId로 넘기면, 그 항목이 속한 과정의 진행
+// 레코드에 반영된다. 같은 항목을 여러 번 완료해도 중복 저장되지 않는다.
 export async function completeLearningItem(
   contentId: string,
   contentType: LearningContentType,
 ): Promise<void> {
   await learningProgressRepo.setReadStatus(contentId, contentType, 'read')
 
-  const matchedItems = LEARNING_CONTENTS.filter((item) => {
-    if (item.type === 'concept') return item.linkedConceptId === contentId
-    if (item.type === 'calculator') return item.linkedCalculatorId === contentId
-    return item.id === contentId // quiz/checklist/example: 커리큘럼 고유 항목 id
-  })
-
+  const matchedItems = ECONOMIC_HISTORY_CONTENTS.filter((item) => item.id === contentId)
   const curriculumIds = new Set(matchedItems.map((item) => item.curriculumId))
 
   for (const curriculumId of curriculumIds) {
@@ -60,13 +61,13 @@ export async function completeLearningItem(
       new Set([...progress.completedItemIds, ...itemIdsForThisModule]),
     )
 
-    const contents = LEARNING_CONTENTS.filter((item) => item.curriculumId === curriculumId)
+    const contents = ECONOMIC_HISTORY_CONTENTS.filter((item) => item.curriculumId === curriculumId)
     const completed = isModuleComplete(contents, nextCompletedItemIds)
 
     await db.curriculumProgress.update(curriculumId, {
       completedItemIds: nextCompletedItemIds,
       status: completed ? 'completed' : 'in_progress',
-      // 재학습해도 최초 완료 시각은 덮어쓰지 않는다(§5).
+      // 재학습해도 최초 완료 시각은 덮어쓰지 않는다(§10).
       completedAt: completed ? (progress.completedAt ?? new Date().toISOString()) : progress.completedAt,
       lastViewedAt: new Date().toISOString(),
     })

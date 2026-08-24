@@ -1,92 +1,116 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { categoriesRepo, learningProgressRepo, transactionsRepo } from '../../db'
-import type { ConceptCard, LearningProgress } from '../../types/models'
-import { computeHeldAssetTypes, scoreConceptCards, sortByRelevance } from '../../domain'
-import { fetchConceptCards } from './learningData'
+import { CONCEPTS, CONCEPT_CATEGORY_LABEL } from '../../content/concepts'
+import { filterByCategory, searchConcepts, sortConceptsAlphabetically } from '../../domain'
+import type { ConceptCategory } from '../../types/models'
 import './ConceptListScreen.css'
 
-const STATUS_LABEL: Record<LearningProgress['status'], string> = {
-  unread: '아직 읽지 않음',
-  reading: '읽는 중',
-  read: '읽어봄',
-}
-const DIFFICULTY_LABEL: Record<ConceptCard['difficulty'], string> = {
-  basic: '기초',
-  intermediate: '중급',
-}
+const CATEGORIES: ConceptCategory[] = [
+  'daily-finance',
+  'money-interest',
+  'debt-credit',
+  'investing',
+  'financial-products',
+  'insurance-pension-tax',
+  'economy-market',
+]
 
 export function ConceptListScreen() {
-  const [loaded, setLoaded] = useState(false)
-  const [concepts, setConcepts] = useState<ConceptCard[]>([])
-  const [skippedCount, setSkippedCount] = useState(0)
-  const [progressByConceptId, setProgressByConceptId] = useState<Map<string, LearningProgress>>(
-    new Map(),
-  )
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<ConceptCategory | 'all'>('all')
 
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      const [{ concepts: loadedConcepts, skippedCount: skipped }, categories, transactions, progress] =
-        await Promise.all([
-          fetchConceptCards(),
-          categoriesRepo.getAllCategories(),
-          transactionsRepo.getAllTransactions(),
-          learningProgressRepo.getAllLearningProgress(),
-        ])
-      if (cancelled) return
+  const results = useMemo(() => {
+    const byCategory = filterByCategory(CONCEPTS, category)
+    const bySearch = searchConcepts(byCategory, query)
+    return sortConceptsAlphabetically(bySearch)
+  }, [query, category])
 
-      const heldAssetTypes = computeHeldAssetTypes(categories, transactions)
-      const scored = scoreConceptCards(loadedConcepts, heldAssetTypes)
-      setConcepts(sortByRelevance(scored))
-      setSkippedCount(skipped)
-      setProgressByConceptId(new Map(progress.map((p) => [p.contentId, p])))
-      setLoaded(true)
-    }
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const empty = loaded && concepts.length === 0
+  const isEmpty = results.length === 0
 
   return (
     <div className="concept-list">
-      <ScreenHeader title="개념 카드" />
+      <ScreenHeader title="돈 개념 사전" />
       <div className="concept-list__body">
-        {!loaded && <p className="concept-list__state">불러오는 중…</p>}
-        {empty && <p className="concept-list__state">아직 표시할 개념 카드가 없어요.</p>}
-        {skippedCount > 0 && (
-          <p className="concept-list__banner">일부 카드({skippedCount}개)를 불러오지 못했어요.</p>
+        <p className="concept-list__intro">궁금한 경제·금융 개념을 찾아보세요.</p>
+
+        <div className="concept-list__search-row">
+          <input
+            type="search"
+            className="concept-list__search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="개념 검색 (예: 복리, 환율, ETF)"
+            aria-label="개념 검색"
+          />
+          {query && (
+            <button
+              type="button"
+              className="concept-list__search-clear"
+              onClick={() => setQuery('')}
+              aria-label="검색어 지우기"
+            >
+              지우기
+            </button>
+          )}
+        </div>
+
+        <div className="concept-list__chips" role="tablist" aria-label="카테고리 필터">
+          <button
+            type="button"
+            className={`concept-list__chip${category === 'all' ? ' concept-list__chip--active' : ''}`}
+            onClick={() => setCategory('all')}
+            aria-pressed={category === 'all'}
+          >
+            전체
+          </button>
+          {CATEGORIES.map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`concept-list__chip${category === c ? ' concept-list__chip--active' : ''}`}
+              onClick={() => setCategory(c)}
+              aria-pressed={category === c}
+            >
+              {CONCEPT_CATEGORY_LABEL[c]}
+            </button>
+          ))}
+        </div>
+
+        {isEmpty && (
+          <div className="concept-list__empty">
+            <p>검색 결과가 없어요.</p>
+            {(query || category !== 'all') && (
+              <button
+                type="button"
+                className="concept-list__empty-reset"
+                onClick={() => {
+                  setQuery('')
+                  setCategory('all')
+                }}
+              >
+                검색 조건 초기화
+              </button>
+            )}
+          </div>
         )}
+
         <ul className="concept-list__list">
-          {concepts.map((concept) => {
-            const progress = progressByConceptId.get(concept.id)
-            return (
-              <li key={concept.id}>
-                <Link to={`/learn/concepts/${concept.id}`} className="concept-list__item">
-                  <div className="concept-list__item-header">
-                    <span className="concept-list__title">{concept.title}</span>
-                    {progress?.saved && (
-                      <span className="concept-list__saved" aria-label="저장됨">
-                        ★
-                      </span>
-                    )}
-                  </div>
-                  <p className="concept-list__summary">{concept.oneLineSummary}</p>
-                  <div className="concept-list__meta">
-                    <span className="concept-list__badge">{DIFFICULTY_LABEL[concept.difficulty]}</span>
-                    <span className="concept-list__badge">약 {concept.estimatedMinutes}분</span>
-                    <span className="concept-list__badge concept-list__badge--status">
-                      {STATUS_LABEL[progress?.status ?? 'unread']}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            )
-          })}
+          {results.map((concept) => (
+            <li key={concept.id}>
+              <Link to={`/learn/concepts/${concept.id}`} className="concept-list__item">
+                <div className="concept-list__item-header">
+                  <span className="concept-list__title">{concept.title}</span>
+                  {concept.status === 'in_review' && (
+                    <span className="concept-list__badge concept-list__badge--review">검토 중</span>
+                  )}
+                </div>
+                {concept.status === 'reviewed' && (
+                  <p className="concept-list__summary">{concept.shortDefinition}</p>
+                )}
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

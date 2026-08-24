@@ -20,7 +20,6 @@
 .concept-detail__meta {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
@@ -31,10 +30,6 @@
   background-color: var(--color-surface-alt);
   border-radius: 999px;
   padding: 4px 10px;
-}
-
-.concept-detail__badge--status {
-  color: var(--color-income);
 }
 
 .concept-detail__save-button {
@@ -48,7 +43,29 @@
   font-weight: 600;
 }
 
-/* ── 한 줄 요약: 스크롤 없이 바로 눈에 띄는 핵심 요약 카드 ─────────── */
+.concept-detail__save-button:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+.concept-detail__review-notice {
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface-alt);
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+}
+
+.concept-detail__review-notice p {
+  margin: 0;
+}
+
+.concept-detail__review-sub {
+  margin-top: var(--space-2) !important;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+/* ── 한 줄 정의: 스크롤 없이 바로 눈에 띄는 핵심 요약 카드 ─────────── */
 
 .concept-detail__hero {
   display: flex;
@@ -71,6 +88,12 @@
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.5;
+}
+
+.concept-detail__paragraph {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  margin: 0 0 var(--space-3);
 }
 
 .concept-detail__section {
@@ -100,15 +123,13 @@
   line-height: 1.7;
 }
 
-.concept-detail__section ul {
-  margin: 0;
-  padding-left: 1.2em;
-  font-size: 0.9rem;
-  line-height: 1.7;
+.concept-detail__caution {
+  background-color: var(--color-orange-soft);
 }
 
 .concept-detail__checklist {
   list-style: none !important;
+  margin: 0;
   padding: 0 !important;
   display: flex;
   flex-direction: column;
@@ -119,9 +140,8 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  background-color: var(--color-surface-alt);
-  border-radius: var(--radius-control);
-  padding: var(--space-2) var(--space-3);
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .concept-detail__checklist li span {
@@ -130,15 +150,34 @@
   font-weight: 700;
 }
 
+.concept-detail__related-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.concept-detail__related-chip {
+  display: inline-block;
+  min-height: 34px;
+  line-height: 34px;
+  border-radius: 999px;
+  background-color: var(--color-lavender-soft);
+  color: var(--color-text);
+  padding: 0 var(--space-3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .concept-detail__sources {
   background-color: var(--color-surface-alt);
-  border-radius: var(--radius-control);
-  padding: var(--space-3);
+  box-shadow: none;
 }
 
 .concept-detail__sources ul {
   list-style: none;
   padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -154,44 +193,4 @@
   margin-top: var(--space-2);
   font-size: 0.72rem;
   color: var(--color-text-muted);
-}
-
-.concept-detail__related-list {
-  list-style: none !important;
-  padding: 0 !important;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.concept-detail__related-list a {
-  color: var(--color-text);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-/* ── 완료 버튼: 스크롤을 내리는 동안 화면 하단에 고정되어 계속 눈에 띈다 ── */
-
-.concept-detail__footer {
-  position: sticky;
-  bottom: 0;
-  padding: var(--space-3) 0 max(var(--space-3), env(safe-area-inset-bottom));
-  background-color: var(--color-bg);
-  border-top: 1px solid var(--color-border);
-}
-
-.concept-detail__done-button {
-  width: 100%;
-  min-height: 52px;
-  border: none;
-  border-radius: var(--radius-control);
-  background-color: var(--color-text);
-  color: var(--color-surface);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.concept-detail__done-button--done {
-  background-color: var(--color-mint-soft);
-  color: var(--color-text);
 }

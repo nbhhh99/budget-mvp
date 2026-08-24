@@ -3,24 +3,12 @@ import { computeSavingsRate } from '../../../domain'
 import { formatWon } from '../../../utils/date'
 import { formatPercent } from '../../../utils/format'
 import { NumberField } from './NumberField'
-import { useCalculatorCompletion } from './useCalculatorCompletion'
-
-const DEFAULTS = { monthlyIncome: 4_000_000, monthlySaving: 1_000_000, monthlyDebtPrincipalPayment: 0 }
 
 export function SavingsRateCalculator() {
-  const [monthlyIncome, setMonthlyIncome] = useState(DEFAULTS.monthlyIncome)
-  const [monthlySaving, setMonthlySaving] = useState(DEFAULTS.monthlySaving)
-  const [monthlyDebtPrincipalPayment, setMonthlyDebtPrincipalPayment] = useState(
-    DEFAULTS.monthlyDebtPrincipalPayment,
-  )
+  const [monthlyIncome, setMonthlyIncome] = useState(4_000_000)
+  const [monthlySaving, setMonthlySaving] = useState(1_000_000)
+  const [monthlyDebtPrincipalPayment, setMonthlyDebtPrincipalPayment] = useState(0)
   const [targetRatePercent, setTargetRatePercent] = useState(0)
-
-  useCalculatorCompletion(
-    'savings_rate',
-    monthlyIncome !== DEFAULTS.monthlyIncome ||
-      monthlySaving !== DEFAULTS.monthlySaving ||
-      monthlyDebtPrincipalPayment !== DEFAULTS.monthlyDebtPrincipalPayment,
-  )
 
   const result = computeSavingsRate({ monthlyIncome, monthlySaving, monthlyDebtPrincipalPayment })
 

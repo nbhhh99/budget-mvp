@@ -1,7 +1,16 @@
 import type { ConceptCard } from '../types/models'
-import { DATE_RE, isPlainObject, validateSource } from './sourceValidation'
+import { DATE_RE, isPlainObject } from './sourceValidation'
 
-const VALID_DIFFICULTIES = new Set(['basic', 'intermediate'])
+const VALID_CATEGORIES = new Set([
+  'daily-finance',
+  'money-interest',
+  'debt-credit',
+  'investing',
+  'financial-products',
+  'insurance-pension-tax',
+  'economy-market',
+])
+const VALID_STATUSES = new Set(['reviewed', 'in_review'])
 
 function validateStringArray(input: unknown, path: string, errors: string[]): void {
   if (!Array.isArray(input) || input.some((v) => typeof v !== 'string')) {
@@ -9,7 +18,9 @@ function validateStringArray(input: unknown, path: string, errors: string[]): vo
   }
 }
 
-// ── 개념 카드 ────────────────────────────────────────────────────
+// ── 돈 개념 사전 ─────────────────────────────────────────────────
+// status: 'in_review'인 카드는 body/keyPoints/sourceIds/reviewedAt이 비어 있어도
+// 되고("검토 중"으로 표시), 'reviewed'인 카드만 실제 상세 내용을 갖춰야 한다(§5, §19).
 
 export function validateConceptCard(input: unknown, path: string, errors: string[]): void {
   if (!isPlainObject(input)) {
@@ -18,39 +29,36 @@ export function validateConceptCard(input: unknown, path: string, errors: string
   }
   if (typeof input.id !== 'string' || !input.id.trim()) errors.push(`${path}: id가 없습니다.`)
   if (typeof input.title !== 'string' || !input.title.trim()) errors.push(`${path}: title이 없습니다.`)
-  if (typeof input.oneLineSummary !== 'string' || !input.oneLineSummary.trim()) {
-    errors.push(`${path}: oneLineSummary가 없습니다.`)
+  if (typeof input.category !== 'string' || !VALID_CATEGORIES.has(input.category)) {
+    errors.push(`${path}: category 값이 올바르지 않습니다.`)
   }
-  if (typeof input.definition !== 'string' || !input.definition.trim()) {
-    errors.push(`${path}: definition이 없습니다.`)
+  if (typeof input.status !== 'string' || !VALID_STATUSES.has(input.status)) {
+    errors.push(`${path}: status 값이 올바르지 않습니다 (reviewed/in_review).`)
   }
-  if (typeof input.example !== 'string' || !input.example.trim()) {
-    errors.push(`${path}: example이 없습니다.`)
+  if (typeof input.version !== 'number' || input.version <= 0) {
+    errors.push(`${path}: version은 양수여야 합니다.`)
   }
-  if (typeof input.whyItMatters !== 'string' || !input.whyItMatters.trim()) {
-    errors.push(`${path}: whyItMatters가 없습니다.`)
-  }
-  if (!Array.isArray(input.relatedAssetTypes)) {
-    errors.push(`${path}: relatedAssetTypes가 배열이 아닙니다.`)
-  }
-  validateStringArray(input.checklist, `${path}.checklist`, errors)
-  if (typeof input.reviewedAt !== 'string' || !DATE_RE.test(input.reviewedAt)) {
-    errors.push(`${path}: reviewedAt 형식이 올바르지 않습니다 (YYYY-MM-DD).`)
-  }
-  if (typeof input.estimatedMinutes !== 'number' || input.estimatedMinutes <= 0) {
-    errors.push(`${path}: estimatedMinutes는 양수여야 합니다.`)
-  }
-  if (typeof input.difficulty !== 'string' || !VALID_DIFFICULTIES.has(input.difficulty)) {
-    errors.push(`${path}: difficulty 값이 올바르지 않습니다 (basic/intermediate).`)
-  }
-  if (input.relatedConceptIds !== undefined) {
-    validateStringArray(input.relatedConceptIds, `${path}.relatedConceptIds`, errors)
-  }
-  // §9: 모든 콘텐츠는 출처를 최소 1개 이상 가져야 한다.
-  if (!Array.isArray(input.sources) || input.sources.length === 0) {
-    errors.push(`${path}: 출처(sources)가 없습니다.`)
-  } else {
-    input.sources.forEach((s, i) => validateSource(s, `${path}.sources[${i}]`, errors))
+  validateStringArray(input.keyPoints, `${path}.keyPoints`, errors)
+  validateStringArray(input.relatedConceptIds, `${path}.relatedConceptIds`, errors)
+  validateStringArray(input.sourceIds, `${path}.sourceIds`, errors)
+  if (typeof input.shortDefinition !== 'string') errors.push(`${path}: shortDefinition이 없습니다.`)
+  if (typeof input.body !== 'string') errors.push(`${path}: body가 없습니다.`)
+  if (typeof input.reviewedAt !== 'string') errors.push(`${path}: reviewedAt이 없습니다.`)
+
+  const status = input.status
+  if (status === 'reviewed') {
+    if (typeof input.shortDefinition === 'string' && !input.shortDefinition.trim()) {
+      errors.push(`${path}: reviewed 카드는 shortDefinition이 비어 있으면 안 됩니다.`)
+    }
+    if (typeof input.body === 'string' && !input.body.trim()) {
+      errors.push(`${path}: reviewed 카드는 body가 비어 있으면 안 됩니다.`)
+    }
+    if (typeof input.reviewedAt === 'string' && !DATE_RE.test(input.reviewedAt)) {
+      errors.push(`${path}: reviewedAt 형식이 올바르지 않습니다 (YYYY-MM-DD).`)
+    }
+    if (!Array.isArray(input.sourceIds) || input.sourceIds.length === 0) {
+      errors.push(`${path}: reviewed 카드는 출처(sourceIds)가 최소 1개 있어야 합니다.`)
+    }
   }
 }
 
@@ -67,6 +75,11 @@ export function validateConceptCardsFile(input: unknown): ConceptCardsValidation
   }
   const errors: string[] = []
   input.forEach((card, i) => validateConceptCard(card, `concepts[${i}]`, errors))
+
+  const ids = input.map((c) => (isPlainObject(c) ? c.id : undefined))
+  const dupes = ids.filter((id, i) => typeof id === 'string' && ids.indexOf(id) !== i)
+  if (dupes.length > 0) errors.push(`중복된 id가 있습니다: ${[...new Set(dupes)].join(', ')}`)
+
   if (errors.length > 0) return { valid: false, errors }
   return { valid: true, errors: [], cards: input as ConceptCard[] }
 }

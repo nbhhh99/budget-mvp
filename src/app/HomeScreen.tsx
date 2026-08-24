@@ -15,7 +15,7 @@ import {
   sanitizeHouseholdSubtitle,
   type RecommendedModule,
 } from '../domain'
-import { CURRICULUM_MODULES, LEARNING_CONTENTS } from '../content/curriculum'
+import { ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_MODULES, ECONOMIC_HISTORY_VERSION } from '../content/economicHistory'
 import { DAILY_QUOTES } from '../content/dailyQuotes'
 import { todayDateString } from '../utils/date'
 import { useToast } from '../components/toast/useToast'
@@ -132,13 +132,13 @@ export function HomeScreen() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const allProgress = await curriculumProgressRepo.getAllCurriculumProgress()
+      const progress = await curriculumProgressRepo.getCurriculumProgressForVersion(ECONOMIC_HISTORY_VERSION)
       if (cancelled) return
-      const result = getRecommendedModule(CURRICULUM_MODULES, allProgress)
+      const result = getRecommendedModule(ECONOMIC_HISTORY_MODULES, progress)
       setRecommended(result)
       if (result) {
-        const contents = LEARNING_CONTENTS.filter((c) => c.curriculumId === result.module.id)
-        const p = allProgress.find((item) => item.curriculumId === result.module.id)
+        const contents = ECONOMIC_HISTORY_CONTENTS.filter((c) => c.curriculumId === result.module.id)
+        const p = progress.find((item) => item.curriculumId === result.module.id)
         setRecommendedProgress(computeModuleProgress(contents, p?.completedItemIds ?? []))
       }
     }

@@ -3,23 +3,11 @@ import { computeInflationAdjustedValue } from '../../../domain'
 import { formatWon } from '../../../utils/date'
 import { NumberField } from './NumberField'
 import { CalculatorDisclaimer } from './CalculatorDisclaimer'
-import { useCalculatorCompletion } from './useCalculatorCompletion'
-
-const DEFAULTS = { currentAmount: 10_000_000, years: 10, annualInflationRatePercent: 3 }
 
 export function InflationAdjustedCalculator() {
-  const [currentAmount, setCurrentAmount] = useState(DEFAULTS.currentAmount)
-  const [years, setYears] = useState(DEFAULTS.years)
-  const [annualInflationRatePercent, setAnnualInflationRatePercent] = useState(
-    DEFAULTS.annualInflationRatePercent,
-  )
-
-  useCalculatorCompletion(
-    'inflation_adjusted',
-    currentAmount !== DEFAULTS.currentAmount ||
-      years !== DEFAULTS.years ||
-      annualInflationRatePercent !== DEFAULTS.annualInflationRatePercent,
-  )
+  const [currentAmount, setCurrentAmount] = useState(10_000_000)
+  const [years, setYears] = useState(10)
+  const [annualInflationRatePercent, setAnnualInflationRatePercent] = useState(3)
 
   const result = computeInflationAdjustedValue({
     currentAmount,

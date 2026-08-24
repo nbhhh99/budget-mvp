@@ -3,23 +3,12 @@ import { computeCompoundInterest } from '../../../domain'
 import { formatWon } from '../../../utils/date'
 import { NumberField } from './NumberField'
 import { CalculatorDisclaimer } from './CalculatorDisclaimer'
-import { useCalculatorCompletion } from './useCalculatorCompletion'
-
-const DEFAULTS = { initialAmount: 1_000_000, monthlyContribution: 300_000, months: 60, annualRatePercent: 4 }
 
 export function CompoundInterestCalculator() {
-  const [initialAmount, setInitialAmount] = useState(DEFAULTS.initialAmount)
-  const [monthlyContribution, setMonthlyContribution] = useState(DEFAULTS.monthlyContribution)
-  const [months, setMonths] = useState(DEFAULTS.months)
-  const [annualRatePercent, setAnnualRatePercent] = useState(DEFAULTS.annualRatePercent)
-
-  useCalculatorCompletion(
-    'compound_interest',
-    initialAmount !== DEFAULTS.initialAmount ||
-      monthlyContribution !== DEFAULTS.monthlyContribution ||
-      months !== DEFAULTS.months ||
-      annualRatePercent !== DEFAULTS.annualRatePercent,
-  )
+  const [initialAmount, setInitialAmount] = useState(1_000_000)
+  const [monthlyContribution, setMonthlyContribution] = useState(300_000)
+  const [months, setMonths] = useState(60)
+  const [annualRatePercent, setAnnualRatePercent] = useState(4)
 
   const result = computeCompoundInterest({
     initialAmount,

@@ -1,0 +1,86 @@
+import type { LearningSource } from '../types/models'
+
+// 돈 개념 사전과 차근차근 경제사가 공통으로 참조하는 출처 카탈로그.
+// 개별 카드/모듈은 이 목록의 id만 참조한다(§17 — 출처 내용을 복제하지 않는다).
+export const LEARNING_SOURCES: LearningSource[] = [
+  {
+    id: 'fss-edu',
+    name: 'e-금융교육센터',
+    publisher: '금융감독원',
+    url: 'https://www.fss.or.kr/edu/main/main.do',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'bok-edu',
+    name: '경제교육',
+    publisher: '한국은행',
+    url: 'https://www.bok.or.kr/portal/main/contents.do?menuNo=200583',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'bok-ecos',
+    name: '경제통계시스템(ECOS)',
+    publisher: '한국은행',
+    url: 'https://ecos.bok.or.kr',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'nts-pension-tax-credit',
+    name: '연금계좌 세액공제',
+    publisher: '국세청',
+    url: 'https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7875',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'nts-financial-income-tax',
+    name: '금융소득 - 자주묻는 Q&A',
+    publisher: '국세청',
+    url: 'https://call.nts.go.kr/call/qna/selectQnaInfo.do?mi=1441&ctgId=CTG11775',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'nps-info',
+    name: '국민연금 보험료율 및 제도 안내',
+    publisher: '국민연금공단',
+    url: 'https://www.nps.or.kr/pnsinfo/ntpsklg/getOHAF0104M0.do',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'kdic-info',
+    name: '예금자보호제도',
+    publisher: '예금보험공사',
+    url: 'https://www.kdic.or.kr/protect/system01.do',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'kostat-info',
+    name: '국가통계포털(KOSIS)',
+    publisher: '통계청',
+    url: 'https://kosis.kr',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'bok-economic-history',
+    name: '알기 쉬운 경제이야기 · 화폐금융박물관 자료',
+    publisher: '한국은행',
+    url: 'https://www.bok.or.kr/portal/bbs/P0000538/list.do?menuNo=200147',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+  {
+    id: 'fss-financial-history',
+    name: '금융용어사전 · 금융과 경제 이야기',
+    publisher: '금융감독원',
+    url: 'https://www.fss.or.kr/edu/main/main.do',
+    reviewedAt: '2026-08-24',
+    sourceType: 'official',
+  },
+]

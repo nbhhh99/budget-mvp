@@ -5,32 +5,32 @@ import './LearnHomeScreen.css'
 
 const CARDS = [
   {
-    to: '/learn/briefing',
-    title: '경제 흐름',
-    description: '국내외 경제 변화와 금융제도 소식을 내 자산의 관점에서 살펴봐요.',
-    image: 'financial-briefing.png',
-    icon: '🌍',
+    to: '/learn/monthly',
+    title: '차근차근 경제사',
+    description: '경제가 지금의 모습이 된 과정을 핵심 사건으로 배워요.',
+    image: 'monthly-money-lesson.png',
+    icon: '💡',
   },
   {
     to: '/learn/concepts',
-    title: '개념 카드',
-    description: '자산 형성에 필요한 개념을 짧고 쉽게 배워요.',
+    title: '돈 개념 사전',
+    description: '복리·환율·ETF 같은 궁금한 금융 개념을 찾아보세요.',
     image: 'concept-cards.png',
     icon: '📇',
   },
   {
     to: '/learn/calculators',
     title: '숫자로 이해하기',
-    description: '금리·물가·복리의 영향을 직접 계산하며 알아봐요.',
+    description: '복리·물가·목표저축을 직접 계산해 보세요.',
     image: 'understand-with-numbers.png',
     icon: '🧮',
   },
   {
-    to: '/learn/monthly',
-    title: '차근차근 돈 공부',
-    description: '내 속도에 맞춰 금융생활의 기본을 하나씩 배워요.',
-    image: 'monthly-money-lesson.png',
-    icon: '💡',
+    to: '/learn/briefing',
+    title: '재무 브리핑',
+    description: '국내외 경제 흐름이 내 자산에 갖는 의미를 살펴봐요.',
+    image: 'financial-briefing.png',
+    icon: '🌍',
   },
 ] as const
 

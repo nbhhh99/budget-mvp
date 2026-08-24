@@ -165,26 +165,49 @@ export interface BriefingIndex {
   entries: BriefingIndexEntry[]
 }
 
-// ── 공부하기 (개념 카드 · 계산기 · 이번 달 돈 공부) ──────────────────
+// ── 공부하기: 돈 개념 사전 · 차근차근 경제사 · 계산기 · 재무 브리핑 ───
 // 자산 형성에 필요한 개념을 정리한 일반 정보. 금융상품 추천이나 투자 방향을
-// 단정하지 않는다. BriefingSource와 동일한 구조를 쓴다.
+// 단정하지 않는다.
 
-export type LearningSource = BriefingSource
+// 돈 개념 사전과 차근차근 경제사가 공통으로 쓰는 출처 카탈로그 항목.
+// 개별 카드/모듈은 이 카탈로그의 id만 참조하고(sourceIds), 출처 내용을 복제하지 않는다.
+export interface LearningSource {
+  id: string
+  name: string
+  publisher: string
+  url: string
+  effectiveDate?: string // 'YYYY-MM-DD', 수치·제도의 기준일(있는 경우)
+  reviewedAt: string // 'YYYY-MM-DD', 이 출처를 확인한 날짜
+  sourceType: 'official' | 'academic' | 'book' | 'institutional'
+}
+
+export type ConceptCategory =
+  | 'daily-finance' // 생활경제
+  | 'money-interest' // 금리·물가·통화
+  | 'debt-credit' // 부채·신용
+  | 'investing' // 투자
+  | 'financial-products' // 금융상품
+  | 'insurance-pension-tax' // 보험·연금·세금·절세계좌
+  | 'economy-market' // 시장과 경제지표
+
+// 검증된 상세 내용이 아직 없는 개념은 'in_review'로 두고 body를 비워, 사실이나
+// 수치를 임의로 채우지 않는다("돈 개념 사전" §5/§19).
+export type ContentReviewStatus = 'reviewed' | 'in_review'
 
 export interface ConceptCard {
   id: string
   title: string
-  oneLineSummary: string
-  definition: string
-  example: string
-  whyItMatters: string
-  relatedAssetTypes: AssetType[]
-  checklist: string[]
-  sources: LearningSource[]
-  reviewedAt: string // 'YYYY-MM-DD'
-  estimatedMinutes: number
-  difficulty: 'basic' | 'intermediate'
-  relatedConceptIds?: string[] // "관련 개념" 섹션에서 이동할 다른 개념 카드
+  shortDefinition: string
+  body: string // in_review면 빈 문자열
+  keyPoints: string[]
+  caution?: string
+  relatedConceptIds: string[]
+  category: ConceptCategory
+  sourceIds: string[] // LearningSource.id 참조
+  reviewedAt: string // 'YYYY-MM-DD', in_review면 빈 문자열
+  effectiveDate?: string
+  version: number
+  status: ContentReviewStatus
 }
 
 export type CalculatorId = 'compound_interest' | 'inflation_adjusted' | 'goal_savings' | 'savings_rate'
@@ -197,6 +220,7 @@ export type LearningContentType =
   | 'calculator'
   | 'quiz'
   | 'checklist'
+  | 'example'
 
 export interface LearningProgress {
   contentId: string // PK (concept id / calculator id / quiz id / checklist id 등)
@@ -207,10 +231,12 @@ export interface LearningProgress {
   completedAt?: string
 }
 
-// ── 차근차근 돈 공부 (순차 잠금해제형 커리큘럼) ─────────────────────
+// ── 순차 잠금해제형 커리큘럼 엔진 (현재는 "차근차근 경제사"가 사용) ──
 // 날짜·경과 기간을 잠금 해제 조건으로 쓰지 않는다. 이전 과정을 완료해야
 // 다음 과정이 열린다. 실제 검증된 콘텐츠가 없는 과정은 itemIds를 비워두고
-// "준비 중"으로 표시한다(수치·사실을 임의로 만들지 않는다).
+// "검토 중"으로 표시한다(수치·사실을 임의로 만들지 않는다). 이 타입들은
+// 콘텐츠와 무관한 제네릭 엔진이라, 콘텐츠 성격이 다른 커리큘럼이 새로 생기면
+// curriculumVersion으로 진행 기록을 구분해 재사용한다(§11).
 
 export type LearningItemType = 'concept' | 'example' | 'calculator' | 'quiz' | 'checklist'
 
@@ -250,6 +276,9 @@ export interface CurriculumModule {
   itemIds: string[]
   relatedAssetTypes?: AssetType[]
   sourceIds?: string[]
+  curriculumVersion?: string // 예: 'economic-history-v1'
+  periodLabel?: string // 예: "선사~고대" — 경제사에서 시대 배지로 사용
+  conceptIds?: string[] // 돈 개념 사전 연결(§17 — 본문에 정의를 복제하지 않고 id로만 참조)
 }
 
 export type CurriculumStatus = 'not_started' | 'in_progress' | 'completed'
@@ -263,4 +292,5 @@ export interface CurriculumProgress {
   startedAt?: string
   completedAt?: string
   lastViewedAt?: string
+  curriculumVersion?: string // 없으면 과거(차근차근 돈 공부) 레코드 — 새 커리큘럼 계산에서 자동 제외된다.
 }

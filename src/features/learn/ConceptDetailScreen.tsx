@@ -1,49 +1,32 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { curriculumProgressRepo, learningProgressRepo } from '../../db'
-import type { ConceptCard, LearningProgress } from '../../types/models'
-import { fetchConceptCards } from './learningData'
+import { learningProgressRepo } from '../../db'
+import { CONCEPTS, CONCEPT_CATEGORY_LABEL } from '../../content/concepts'
+import { LEARNING_SOURCES } from '../../content/learningSources'
+import type { LearningProgress } from '../../types/models'
 import './ConceptDetailScreen.css'
-
-const STATUS_LABEL: Record<LearningProgress['status'], string> = {
-  unread: '아직 읽지 않음',
-  reading: '읽는 중',
-  read: '읽어봄',
-}
-
-const DIFFICULTY_LABEL: Record<ConceptCard['difficulty'], string> = {
-  basic: '기초',
-  intermediate: '중급',
-}
 
 export function ConceptDetailScreen() {
   const { conceptId } = useParams<{ conceptId: string }>()
-  const [allConcepts, setAllConcepts] = useState<ConceptCard[] | null>(null)
   const [progress, setProgress] = useState<LearningProgress | null>(null)
   const [loaded, setLoaded] = useState(false)
+
+  const concept = CONCEPTS.find((c) => c.id === conceptId) ?? null
+  const relatedConcepts = concept
+    ? concept.relatedConceptIds.map((id) => CONCEPTS.find((c) => c.id === id)).filter((c): c is (typeof CONCEPTS)[number] => Boolean(c))
+    : []
+  const sources = concept ? concept.sourceIds.map((id) => LEARNING_SOURCES.find((s) => s.id === id)).filter((s): s is (typeof LEARNING_SOURCES)[number] => Boolean(s)) : []
+  const bodyParagraphs = concept ? concept.body.split('\n\n').filter(Boolean) : []
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [{ concepts }, existingProgress] = await Promise.all([
-        fetchConceptCards(),
-        conceptId ? learningProgressRepo.getLearningProgress(conceptId) : Promise.resolve(undefined),
-      ])
-      if (cancelled) return
-      setAllConcepts(concepts)
-
       if (conceptId) {
-        const currentStatus = existingProgress?.status ?? 'unread'
-        if (currentStatus === 'unread') {
-          await learningProgressRepo.setReadStatus(conceptId, 'concept', 'reading')
-          if (cancelled) return
-          setProgress(await learningProgressRepo.getLearningProgress(conceptId) ?? null)
-        } else {
-          setProgress(existingProgress ?? null)
-        }
+        const existing = await learningProgressRepo.getLearningProgress(conceptId)
+        if (!cancelled) setProgress(existing ?? null)
       }
-      setLoaded(true)
+      if (!cancelled) setLoaded(true)
     }
     load()
     return () => {
@@ -51,36 +34,15 @@ export function ConceptDetailScreen() {
     }
   }, [conceptId])
 
-  const concept = allConcepts?.find((c) => c.id === conceptId) ?? null
-  const relatedConcepts = concept
-    ? (concept.relatedConceptIds ?? [])
-        .map((id) => allConcepts?.find((c) => c.id === id))
-        .filter((c): c is ConceptCard => Boolean(c))
-    : []
-
-  async function handleToggleRead() {
-    if (!conceptId) return
-    if (progress?.status === 'read') {
-      await learningProgressRepo.setReadStatus(conceptId, 'concept', 'reading')
-    } else {
-      // '읽어봄'으로 바뀔 때만 커리큘럼 완료 처리(§13 공통 완료 처리 함수)를 함께
-      // 호출한다. 다시 '읽는 중'으로 되돌려도 이미 인정된 커리큘럼 완료는 취소하지 않는다.
-      await curriculumProgressRepo.completeLearningItem(conceptId, 'concept')
-    }
-    setProgress((await learningProgressRepo.getLearningProgress(conceptId)) ?? null)
-  }
-
   async function handleToggleSaved() {
     if (!conceptId) return
     await learningProgressRepo.setSaved(conceptId, 'concept', !progress?.saved)
-    setProgress(await learningProgressRepo.getLearningProgress(conceptId) ?? null)
+    setProgress((await learningProgressRepo.getLearningProgress(conceptId)) ?? null)
   }
-
-  const isRead = progress?.status === 'read'
 
   return (
     <div className="concept-detail">
-      <ScreenHeader title="개념 카드" />
+      <ScreenHeader title="돈 개념 사전" />
       <div className="concept-detail__body">
         {!loaded && <p className="concept-detail__state">불러오는 중…</p>}
         {loaded && !concept && <p className="concept-detail__state">이 개념 카드를 찾을 수 없어요.</p>}
@@ -90,11 +52,7 @@ export function ConceptDetailScreen() {
             <div className="concept-detail__header">
               <h1 className="concept-detail__title">{concept.title}</h1>
               <div className="concept-detail__meta">
-                <span className="concept-detail__badge">⏱ 약 {concept.estimatedMinutes}분</span>
-                <span className="concept-detail__badge">{DIFFICULTY_LABEL[concept.difficulty]}</span>
-                <span className="concept-detail__badge concept-detail__badge--status">
-                  {isRead ? '✓ 읽어봄' : STATUS_LABEL[progress?.status ?? 'unread']}
-                </span>
+                <span className="concept-detail__badge">{CONCEPT_CATEGORY_LABEL[concept.category]}</span>
                 <button
                   type="button"
                   onClick={handleToggleSaved}
@@ -107,103 +65,96 @@ export function ConceptDetailScreen() {
               </div>
             </div>
 
-            <section className="concept-detail__hero">
-              <span className="concept-detail__hero-icon" aria-hidden="true">
-                💬
-              </span>
-              <p className="concept-detail__hero-text">{concept.oneLineSummary}</p>
-            </section>
-
-            <section className="concept-detail__section">
-              <h2>
-                <span className="concept-detail__section-icon" aria-hidden="true">
-                  📖
-                </span>
-                쉽게 설명하면
-              </h2>
-              <p>{concept.definition}</p>
-            </section>
-            <section className="concept-detail__section">
-              <h2>
-                <span className="concept-detail__section-icon" aria-hidden="true">
-                  💡
-                </span>
-                예시
-              </h2>
-              <p>{concept.example}</p>
-            </section>
-            <section className="concept-detail__section">
-              <h2>
-                <span className="concept-detail__section-icon" aria-hidden="true">
-                  🔗
-                </span>
-                내 자산과 어떤 관련이 있나요?
-              </h2>
-              <p>{concept.whyItMatters}</p>
-            </section>
-            {concept.checklist.length > 0 && (
-              <section className="concept-detail__section">
-                <h2>
-                  <span className="concept-detail__section-icon" aria-hidden="true">
-                    ✅
+            {concept.status === 'in_review' ? (
+              <div className="concept-detail__review-notice">
+                <p>아직 검토 중인 개념이에요.</p>
+                <p className="concept-detail__review-sub">
+                  정확한 설명을 준비하고 있어요. 출처가 확인되지 않은 내용은 미리 채워두지 않아요.
+                </p>
+              </div>
+            ) : (
+              <>
+                <section className="concept-detail__hero">
+                  <span className="concept-detail__hero-icon" aria-hidden="true">
+                    💬
                   </span>
-                  확인해볼 것
-                </h2>
-                <ul className="concept-detail__checklist">
-                  {concept.checklist.map((item, i) => (
-                    <li key={i}>
-                      <span aria-hidden="true">✓</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            <section className="concept-detail__section concept-detail__sources">
-              <h2>
-                <span className="concept-detail__section-icon" aria-hidden="true">
-                  📚
-                </span>
-                공식 출처
-              </h2>
-              <ul>
-                {concept.sources.map((source, i) => (
-                  <li key={i}>
-                    {source.organization} · {source.title}
-                    <br />
-                    <a href={source.url} target="_blank" rel="noopener noreferrer">
-                      원문 보기 (새 창)
-                    </a>
-                  </li>
+                  <p className="concept-detail__hero-text">{concept.shortDefinition}</p>
+                </section>
+
+                {bodyParagraphs.map((paragraph, i) => (
+                  <p key={i} className="concept-detail__paragraph">
+                    {paragraph}
+                  </p>
                 ))}
-              </ul>
-              <span className="concept-detail__reviewed-at">검수일 {concept.reviewedAt}</span>
-            </section>
 
-            {relatedConcepts.length > 0 && (
-              <section className="concept-detail__section">
-                <h2>관련 개념</h2>
-                <ul className="concept-detail__related-list">
-                  {relatedConcepts.map((related) => (
-                    <li key={related.id}>
-                      <Link to={`/learn/concepts/${related.id}`}>{related.title} ›</Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+                {concept.keyPoints.length > 0 && (
+                  <section className="concept-detail__section">
+                    <h2>
+                      <span className="concept-detail__section-icon" aria-hidden="true">
+                        ✅
+                      </span>
+                      핵심
+                    </h2>
+                    <ul className="concept-detail__checklist">
+                      {concept.keyPoints.map((point, i) => (
+                        <li key={i}>
+                          <span aria-hidden="true">·</span>
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {concept.caution && (
+                  <section className="concept-detail__section concept-detail__caution">
+                    <h2>
+                      <span className="concept-detail__section-icon" aria-hidden="true">
+                        ⚠️
+                      </span>
+                      주의할 점
+                    </h2>
+                    <p>{concept.caution}</p>
+                  </section>
+                )}
+
+                {relatedConcepts.length > 0 && (
+                  <section className="concept-detail__section">
+                    <h2>함께 보면 좋은 개념</h2>
+                    <div className="concept-detail__related-chips">
+                      {relatedConcepts.map((related) => (
+                        <Link key={related.id} to={`/learn/concepts/${related.id}`} className="concept-detail__related-chip">
+                          {related.title}
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {sources.length > 0 && (
+                  <section className="concept-detail__section concept-detail__sources">
+                    <h2>
+                      <span className="concept-detail__section-icon" aria-hidden="true">
+                        📚
+                      </span>
+                      출처
+                    </h2>
+                    <ul>
+                      {sources.map((source) => (
+                        <li key={source.id}>
+                          {source.publisher} · {source.name}
+                          <br />
+                          <a href={source.url} target="_blank" rel="noopener noreferrer">
+                            원문 보기 (새 창)
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                    <span className="concept-detail__reviewed-at">검토일 {concept.reviewedAt}</span>
+                  </section>
+                )}
+              </>
             )}
-
-            {/* 스크롤 위치와 무관하게 항상 보이는 완료 버튼 — 헤더까지 다시 스크롤하지
-                않아도 바로 다음 단계로 넘어갈 수 있게 한다. */}
-            <div className="concept-detail__footer">
-              <button
-                type="button"
-                onClick={handleToggleRead}
-                className={`concept-detail__done-button${isRead ? ' concept-detail__done-button--done' : ''}`}
-              >
-                {isRead ? '✓ 다 읽었어요' : '다 읽었어요'}
-              </button>
-            </div>
           </>
         )}
       </div>

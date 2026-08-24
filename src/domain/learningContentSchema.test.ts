@@ -6,30 +6,45 @@ function validConcept(overrides: Partial<ConceptCard> = {}): ConceptCard {
   return {
     id: 'emergency-fund',
     title: '비상자금',
-    oneLineSummary: '갑작스러운 지출에 대비해 따로 마련해두는 돈이에요.',
-    definition: '비상자금은 실직, 질병 등 예상치 못한 상황에 대비해 마련해두는 자금입니다.',
-    example: '생활비의 3~6개월치를 CMA나 예금에 따로 두는 경우가 많습니다.',
-    whyItMatters: '비상자금이 있으면 급한 지출이 생겨도 투자자산을 급하게 팔지 않아도 됩니다.',
-    relatedAssetTypes: ['cash_deposit'],
-    checklist: ['생활비 몇 개월치가 준비되어 있는지 확인해볼 수 있습니다.'],
-    sources: [
-      {
-        organization: '금융감독원',
-        title: 'e-금융교육센터',
-        url: 'https://www.fss.or.kr/edu/main/main.do',
-        accessedAt: '2026-08-24',
-      },
-    ],
+    shortDefinition: '갑작스러운 지출에 대비해 따로 마련해두는 돈이에요.',
+    body: '비상자금은 실직, 질병 등 예상치 못한 상황에 대비해 마련해두는 자금입니다.',
+    keyPoints: ['생활비 몇 개월치가 준비되어 있는지 확인해볼 수 있어요.'],
+    relatedConceptIds: [],
+    category: 'daily-finance',
+    sourceIds: ['fss-edu'],
     reviewedAt: '2026-08-24',
-    estimatedMinutes: 2,
-    difficulty: 'basic',
+    version: 1,
+    status: 'reviewed',
+    ...overrides,
+  }
+}
+
+function inReviewConcept(overrides: Partial<ConceptCard> = {}): ConceptCard {
+  return {
+    id: 'stub-term',
+    title: '검토 중 개념',
+    shortDefinition: '',
+    body: '',
+    keyPoints: [],
+    relatedConceptIds: [],
+    category: 'economy-market',
+    sourceIds: [],
+    reviewedAt: '',
+    version: 1,
+    status: 'in_review',
     ...overrides,
   }
 }
 
 describe('validateConceptCardsFile', () => {
-  it('accepts a well-formed concept card array', () => {
+  it('accepts a well-formed reviewed concept card array', () => {
     const result = validateConceptCardsFile([validConcept()])
+    expect(result.valid).toBe(true)
+    expect(result.errors).toEqual([])
+  })
+
+  it('accepts an in_review stub with empty body/sourceIds/reviewedAt', () => {
+    const result = validateConceptCardsFile([inReviewConcept()])
     expect(result.valid).toBe(true)
     expect(result.errors).toEqual([])
   })
@@ -38,32 +53,44 @@ describe('validateConceptCardsFile', () => {
     expect(validateConceptCardsFile({}).valid).toBe(false)
   })
 
-  it('rejects a card with no sources', () => {
-    const result = validateConceptCardsFile([validConcept({ sources: [] })])
+  it('rejects a reviewed card with no sourceIds', () => {
+    const result = validateConceptCardsFile([validConcept({ sourceIds: [] })])
     expect(result.valid).toBe(false)
     expect(result.errors.some((e) => e.includes('출처'))).toBe(true)
   })
 
-  it('rejects an invalid difficulty value', () => {
+  it('rejects an invalid category value', () => {
     // @ts-expect-error intentionally malformed for the test
-    const result = validateConceptCardsFile([validConcept({ difficulty: 'expert' })])
+    const result = validateConceptCardsFile([validConcept({ category: 'not-a-category' })])
     expect(result.valid).toBe(false)
   })
 
-  it('rejects a non-positive estimatedMinutes', () => {
-    const result = validateConceptCardsFile([validConcept({ estimatedMinutes: 0 })])
+  it('rejects an invalid status value', () => {
+    // @ts-expect-error intentionally malformed for the test
+    const result = validateConceptCardsFile([validConcept({ status: 'draft' })])
     expect(result.valid).toBe(false)
   })
 
-  it('rejects a malformed reviewedAt date', () => {
+  it('rejects a reviewed card with an empty body', () => {
+    const result = validateConceptCardsFile([validConcept({ body: '' })])
+    expect(result.valid).toBe(false)
+  })
+
+  it('rejects a malformed reviewedAt date on a reviewed card', () => {
     const result = validateConceptCardsFile([validConcept({ reviewedAt: '2026/08/24' })])
     expect(result.valid).toBe(false)
+  })
+
+  it('rejects duplicate ids in the same file', () => {
+    const result = validateConceptCardsFile([validConcept(), validConcept()])
+    expect(result.valid).toBe(false)
+    expect(result.errors.some((e) => e.includes('중복'))).toBe(true)
   })
 })
 
 describe('sanitizeConceptCardsFile', () => {
   it('keeps valid cards and drops only the broken one', () => {
-    const broken = { ...validConcept({ id: 'broken' }), sources: [] }
+    const broken = { ...validConcept({ id: 'broken' }), sourceIds: [] }
     const result = sanitizeConceptCardsFile([validConcept(), broken])
     expect(result.cards).toHaveLength(1)
     expect(result.skippedCount).toBe(1)

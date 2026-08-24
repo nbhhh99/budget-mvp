@@ -8,11 +8,27 @@
   padding: var(--space-6) 0;
 }
 
+.curriculum-module__meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
 .curriculum-module__step {
-  margin: 0 0 var(--space-1);
+  margin: 0;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--color-text-muted);
+}
+
+.curriculum-module__period {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-alt);
+  border-radius: 999px;
+  padding: 2px 8px;
 }
 
 .curriculum-module__description {
@@ -28,117 +44,119 @@
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: var(--space-3);
-}
-
-.curriculum-module__shortcut-button {
-  display: block;
-  width: 100%;
-  border: none;
-  text-align: center;
-  min-height: var(--touch-target);
-  line-height: var(--touch-target);
-  border-radius: var(--radius-control);
-  background-color: var(--color-lavender-soft);
-  color: var(--color-text);
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-decoration: none;
   margin-bottom: var(--space-4);
 }
 
-.curriculum-module__items {
-  list-style: none;
-  margin: 0 0 var(--space-4);
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
+/* ── 본문(§9 8단 구성) ─────────────────────────────────────────── */
 
-.curriculum-module__item {
+.history-body {
   border-radius: var(--radius-card);
   background-color: var(--color-surface);
   box-shadow: var(--shadow-card);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
-.curriculum-module__item-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.curriculum-module__item-check {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.history-body__heading {
+  margin: var(--space-4) 0 var(--space-2);
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--color-income);
-  border: 2px solid var(--color-border);
-}
-
-.curriculum-module__item-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.curriculum-module__item-type-icon {
-  font-size: 1rem;
-}
-
-.curriculum-module__item-body {
-  margin-top: var(--space-2);
-  padding-left: calc(22px + var(--space-2));
-}
-
-.curriculum-module__item-preview {
-  margin: 4px 0 0;
-  font-size: 0.82rem;
   color: var(--color-text-muted);
-  line-height: 1.5;
 }
 
-/* concept/calculator 항목: 카드 전체가 버튼 — 텍스트 링크가 아니라 눌리는
-   영역을 넓혀서(§ 사용자 피드백) 어디를 눌러야 이동하는지 헷갈리지 않게 한다. */
-.curriculum-module__item--link {
+.history-body__heading:first-child {
+  margin-top: 0;
+}
+
+.history-body__paragraph {
+  margin: 0 0 var(--space-2);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.history-body__concept-chips {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
-  min-height: var(--touch-target);
+}
+
+.history-body__concept-chip {
+  display: inline-block;
+  min-height: 34px;
+  line-height: 34px;
+  border-radius: 999px;
+  background-color: var(--color-lavender-soft);
+  color: var(--color-text);
+  padding: 0 var(--space-3);
+  font-size: 0.82rem;
+  font-weight: 600;
   text-decoration: none;
+}
+
+.history-body__key-scene {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+}
+
+.history-body__takeaway {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  background-color: var(--color-mint-soft);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+}
+
+.history-body__takeaway p {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* ── 본문 완료 버튼 ────────────────────────────────────────────── */
+
+.curriculum-module__footer {
+  margin-bottom: var(--space-4);
+}
+
+.curriculum-module__done-button {
+  width: 100%;
+  min-height: 52px;
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-text);
+  color: var(--color-surface);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.curriculum-module__done-button--done {
+  background-color: var(--color-mint-soft);
   color: var(--color-text);
 }
 
-.curriculum-module__item--link:active {
-  background-color: var(--color-surface-alt);
+/* ── 확인 문제 ─────────────────────────────────────────────────── */
+
+.curriculum-module__quiz-section {
+  margin-bottom: var(--space-4);
 }
 
-.curriculum-module__item--link:focus-visible {
-  outline: 2px solid var(--color-orange);
-  outline-offset: 2px;
-}
-
-.curriculum-module__item-main {
-  flex: 1;
-  min-width: 0;
+.curriculum-module__quiz-heading {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
 }
 
-.curriculum-module__item-chevron {
-  flex-shrink: 0;
-  font-size: 1.2rem;
-  color: var(--color-text-muted);
-}
+/* ── 하단 이동 ─────────────────────────────────────────────────── */
 
 .curriculum-module__nav {
   display: flex;
@@ -206,7 +224,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .curriculum-module__item,
+  .history-body,
   .curriculum-module__done-card {
     transition: none;
   }
