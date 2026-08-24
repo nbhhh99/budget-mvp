@@ -5,6 +5,13 @@ import './LearnHomeScreen.css'
 
 const CARDS = [
   {
+    to: '/learn/briefing',
+    title: '재무 브리핑',
+    description: '국내외 경제 흐름이 내 자산에 갖는 의미를 살펴봐요.',
+    image: 'financial-briefing.png',
+    icon: '🌍',
+  },
+  {
     to: '/learn/monthly',
     title: '차근차근 경제사',
     description: '경제가 지금의 모습이 된 과정을 핵심 사건으로 배워요.',
@@ -24,13 +31,6 @@ const CARDS = [
     description: '복리·물가·목표저축을 직접 계산해 보세요.',
     image: 'understand-with-numbers.png',
     icon: '🧮',
-  },
-  {
-    to: '/learn/briefing',
-    title: '재무 브리핑',
-    description: '국내외 경제 흐름이 내 자산에 갖는 의미를 살펴봐요.',
-    image: 'financial-briefing.png',
-    icon: '🌍',
   },
 ] as const
 

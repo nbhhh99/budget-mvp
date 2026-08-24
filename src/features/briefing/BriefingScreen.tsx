@@ -19,7 +19,15 @@ import {
 } from '../../domain'
 import { fetchBriefingIndex, fetchBriefingMonth } from './briefingData'
 import { formatKoreanYearMonth } from '../../utils/date'
+import { formatKoreanWon } from '../../utils/format'
 import './BriefingScreen.css'
+
+// 금리처럼 %는 숫자를 그대로 보여주고, 예금자보호 한도처럼 원 단위 금액은
+// "1억원"같이 사람이 바로 읽을 수 있는 표기로 바꿔준다.
+function formatBriefingValue(value: number, unit: string): string {
+  if (unit === '원') return formatKoreanWon(value)
+  return `${value}${unit}`
+}
 
 const REGION_LABEL: Record<BriefingRegion, string> = { korea: '국내 경제', global: '세계 경제' }
 const CATEGORY_LABEL: Record<BriefingCategory, string> = {
@@ -276,8 +284,7 @@ function SummaryGroup({
               <span className="briefing-summary-group__title">{item.title}</span>
               {item.value !== undefined && (
                 <span className="briefing-summary-group__value">
-                  {item.value}
-                  {item.unit}
+                  {formatBriefingValue(item.value, item.unit ?? '')}
                 </span>
               )}
             </button>
@@ -315,10 +322,12 @@ function BriefingCard({
         <span className="briefing-card__title">{item.title}</span>
         {item.value !== undefined && (
           <span className="briefing-card__value">
-            {item.value}
-            {item.unit}
+            {formatBriefingValue(item.value, item.unit ?? '')}
             {item.previousValue !== undefined && (
-              <span className="briefing-card__previous"> (전 {item.previousValue}{item.unit})</span>
+              <span className="briefing-card__previous">
+                {' '}
+                (전 {formatBriefingValue(item.previousValue, item.unit ?? '')})
+              </span>
             )}
           </span>
         )}

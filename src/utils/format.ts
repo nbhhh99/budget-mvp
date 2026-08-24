@@ -17,3 +17,24 @@ export function formatCompactWon(amount: number): string {
   if (abs >= 10_000) return `${sign}${Math.round(abs / 10_000)}만`
   return `${sign}${abs.toLocaleString('ko-KR')}`
 }
+
+// 억/천만/만원 단위를 사람이 한눈에 읽기 쉽게 표기한다(예: 100,000,000 -> "1억원").
+// 딱 떨어지지 않는 금액은 억 단위까지만 소수 첫째 자리로 반올림하고, 그보다 작은
+// 금액은 쉼표 구분 원 단위 그대로 보여준다 — 재무 브리핑처럼 제도상 금액을
+// 강조해 보여줘야 하는 곳에서 쓴다(§ 사용자 피드백: 숫자만 나열하면 가시성이 떨어짐).
+export function formatKoreanWon(amount: number): string {
+  const abs = Math.abs(amount)
+  const sign = amount < 0 ? '−' : ''
+  if (abs >= 100_000_000) {
+    const eok = abs / 100_000_000
+    const rounded = Number.isInteger(eok) ? eok : Number(eok.toFixed(1))
+    return `${sign}${rounded}억원`
+  }
+  if (abs >= 10_000_000 && abs % 10_000_000 === 0) {
+    return `${sign}${abs / 10_000_000}천만원`
+  }
+  if (abs >= 10_000 && abs % 10_000 === 0) {
+    return `${sign}${abs / 10_000}만원`
+  }
+  return `${sign}${abs.toLocaleString('ko-KR')}원`
+}
