@@ -191,4 +191,127 @@ describe('ECONOMIC_HISTORY_MODULES / ECONOMIC_HISTORY_CONTENTS (차근차근 경
       }
     }
   })
+
+  it("every module's conceptIds entry points at a concept card that exists", () => {
+    const conceptIds = new Set(CONCEPTS.map((c) => c.id))
+    for (const module of ECONOMIC_HISTORY_MODULES) {
+      for (const conceptId of module.conceptIds ?? []) {
+        expect(conceptIds.has(conceptId), `${module.id} -> concept ${conceptId}`).toBe(true)
+      }
+    }
+  })
+})
+
+// 이전에 '검토 중'이었던 10개 경제사 과정이 실제 콘텐츠로 채워졌는지 확인하는 회귀 테스트.
+const FILLED_HISTORY_MODULE_IDS = [
+  'history-joint-stock-market',
+  'history-industrial-revolution',
+  'history-bretton-woods',
+  'history-oil-shock',
+  'history-korea-growth',
+  'history-asian-financial-crisis',
+  'history-dotcom-bubble',
+  'history-european-debt-crisis',
+  'history-covid-economy',
+  'history-digital-finance',
+]
+
+describe('10개 완성 대상 경제사 과정(이전 검토 중 스텁)', () => {
+  it('has exactly the expected 10 ids, each present in ECONOMIC_HISTORY_MODULES', () => {
+    expect(FILLED_HISTORY_MODULE_IDS).toHaveLength(10)
+    const ids = new Set(ECONOMIC_HISTORY_MODULES.map((m) => m.id))
+    for (const id of FILLED_HISTORY_MODULE_IDS) {
+      expect(ids.has(id), id).toBe(true)
+    }
+  })
+
+  it('none of the 10 are still stubbed out (empty itemIds)', () => {
+    for (const id of FILLED_HISTORY_MODULE_IDS) {
+      const module = ECONOMIC_HISTORY_MODULES.find((m) => m.id === id)
+      expect(module?.itemIds.length ?? 0, id).toBeGreaterThan(0)
+    }
+  })
+
+  it('all 10 have estimatedMinutes and a HISTORY_BODIES entry', () => {
+    for (const id of FILLED_HISTORY_MODULE_IDS) {
+      const module = ECONOMIC_HISTORY_MODULES.find((m) => m.id === id)
+      expect(module?.estimatedMinutes, id).toBeGreaterThan(0)
+      expect(HISTORY_BODIES[id], id).toBeDefined()
+    }
+  })
+
+  it('no module anywhere has empty itemIds anymore (all 16 are complete)', () => {
+    const stillStubbed = ECONOMIC_HISTORY_MODULES.filter((m) => m.itemIds.length === 0).map((m) => m.id)
+    expect(stillStubbed).toEqual([])
+  })
+})
+
+// 새로 추가된 주식 용어 카드가 모두 실제 콘텐츠(reviewed)로 채워져 있는지 확인하는 회귀 테스트.
+const NEW_STOCK_CONCEPT_IDS = [
+  'stock',
+  'joint-stock-company',
+  'limited-liability',
+  'shareholder',
+  'stock-market',
+  'equity',
+  'par-value',
+  'common-and-preferred-stock',
+  'shareholder-meeting-and-voting-right',
+  'authorized-and-issued-shares',
+  'kospi-kosdaq',
+  'listing',
+  'ipo',
+  'primary-and-secondary-market',
+  'order-types',
+  'trading-hours-and-price-limit',
+  'circuit-breaker-and-sidecar',
+  'trading-halt-and-market-alert',
+  'per',
+  'pbr',
+  'eps',
+  'bps',
+  'roe',
+  'intrinsic-value-vs-market-price',
+  'treasury-stock-buyback',
+  'ex-dividend-and-record-date',
+  'capital-increase',
+  'capital-reduction',
+  'stock-split-and-merger',
+  'convertible-bond-and-bw',
+  'disclosure',
+  'dart',
+  'financial-statement-basics',
+  'market-risk-and-idiosyncratic-risk',
+  'short-selling',
+  'blue-chip-stock',
+  'foreign-and-institutional-investors',
+  'etf-mechanics',
+  'nav-tracking-error-and-premium-discount',
+]
+
+describe('신규 추가된 주식 용어 카드', () => {
+  it('has at least 35 new stock-related concept ids, each present and reviewed in CONCEPTS', () => {
+    expect(NEW_STOCK_CONCEPT_IDS.length).toBeGreaterThanOrEqual(35)
+    for (const id of NEW_STOCK_CONCEPT_IDS) {
+      const concept = CONCEPTS.find((c) => c.id === id)
+      expect(concept, id).toBeDefined()
+      expect(concept?.status, id).toBe('reviewed')
+    }
+  })
+
+  it('all have at least 2 keyPoints, a non-empty body, and at least one sourceId', () => {
+    for (const id of NEW_STOCK_CONCEPT_IDS) {
+      const concept = CONCEPTS.find((c) => c.id === id)
+      expect(concept?.keyPoints.length ?? 0, id).toBeGreaterThanOrEqual(2)
+      expect(concept?.body.trim(), id).not.toBe('')
+      expect(concept?.sourceIds.length ?? 0, id).toBeGreaterThanOrEqual(1)
+    }
+  })
+
+  it('no new stock concept id duplicates another entry in CONCEPTS', () => {
+    const allIds = CONCEPTS.map((c) => c.id)
+    for (const id of NEW_STOCK_CONCEPT_IDS) {
+      expect(allIds.filter((x) => x === id), id).toHaveLength(1)
+    }
+  })
 })

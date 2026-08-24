@@ -208,6 +208,7 @@ export interface ConceptCard {
   effectiveDate?: string
   version: number
   status: ContentReviewStatus
+  aliases?: string[] // 검색용 별칭(약어·영문 표기 등). 선택 필드라 기존 카드는 그대로 둬도 된다.
 }
 
 export type CalculatorId = 'compound_interest' | 'inflation_adjusted' | 'goal_savings' | 'savings_rate'

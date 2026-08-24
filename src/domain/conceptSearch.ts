@@ -8,7 +8,9 @@ export function searchConcepts(cards: ConceptCard[], query: string): ConceptCard
   if (!trimmed) return cards
   return cards.filter(
     (card) =>
-      card.title.toLowerCase().includes(trimmed) || card.shortDefinition.toLowerCase().includes(trimmed),
+      card.title.toLowerCase().includes(trimmed) ||
+      card.shortDefinition.toLowerCase().includes(trimmed) ||
+      (card.aliases ?? []).some((alias) => alias.toLowerCase().includes(trimmed)),
   )
 }
 

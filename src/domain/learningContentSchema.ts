@@ -41,6 +41,9 @@ export function validateConceptCard(input: unknown, path: string, errors: string
   validateStringArray(input.keyPoints, `${path}.keyPoints`, errors)
   validateStringArray(input.relatedConceptIds, `${path}.relatedConceptIds`, errors)
   validateStringArray(input.sourceIds, `${path}.sourceIds`, errors)
+  if (input.aliases !== undefined) {
+    validateStringArray(input.aliases, `${path}.aliases`, errors)
+  }
   if (typeof input.shortDefinition !== 'string') errors.push(`${path}: shortDefinition이 없습니다.`)
   if (typeof input.body !== 'string') errors.push(`${path}: body가 없습니다.`)
   if (typeof input.reviewedAt !== 'string') errors.push(`${path}: reviewedAt이 없습니다.`)

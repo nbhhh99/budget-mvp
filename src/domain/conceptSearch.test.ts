@@ -46,6 +46,19 @@ describe('searchConcepts', () => {
   it('returns an empty array when nothing matches', () => {
     expect(searchConcepts(cards, '존재하지않는단어')).toEqual([])
   })
+
+  it('matches by alias (case-insensitive)', () => {
+    const withAlias = [
+      ...cards,
+      card({ id: 'd', title: '주가수익비율(PER)', shortDefinition: '주가를 주당순이익으로 나눈 값이에요.', aliases: ['PER', '피이알', '주가수익비율'] }),
+    ]
+    expect(searchConcepts(withAlias, 'per').map((c) => c.id)).toEqual(['d'])
+    expect(searchConcepts(withAlias, '피이알').map((c) => c.id)).toEqual(['d'])
+  })
+
+  it('does not fail when a card has no aliases field', () => {
+    expect(() => searchConcepts(cards, '복리')).not.toThrow()
+  })
 })
 
 describe('filterByCategory', () => {
