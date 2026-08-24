@@ -27,8 +27,8 @@ const CARDS = [
   },
   {
     to: '/learn/monthly',
-    title: '이번 달 돈 공부',
-    description: '이번 달 경제 흐름과 연결된 한 가지 주제를 깊이 살펴봐요.',
+    title: '차근차근 돈 공부',
+    description: '내 속도에 맞춰 금융생활의 기본을 하나씩 배워요.',
     image: 'monthly-money-lesson.png',
     icon: '💡',
   },

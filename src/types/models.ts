@@ -187,47 +187,80 @@ export interface ConceptCard {
   relatedConceptIds?: string[] // "관련 개념" 섹션에서 이동할 다른 개념 카드
 }
 
-export interface LessonSection {
-  heading: string
-  body: string
-}
-
-export interface MonthlyMoneyLesson {
-  id: string
-  yearMonth: string
-  title: string
-  subtitle: string
-  relatedBriefingItemIds: string[]
-  learningGoals: string[]
-  sections: LessonSection[]
-  reflectionQuestion: string
-  relatedConceptIds: string[]
-  relatedCalculatorIds: string[]
-  sources: LearningSource[]
-  status: 'draft' | 'reviewed'
-  reviewedAt?: string
-}
-
-export interface MonthlyLessonIndexEntry {
-  yearMonth: string
-  status: 'draft' | 'reviewed'
-  updatedAt: string
-}
-
-export interface MonthlyLessonIndex {
-  latestReviewed: string | null
-  entries: MonthlyLessonIndexEntry[]
-}
-
 export type CalculatorId = 'compound_interest' | 'inflation_adjusted' | 'goal_savings' | 'savings_rate'
 
-export type LearningContentType = 'concept' | 'monthly_lesson'
+// 'monthly_lesson'은 더 이상 새로 생성되지 않지만(§13, 차근차근 돈 공부로 대체),
+// 기기에 이미 저장된 과거 레코드의 타입 호환을 위해 유니온에는 남겨둔다.
+export type LearningContentType =
+  | 'concept'
+  | 'monthly_lesson'
+  | 'calculator'
+  | 'quiz'
+  | 'checklist'
 
 export interface LearningProgress {
-  contentId: string // PK (concept id 또는 monthly lesson id)
+  contentId: string // PK (concept id / calculator id / quiz id / checklist id 등)
   contentType: LearningContentType
   status: 'unread' | 'reading' | 'read'
   saved: boolean
   lastOpenedAt?: string
   completedAt?: string
+}
+
+// ── 차근차근 돈 공부 (순차 잠금해제형 커리큘럼) ─────────────────────
+// 날짜·경과 기간을 잠금 해제 조건으로 쓰지 않는다. 이전 과정을 완료해야
+// 다음 과정이 열린다. 실제 검증된 콘텐츠가 없는 과정은 itemIds를 비워두고
+// "준비 중"으로 표시한다(수치·사실을 임의로 만들지 않는다).
+
+export type LearningItemType = 'concept' | 'example' | 'calculator' | 'quiz' | 'checklist'
+
+export interface QuizContent {
+  question: string
+  choices: string[]
+  correctIndex: number
+  explanation: string
+}
+
+export interface LearningContent {
+  id: string
+  curriculumId: string
+  type: LearningItemType
+  title: string
+  body: string
+  required: boolean
+  order: number
+  version: number
+  reviewedAt: string // 'YYYY-MM-DD'
+  effectiveDate?: string
+  sourceName?: string
+  sourceUrl?: string
+  riskNotice?: string
+  linkedConceptId?: string // type: 'concept' — 기존 ConceptCard.id 참조(콘텐츠 복제 없음)
+  linkedCalculatorId?: CalculatorId // type: 'calculator' — 기존 계산기 화면 참조
+  quiz?: QuizContent // type: 'quiz'
+  checklistItems?: string[] // type: 'checklist'
+}
+
+export interface CurriculumModule {
+  id: string
+  order: number
+  title: string
+  description: string
+  estimatedMinutes?: number
+  itemIds: string[]
+  relatedAssetTypes?: AssetType[]
+  sourceIds?: string[]
+}
+
+export type CurriculumStatus = 'not_started' | 'in_progress' | 'completed'
+
+// contentId/contentType 기준 범용 LearningProgress와 이름이 겹치지 않도록,
+// 과정 단위 진행 레코드는 CurriculumProgress로 별도 명명한다.
+export interface CurriculumProgress {
+  curriculumId: string // PK
+  status: CurriculumStatus
+  completedItemIds: string[]
+  startedAt?: string
+  completedAt?: string
+  lastViewedAt?: string
 }

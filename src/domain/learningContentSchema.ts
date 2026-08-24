@@ -1,8 +1,7 @@
-import type { ConceptCard, MonthlyMoneyLesson } from '../types/models'
-import { DATE_RE, YEAR_MONTH_RE, isPlainObject, validateSource } from './sourceValidation'
+import type { ConceptCard } from '../types/models'
+import { DATE_RE, isPlainObject, validateSource } from './sourceValidation'
 
 const VALID_DIFFICULTIES = new Set(['basic', 'intermediate'])
-const VALID_STATUSES = new Set(['draft', 'reviewed'])
 
 function validateStringArray(input: unknown, path: string, errors: string[]): void {
   if (!Array.isArray(input) || input.some((v) => typeof v !== 'string')) {
@@ -97,65 +96,4 @@ export function sanitizeConceptCardsFile(input: unknown): SanitizeConceptCardsRe
     }
   })
   return { cards, skippedCount, itemErrors }
-}
-
-// ── 이번 달 돈 공부 ──────────────────────────────────────────────
-
-function validateLessonSection(input: unknown, path: string, errors: string[]): void {
-  if (!isPlainObject(input)) {
-    errors.push(`${path}: 형식이 올바르지 않습니다.`)
-    return
-  }
-  if (typeof input.heading !== 'string' || !input.heading.trim()) {
-    errors.push(`${path}: heading이 없습니다.`)
-  }
-  if (typeof input.body !== 'string' || !input.body.trim()) {
-    errors.push(`${path}: body가 없습니다.`)
-  }
-}
-
-export function validateMonthlyLesson(input: unknown): { valid: boolean; errors: string[] } {
-  const errors: string[] = []
-  if (!isPlainObject(input)) {
-    return { valid: false, errors: ['JSON 형식이 아니거나 파일이 손상되었습니다.'] }
-  }
-  if (typeof input.id !== 'string' || !input.id.trim()) errors.push('id가 없습니다.')
-  if (typeof input.yearMonth !== 'string' || !YEAR_MONTH_RE.test(input.yearMonth)) {
-    errors.push('yearMonth 형식이 올바르지 않습니다 (YYYY-MM).')
-  }
-  if (typeof input.title !== 'string' || !input.title.trim()) errors.push('title이 없습니다.')
-  if (typeof input.subtitle !== 'string' || !input.subtitle.trim()) errors.push('subtitle이 없습니다.')
-  validateStringArray(input.relatedBriefingItemIds, 'relatedBriefingItemIds', errors)
-  validateStringArray(input.learningGoals, 'learningGoals', errors)
-  if (!Array.isArray(input.sections) || input.sections.length === 0) {
-    errors.push('sections가 비어 있습니다.')
-  } else {
-    input.sections.forEach((s, i) => validateLessonSection(s, `sections[${i}]`, errors))
-  }
-  if (typeof input.reflectionQuestion !== 'string' || !input.reflectionQuestion.trim()) {
-    errors.push('reflectionQuestion이 없습니다.')
-  }
-  validateStringArray(input.relatedConceptIds, 'relatedConceptIds', errors)
-  validateStringArray(input.relatedCalculatorIds, 'relatedCalculatorIds', errors)
-  if (!Array.isArray(input.sources) || input.sources.length === 0) {
-    errors.push('출처(sources)가 없습니다.')
-  } else {
-    input.sources.forEach((s, i) => validateSource(s, `sources[${i}]`, errors))
-  }
-  if (typeof input.status !== 'string' || !VALID_STATUSES.has(input.status)) {
-    errors.push('status 값이 올바르지 않습니다 (draft/reviewed).')
-  }
-  if (input.reviewedAt !== undefined) {
-    if (typeof input.reviewedAt !== 'string' || Number.isNaN(Date.parse(input.reviewedAt))) {
-      errors.push('reviewedAt이 올바른 날짜가 아닙니다.')
-    }
-  }
-
-  if (errors.length > 0) return { valid: false, errors }
-  return { valid: true, errors: [] }
-}
-
-export function sanitizeMonthlyLesson(input: unknown): MonthlyMoneyLesson | null {
-  const result = validateMonthlyLesson(input)
-  return result.valid ? (input as MonthlyMoneyLesson) : null
 }

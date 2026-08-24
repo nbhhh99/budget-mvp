@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { fetchConceptCards, fetchMonthlyLesson, fetchMonthlyLessonIndex } from './learningData'
+import { fetchConceptCards } from './learningData'
 
 afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('fetchConceptCards / fetchMonthlyLesson*', () => {
-  it('requests only a static same-origin-relative JSON path for concepts — no user data', async () => {
+describe('fetchConceptCards', () => {
+  it('requests only a static same-origin-relative JSON path — no user data', async () => {
     const fetchSpy = vi.fn(async (..._args: unknown[]) => ({ ok: true, json: async () => [] }))
     vi.stubGlobal('fetch', fetchSpy)
 
@@ -16,16 +16,6 @@ describe('fetchConceptCards / fetchMonthlyLesson*', () => {
     const [url, init] = fetchSpy.mock.calls[0]
     expect(String(url)).toMatch(/^\/?data\/learning\/concepts\.json$/)
     expect(init).toBeUndefined()
-  })
-
-  it('requests exactly the given yearMonth for a monthly lesson and nothing else', async () => {
-    const fetchSpy = vi.fn(async (..._args: unknown[]) => ({ ok: true, json: async () => null }))
-    vi.stubGlobal('fetch', fetchSpy)
-
-    await fetchMonthlyLesson('2026-08')
-
-    const [url] = fetchSpy.mock.calls[0]
-    expect(String(url)).toMatch(/^\/?data\/learning\/monthly\/2026-08\.json$/)
   })
 
   it('sanitizes concept payloads, dropping only invalid cards instead of throwing', async () => {
@@ -38,7 +28,7 @@ describe('fetchConceptCards / fetchMonthlyLesson*', () => {
     expect(result.skippedCount).toBe(1)
   })
 
-  it('returns empty/null (not throws) on network failure', async () => {
+  it('returns an empty list (not throws) on network failure', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => {
@@ -46,12 +36,5 @@ describe('fetchConceptCards / fetchMonthlyLesson*', () => {
       }),
     )
     expect((await fetchConceptCards()).concepts).toEqual([])
-    expect(await fetchMonthlyLessonIndex()).toBeNull()
-    expect(await fetchMonthlyLesson('2026-08')).toBeNull()
-  })
-
-  it('returns null index when the JSON has no entries array', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({}) })))
-    expect(await fetchMonthlyLessonIndex()).toBeNull()
   })
 })

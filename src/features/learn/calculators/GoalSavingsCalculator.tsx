@@ -3,12 +3,23 @@ import { computeGoalSavings } from '../../../domain'
 import { formatWon } from '../../../utils/date'
 import { NumberField } from './NumberField'
 import { CalculatorDisclaimer } from './CalculatorDisclaimer'
+import { useCalculatorCompletion } from './useCalculatorCompletion'
+
+const DEFAULTS = { goalAmount: 30_000_000, currentAmount: 5_000_000, months: 24, annualRatePercent: 4 }
 
 export function GoalSavingsCalculator() {
-  const [goalAmount, setGoalAmount] = useState(30_000_000)
-  const [currentAmount, setCurrentAmount] = useState(5_000_000)
-  const [months, setMonths] = useState(24)
-  const [annualRatePercent, setAnnualRatePercent] = useState(4)
+  const [goalAmount, setGoalAmount] = useState(DEFAULTS.goalAmount)
+  const [currentAmount, setCurrentAmount] = useState(DEFAULTS.currentAmount)
+  const [months, setMonths] = useState(DEFAULTS.months)
+  const [annualRatePercent, setAnnualRatePercent] = useState(DEFAULTS.annualRatePercent)
+
+  useCalculatorCompletion(
+    'goal_savings',
+    goalAmount !== DEFAULTS.goalAmount ||
+      currentAmount !== DEFAULTS.currentAmount ||
+      months !== DEFAULTS.months ||
+      annualRatePercent !== DEFAULTS.annualRatePercent,
+  )
 
   const result = computeGoalSavings({ goalAmount, currentAmount, months, annualRatePercent })
 

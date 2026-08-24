@@ -1,7 +1,7 @@
 import type { FinancialBriefing } from '../types/models'
 
-// yearMonth/status만 있으면 되는 최소 형태 — BriefingIndexEntry와 MonthlyLessonIndexEntry가
-// 둘 다 구조적으로 이 타입을 만족해서, 이번 달 돈 공부의 월 선택에도 그대로 재사용한다.
+// yearMonth/status만 있으면 되는 최소 형태 — BriefingIndexEntry가 구조적으로
+// 이 타입을 만족한다.
 interface YearMonthStatusEntry {
   yearMonth: string
   status: 'draft' | 'reviewed'

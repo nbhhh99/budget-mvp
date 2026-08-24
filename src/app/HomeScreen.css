@@ -226,6 +226,41 @@
   background-color: var(--color-mint-soft);
 }
 
+/* ── 다음 학습(차근차근 돈 공부 추천 과정) ──────────────────────── */
+
+.home-screen__learning-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: var(--radius-card);
+  background-color: var(--color-lavender-soft);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-3) var(--space-4);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.home-screen__learning-card:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+.home-screen__learning-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.home-screen__learning-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.home-screen__learning-progress {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
 /* ── 하단 오늘의 문구 ───────────────────────────────────────────── */
 
 .home-screen__quote {

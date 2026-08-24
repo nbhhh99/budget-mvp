@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { learningProgressRepo } from '../../db'
+import { curriculumProgressRepo, learningProgressRepo } from '../../db'
 import type { ConceptCard, LearningProgress } from '../../types/models'
 import { fetchConceptCards } from './learningData'
 import './ConceptDetailScreen.css'
@@ -55,9 +55,14 @@ export function ConceptDetailScreen() {
 
   async function handleToggleRead() {
     if (!conceptId) return
-    const nextStatus = progress?.status === 'read' ? 'reading' : 'read'
-    await learningProgressRepo.setReadStatus(conceptId, 'concept', nextStatus)
-    setProgress(await learningProgressRepo.getLearningProgress(conceptId) ?? null)
+    if (progress?.status === 'read') {
+      await learningProgressRepo.setReadStatus(conceptId, 'concept', 'reading')
+    } else {
+      // '읽어봄'으로 바뀔 때만 커리큘럼 완료 처리(§13 공통 완료 처리 함수)를 함께
+      // 호출한다. 다시 '읽는 중'으로 되돌려도 이미 인정된 커리큘럼 완료는 취소하지 않는다.
+      await curriculumProgressRepo.completeLearningItem(conceptId, 'concept')
+    }
+    setProgress((await learningProgressRepo.getLearningProgress(conceptId)) ?? null)
   }
 
   async function handleToggleSaved() {

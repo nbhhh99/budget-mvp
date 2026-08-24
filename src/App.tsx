@@ -15,7 +15,8 @@ import { ConceptListScreen } from './features/learn/ConceptListScreen'
 import { ConceptDetailScreen } from './features/learn/ConceptDetailScreen'
 import { CalculatorListScreen } from './features/learn/CalculatorListScreen'
 import { CalculatorDetailScreen } from './features/learn/CalculatorDetailScreen'
-import { MonthlyLessonScreen } from './features/learn/MonthlyLessonScreen'
+import { CurriculumHomeScreen } from './features/learn/CurriculumHomeScreen'
+import { CurriculumModuleScreen } from './features/learn/CurriculumModuleScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
 import { CategoryManagementScreen } from './features/categories/CategoryManagementScreen'
 import { LockSettingsScreen } from './features/settings/LockSettingsScreen'
@@ -54,8 +55,8 @@ function App() {
               <Route path="learn/concepts/:conceptId" element={<ConceptDetailScreen />} />
               <Route path="learn/calculators" element={<CalculatorListScreen />} />
               <Route path="learn/calculators/:calculatorId" element={<CalculatorDetailScreen />} />
-              <Route path="learn/monthly" element={<MonthlyLessonScreen />} />
-              <Route path="learn/monthly/:yearMonth" element={<MonthlyLessonScreen />} />
+              <Route path="learn/monthly" element={<CurriculumHomeScreen />} />
+              <Route path="learn/monthly/:moduleId" element={<CurriculumModuleScreen />} />
               <Route
                 path="assets"
                 element={

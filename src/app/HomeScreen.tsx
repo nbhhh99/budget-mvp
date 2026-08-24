@@ -4,14 +4,18 @@ import transactionImage from '../assets/branding/btn-transaction.webp'
 import statsImage from '../assets/branding/btn-stats.webp'
 import transactionsListImage from '../assets/branding/btn-transactions.webp'
 import assetsImage from '../assets/branding/btn-assets.webp'
-import { settingsRepo } from '../db'
+import { curriculumProgressRepo, settingsRepo } from '../db'
 import {
+  computeModuleProgress,
   getDailyQuote,
+  getRecommendedModule,
   resolveHouseholdSubtitle,
   resolveHouseholdTitle,
   sanitizeHouseholdName,
   sanitizeHouseholdSubtitle,
+  type RecommendedModule,
 } from '../domain'
+import { CURRICULUM_MODULES, LEARNING_CONTENTS } from '../content/curriculum'
 import { DAILY_QUOTES } from '../content/dailyQuotes'
 import { todayDateString } from '../utils/date'
 import { useToast } from '../components/toast/useToast'
@@ -107,6 +111,8 @@ export function HomeScreen() {
   const [householdSubtitle, setHouseholdSubtitle] = useState('')
   const [loaded, setLoaded] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [recommended, setRecommended] = useState<RecommendedModule | null>(null)
+  const [recommendedProgress, setRecommendedProgress] = useState({ completed: 0, total: 0 })
 
   useEffect(() => {
     let cancelled = false
@@ -116,6 +122,25 @@ export function HomeScreen() {
       setHouseholdName(settings.householdName ?? '')
       setHouseholdSubtitle(settings.householdSubtitle ?? '')
       setLoaded(true)
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const allProgress = await curriculumProgressRepo.getAllCurriculumProgress()
+      if (cancelled) return
+      const result = getRecommendedModule(CURRICULUM_MODULES, allProgress)
+      setRecommended(result)
+      if (result) {
+        const contents = LEARNING_CONTENTS.filter((c) => c.curriculumId === result.module.id)
+        const p = allProgress.find((item) => item.curriculumId === result.module.id)
+        setRecommendedProgress(computeModuleProgress(contents, p?.completedItemIds ?? []))
+      }
     }
     load()
     return () => {
@@ -172,6 +197,20 @@ export function HomeScreen() {
             </Link>
           ))}
         </div>
+
+        {recommended && (
+          <Link to={`/learn/monthly/${recommended.module.id}`} className="home-screen__learning-card">
+            <span className="home-screen__learning-label">
+              {recommended.status === 'in_progress' ? '이어서 학습하기' : '다음 학습'}
+            </span>
+            <span className="home-screen__learning-title">
+              {recommended.module.order}단계 · {recommended.module.title}
+            </span>
+            <span className="home-screen__learning-progress">
+              {recommendedProgress.completed}/{recommendedProgress.total} 완료
+            </span>
+          </Link>
+        )}
 
         {quote && (
           <div className="home-screen__quote">

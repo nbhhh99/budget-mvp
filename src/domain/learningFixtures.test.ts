@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { validateConceptCardsFile, validateMonthlyLesson } from './learningContentSchema'
+import { validateConceptCardsFile } from './learningContentSchema'
 import type { ConceptCard } from '../types/models'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -35,34 +35,6 @@ describe('shipped concepts.json', () => {
       for (const relatedId of concept.relatedConceptIds ?? []) {
         expect(ids.has(relatedId), `${concept.id} -> ${relatedId}`).toBe(true)
       }
-    }
-  })
-})
-
-describe('shipped monthly lesson index + files', () => {
-  const index = readJson('monthly/index.json') as {
-    entries: { yearMonth: string; status: string }[]
-  }
-
-  it('index.json has the expected shape', () => {
-    expect(Array.isArray(index.entries)).toBe(true)
-    expect(index.entries.length).toBeGreaterThan(0)
-  })
-
-  it('every yearMonth in index.json has a matching, schema-valid JSON file', () => {
-    for (const entry of index.entries) {
-      const lesson = readJson(`monthly/${entry.yearMonth}.json`)
-      const result = validateMonthlyLesson(lesson)
-      expect(result.errors).toEqual([])
-      expect(result.valid).toBe(true)
-    }
-  })
-
-  it('a reviewed entry in index.json actually has status "reviewed" in its own file', () => {
-    for (const entry of index.entries) {
-      if (entry.status !== 'reviewed') continue
-      const lesson = readJson(`monthly/${entry.yearMonth}.json`) as { status?: string }
-      expect(lesson.status).toBe('reviewed')
     }
   })
 })

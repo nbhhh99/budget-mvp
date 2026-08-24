@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-  sanitizeConceptCardsFile,
-  sanitizeMonthlyLesson,
-  validateConceptCardsFile,
-  validateMonthlyLesson,
-} from './learningContentSchema'
-import type { ConceptCard, MonthlyMoneyLesson } from '../types/models'
+import { sanitizeConceptCardsFile, validateConceptCardsFile } from './learningContentSchema'
+import type { ConceptCard } from '../types/models'
 
 function validConcept(overrides: Partial<ConceptCard> = {}): ConceptCard {
   return {
@@ -28,32 +23,6 @@ function validConcept(overrides: Partial<ConceptCard> = {}): ConceptCard {
     reviewedAt: '2026-08-24',
     estimatedMinutes: 2,
     difficulty: 'basic',
-    ...overrides,
-  }
-}
-
-function validLesson(overrides: Partial<MonthlyMoneyLesson> = {}): MonthlyMoneyLesson {
-  return {
-    id: '2026-08-base-rate',
-    yearMonth: '2026-08',
-    title: '기준금리가 바뀌면 예금과 대출에는 어떤 일이 생길까?',
-    subtitle: '이번 달 한국은행 기준금리 인상과 연결된 학습 주제',
-    relatedBriefingItemIds: ['kr-base-rate-2026-08'],
-    learningGoals: ['기준금리와 시장금리의 관계를 이해합니다.'],
-    sections: [{ heading: '기준금리란', body: '한국은행이 정하는 정책금리입니다.' }],
-    reflectionQuestion: '내가 가진 예금·대출은 금리 변화에 어떻게 반응할까요?',
-    relatedConceptIds: ['nominal-vs-real-rate'],
-    relatedCalculatorIds: ['compound_interest'],
-    sources: [
-      {
-        organization: '한국은행',
-        title: '기준금리 추이',
-        url: 'https://www.bok.or.kr/portal/singl/baseRate/list.do',
-        accessedAt: '2026-08-24',
-      },
-    ],
-    status: 'reviewed',
-    reviewedAt: '2026-08-24T00:00:00.000Z',
     ...overrides,
   }
 }
@@ -104,43 +73,5 @@ describe('sanitizeConceptCardsFile', () => {
     const result = sanitizeConceptCardsFile('nope')
     expect(result.cards).toEqual([])
     expect(result.itemErrors.length).toBeGreaterThan(0)
-  })
-})
-
-describe('validateMonthlyLesson', () => {
-  it('accepts a well-formed lesson', () => {
-    const result = validateMonthlyLesson(validLesson())
-    expect(result.valid).toBe(true)
-  })
-
-  it('rejects a lesson with no sections', () => {
-    const result = validateMonthlyLesson(validLesson({ sections: [] }))
-    expect(result.valid).toBe(false)
-  })
-
-  it('rejects a lesson with no sources', () => {
-    const result = validateMonthlyLesson(validLesson({ sources: [] }))
-    expect(result.valid).toBe(false)
-  })
-
-  it('rejects an invalid status', () => {
-    // @ts-expect-error intentionally malformed for the test
-    const result = validateMonthlyLesson(validLesson({ status: 'archived' }))
-    expect(result.valid).toBe(false)
-  })
-
-  it('rejects a malformed yearMonth', () => {
-    const result = validateMonthlyLesson(validLesson({ yearMonth: '2026/08' }))
-    expect(result.valid).toBe(false)
-  })
-})
-
-describe('sanitizeMonthlyLesson', () => {
-  it('returns the lesson when valid', () => {
-    expect(sanitizeMonthlyLesson(validLesson())).not.toBeNull()
-  })
-
-  it('returns null when invalid instead of throwing', () => {
-    expect(sanitizeMonthlyLesson({ not: 'a lesson' })).toBeNull()
   })
 })
