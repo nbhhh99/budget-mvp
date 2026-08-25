@@ -42,7 +42,7 @@ export function ConceptDetailScreen() {
 
   return (
     <div className="concept-detail">
-      <ScreenHeader title="돈 개념 사전" />
+      <ScreenHeader title="금융 개념 노트" />
       <div className="concept-detail__body">
         {!loaded && <p className="concept-detail__state">불러오는 중…</p>}
         {loaded && !concept && <p className="concept-detail__state">이 개념 카드를 찾을 수 없어요.</p>}

@@ -261,34 +261,8 @@
   color: var(--color-text-muted);
 }
 
-/* ── 재무 브리핑 진입 카드 ──────────────────────────────────────── */
-
-.home-screen__briefing-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  border-radius: var(--radius-card);
-  background-color: var(--color-lavender-soft);
-  box-shadow: var(--shadow-card);
-  padding: var(--space-3) var(--space-4);
-  text-decoration: none;
-  color: var(--color-text);
-}
-
-.home-screen__briefing-card:focus-visible {
-  outline: 2px solid var(--color-orange);
-  outline-offset: 2px;
-}
-
-.home-screen__briefing-label {
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
-.home-screen__briefing-desc {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
+.home-screen__learning-card--orange {
+  background-color: var(--color-orange-soft);
 }
 
 /* ── 하단 오늘의 문구 ───────────────────────────────────────────── */

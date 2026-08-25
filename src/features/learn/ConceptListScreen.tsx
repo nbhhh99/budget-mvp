@@ -30,7 +30,7 @@ export function ConceptListScreen() {
 
   return (
     <div className="concept-list">
-      <ScreenHeader title="돈 개념 사전" />
+      <ScreenHeader title="금융 개념 노트" />
       <div className="concept-list__body">
         <p className="concept-list__intro">궁금한 경제·금융 개념을 찾아보세요.</p>
 

@@ -5,18 +5,25 @@ import './LearnHomeScreen.css'
 
 const CARDS = [
   {
+    to: '/learn/briefing',
+    title: '재무 브리핑',
+    description: '정부 정책·세금·금융제도 변경과 공식 통계 발표를 확인해요.',
+    image: 'financial-briefing.png',
+    icon: '🌍',
+  },
+  {
+    to: '/learn/concepts',
+    title: '금융 개념 노트',
+    description: '복리·환율·ETF 같은 궁금한 금융 개념을 찾아보세요.',
+    image: 'concept-cards.png',
+    icon: '📇',
+  },
+  {
     to: '/learn/life-economy',
     title: '생활로 읽는 경제',
     description: '금리·환율·물가와 정책이 내 생활에 어떻게 이어지는지 알아봐요.',
     image: 'life-economy.png',
     icon: '🔗',
-  },
-  {
-    to: '/learn/concepts',
-    title: '돈 개념 사전',
-    description: '복리·환율·ETF 같은 궁금한 금융 개념을 찾아보세요.',
-    image: 'concept-cards.png',
-    icon: '📇',
   },
   {
     to: '/learn/monthly',

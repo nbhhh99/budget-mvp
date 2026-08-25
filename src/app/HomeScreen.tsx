@@ -16,6 +16,7 @@ import {
   type RecommendedModule,
 } from '../domain'
 import { ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_MODULES, ECONOMIC_HISTORY_VERSION } from '../content/economicHistory'
+import { REAL_LIFE_ECONOMY_CONTENTS, REAL_LIFE_ECONOMY_MODULES, REAL_LIFE_ECONOMY_VERSION } from '../content/realLifeEconomy'
 import { DAILY_QUOTES } from '../content/dailyQuotes'
 import { todayDateString } from '../utils/date'
 import { useToast } from '../components/toast/useToast'
@@ -113,6 +114,8 @@ export function HomeScreen() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [recommended, setRecommended] = useState<RecommendedModule | null>(null)
   const [recommendedProgress, setRecommendedProgress] = useState({ completed: 0, total: 0 })
+  const [recommendedLifeEconomy, setRecommendedLifeEconomy] = useState<RecommendedModule | null>(null)
+  const [recommendedLifeEconomyProgress, setRecommendedLifeEconomyProgress] = useState({ completed: 0, total: 0 })
 
   useEffect(() => {
     let cancelled = false
@@ -140,6 +143,25 @@ export function HomeScreen() {
         const contents = ECONOMIC_HISTORY_CONTENTS.filter((c) => c.curriculumId === result.module.id)
         const p = progress.find((item) => item.curriculumId === result.module.id)
         setRecommendedProgress(computeModuleProgress(contents, p?.completedItemIds ?? []))
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const progress = await curriculumProgressRepo.getCurriculumProgressForVersion(REAL_LIFE_ECONOMY_VERSION)
+      if (cancelled) return
+      const result = getRecommendedModule(REAL_LIFE_ECONOMY_MODULES, progress)
+      setRecommendedLifeEconomy(result)
+      if (result) {
+        const contents = REAL_LIFE_ECONOMY_CONTENTS.filter((c) => c.curriculumId === result.module.id)
+        const p = progress.find((item) => item.curriculumId === result.module.id)
+        setRecommendedLifeEconomyProgress(computeModuleProgress(contents, p?.completedItemIds ?? []))
       }
     }
     load()
@@ -198,12 +220,22 @@ export function HomeScreen() {
           ))}
         </div>
 
-        <Link to="/learn/briefing" className="home-screen__briefing-card">
-          <span className="home-screen__briefing-label">재무 브리핑</span>
-          <span className="home-screen__briefing-desc">
-            정부 정책·세금·금융제도 변경과 공식 통계 발표를 확인해요.
-          </span>
-        </Link>
+        {recommendedLifeEconomy && (
+          <Link
+            to={`/learn/life-economy/${recommendedLifeEconomy.module.id}`}
+            className="home-screen__learning-card home-screen__learning-card--orange"
+          >
+            <span className="home-screen__learning-label">
+              {recommendedLifeEconomy.status === 'in_progress' ? '이어서 학습하기' : '다음 학습'}
+            </span>
+            <span className="home-screen__learning-title">
+              {recommendedLifeEconomy.module.order}단계 · {recommendedLifeEconomy.module.title}
+            </span>
+            <span className="home-screen__learning-progress">
+              {recommendedLifeEconomyProgress.completed}/{recommendedLifeEconomyProgress.total} 완료
+            </span>
+          </Link>
+        )}
 
         {recommended && (
           <Link to={`/learn/monthly/${recommended.module.id}`} className="home-screen__learning-card">
