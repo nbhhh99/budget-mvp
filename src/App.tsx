@@ -30,6 +30,10 @@ import { ResetScreen } from './features/backup/ResetScreen'
 const StatsScreen = lazy(() =>
   import('./features/stats/StatsScreen').then((m) => ({ default: m.StatsScreen })),
 )
+// 지표 상세 화면도 미니 차트에 Recharts를 쓰므로 같은 이유로 지연 로드한다.
+const IndicatorDetailScreen = lazy(() =>
+  import('./features/briefing/indicators/IndicatorDetailScreen').then((m) => ({ default: m.IndicatorDetailScreen })),
+)
 
 function App() {
   return (
@@ -53,6 +57,14 @@ function App() {
               <Route path="briefing" element={<Navigate to="/learn/briefing" replace />} />
               <Route path="learn" element={<LearnHomeScreen />} />
               <Route path="learn/briefing" element={<BriefingScreen />} />
+              <Route
+                path="learn/briefing/indicators/:indicatorId"
+                element={
+                  <Suspense fallback={<div className="route-loading">불러오는 중…</div>}>
+                    <IndicatorDetailScreen />
+                  </Suspense>
+                }
+              />
               <Route path="learn/concepts" element={<ConceptListScreen />} />
               <Route path="learn/concepts/:conceptId" element={<ConceptDetailScreen />} />
               <Route path="learn/calculators" element={<CalculatorListScreen />} />

@@ -1,0 +1,86 @@
+.indicator-detail__body {
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.indicator-detail__state {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-6) 0;
+}
+
+.indicator-detail__value {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.indicator-detail__unit {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.indicator-detail__change {
+  margin: 0 0 var(--space-3);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.indicator-detail__change--up {
+  color: var(--color-danger);
+}
+
+.indicator-detail__change--down {
+  color: var(--color-saving);
+}
+
+.indicator-detail__change--flat {
+  color: var(--color-text-muted);
+}
+
+.indicator-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.indicator-detail__chart-section,
+.indicator-detail__section {
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.indicator-detail__heading {
+  margin: 0 0 var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.indicator-detail__paragraph {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.indicator-detail__caution {
+  margin: var(--space-2) 0 0;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.indicator-detail__back-link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}

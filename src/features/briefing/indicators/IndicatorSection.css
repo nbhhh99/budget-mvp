@@ -1,0 +1,63 @@
+.indicator-section {
+  margin-top: var(--space-5);
+}
+
+.indicator-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: 2px;
+}
+
+.indicator-section__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.indicator-section__refresh {
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid var(--color-border);
+}
+
+.indicator-section__refresh:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+.indicator-section__updated {
+  margin: 0 0 var(--space-3);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.indicator-section__category {
+  margin-bottom: var(--space-4);
+}
+
+.indicator-section__category-title {
+  margin: 0 0 var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+/* 모바일 기본 2열, 아주 좁은 화면에서만 1열로 자연스럽게 전환한다(§6/§7). */
+.indicator-section__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 340px) {
+  .indicator-section__grid {
+    grid-template-columns: 1fr;
+  }
+}

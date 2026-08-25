@@ -20,6 +20,10 @@ import {
 import { fetchBriefingIndex, fetchBriefingMonth } from './briefingData'
 import { formatKoreanYearMonth } from '../../utils/date'
 import { formatKoreanWon } from '../../utils/format'
+import { TodaysChangesCard } from './TodaysChangesCard'
+import { MonthlyPersonalRecap } from './MonthlyPersonalRecap'
+import { IndicatorSection } from './indicators/IndicatorSection'
+import type { FinancialBriefing } from '../../types/models'
 import './BriefingScreen.css'
 
 // 금리처럼 %는 숫자를 그대로 보여주고, 예금자보호 한도처럼 원 단위 금액은
@@ -145,6 +149,21 @@ export function BriefingScreen() {
   const summary = useMemo(() => (scored ? selectSummaryItems(scored) : null), [scored])
   const availableMonths = index ? listReviewedYearMonths(index.entries) : []
 
+  // 거시지표(기준금리·물가·실업률·성장률) 카드는 새로 수집하지 않고 이미 불러온
+  // 검수완료 브리핑에서 파생시킨다(§2/§5) — scored는 ScoredBriefingItem[]라
+  // BriefingItem[]으로도 쓸 수 있다.
+  const latestBriefing: FinancialBriefing | null = useMemo(() => {
+    if (!yearMonth || !briefingMeta || !scored) return null
+    return {
+      yearMonth,
+      generatedAt: briefingMeta.generatedAt,
+      reviewedAt: briefingMeta.reviewedAt,
+      status: 'reviewed',
+      summary: briefingMeta.summary,
+      items: scored,
+    }
+  }, [yearMonth, briefingMeta, scored])
+
   function handleSelectFromSummary(id: string) {
     setExpandedId(id)
     requestAnimationFrame(() => {
@@ -163,6 +182,8 @@ export function BriefingScreen() {
           공식 자료를 바탕으로 정리한 일반 정보입니다. 투자 자문이 아니며, 매수·매도를
           권유하지 않습니다.
         </p>
+
+        <TodaysChangesCard />
 
         {availableMonths.length > 1 && yearMonth && (
           <label className="briefing-screen__month-picker">
@@ -212,6 +233,8 @@ export function BriefingScreen() {
 
             <p className="briefing-screen__summary">{briefingMeta.summary}</p>
 
+            <MonthlyPersonalRecap yearMonth={yearMonth} />
+
             {summary && (
               <section className="briefing-screen__summary-section">
                 <h2 className="briefing-screen__section-title">이번 달 한눈에 보기</h2>
@@ -253,6 +276,8 @@ export function BriefingScreen() {
             )}
           </>
         )}
+
+        <IndicatorSection latestBriefing={latestBriefing} />
       </div>
     </div>
   )

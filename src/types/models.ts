@@ -301,3 +301,72 @@ export interface CurriculumProgress {
   lastViewedAt?: string
   curriculumVersion?: string // 없으면 과거(차근차근 돈 공부) 레코드 — 새 커리큘럼 계산에서 자동 제외된다.
 }
+
+// ── 오늘의 경제지표 (재무 브리핑 하단) ──────────────────────────────
+// 환율·주식·유가·금·코인·거시지표처럼 매일(또는 그 이상) 갱신되는 숫자형 지표.
+// 서술형 "재무 브리핑"(월간, 사람 검수)과는 완전히 분리된 파이프라인으로 채워진다.
+
+export type IndicatorCategory = 'exchange' | 'stock' | 'oil' | 'fuel' | 'gold' | 'crypto' | 'macro'
+
+export type MarketStatus = 'open' | 'closed' | 'holiday' | 'not-released' | 'delayed' | 'unknown'
+
+// 'pending'은 값 자체가 없는 게 아니라, 필요한 API 키가 아직 설정되지 않아
+// 기능이 비활성화된 상태(§10/§14 — 미확인 API는 코드는 만들고 비활성 표시).
+export type IndicatorFreshness = 'fresh' | 'stale' | 'unavailable' | 'pending'
+
+export interface MarketIndicator {
+  id: string
+  category: IndicatorCategory
+  name: string
+  symbol?: string
+  value: number | null
+  unit: string
+  change: number | null
+  changeRate: number | null
+  referenceDate: string // 'YYYY-MM-DD', 공식 출처가 밝힌 기준일
+  updatedAt: string // ISO datetime, 수집 시각
+  timezone: string // 예: 'Asia/Seoul' — 내부 계산 기준. 화면 표시는 항상 한국시간으로 변환한다.
+  sourceId: string
+  sourceName: string
+  sourceUrl: string
+  marketStatus: MarketStatus
+  freshness: IndicatorFreshness
+}
+
+export interface IndicatorHistoryPoint {
+  referenceDate: string
+  value: number
+}
+
+export interface IndicatorSnapshot {
+  generatedAt: string // ISO datetime, scripts/collect-indicators가 이 스냅샷을 만든 시각
+  indicators: MarketIndicator[]
+}
+
+// 코인(BTC/ETH)은 GitHub Actions가 아니라 브라우저가 업비트 공개 API를 직접 호출해
+// 얻으므로, 정적 스냅샷과 별도로 기기 안에만 15분 TTL로 캐시한다(§4).
+export interface CryptoIndicatorCache {
+  market: string // PK, 예: 'KRW-BTC'
+  value: number
+  change: number | null
+  changeRate: number | null
+  fetchedAt: string // ISO datetime
+}
+
+// §8/§9: 일간/주간/월간 브리핑을 중복 생성하지 않기 위한 상태. 단일 행(PK 'state').
+export interface BriefingState {
+  id: 'state'
+  daily?: {
+    dateKey: string // 'YYYY-MM-DD', KST 기준
+    generatedAt: string
+    indicatorSnapshotGeneratedAt: string // 이 값이 바뀌지 않으면 재생성하지 않는다
+  }
+  weekly?: {
+    weekId: string // 'YYYY-Www' (ISO 주차)
+    generatedAt: string
+  }
+  monthly?: {
+    monthId: string // 'YYYY-MM'
+    generatedAt: string
+  }
+}

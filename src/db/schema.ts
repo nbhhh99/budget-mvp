@@ -1,7 +1,9 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type {
   AssetValuation,
+  BriefingState,
   Category,
+  CryptoIndicatorCache,
   CurriculumProgress,
   LearningProgress,
   MonthlyBudget,
@@ -19,6 +21,8 @@ export class BudgetDB extends Dexie {
   assetValuations!: EntityTable<AssetValuation, 'categoryId'>
   learningProgress!: EntityTable<LearningProgress, 'contentId'>
   curriculumProgress!: EntityTable<CurriculumProgress, 'curriculumId'>
+  indicatorCryptoCache!: EntityTable<CryptoIndicatorCache, 'market'>
+  briefingState!: EntityTable<BriefingState, 'id'>
 
   constructor() {
     super('budget-mvp')
@@ -59,6 +63,19 @@ export class BudgetDB extends Dexie {
       assetValuations: 'categoryId',
       learningProgress: 'contentId, contentType',
       curriculumProgress: 'curriculumId',
+    })
+
+    this.version(5).stores({
+      transactions: 'id, date, type, categoryId, [date+type], [categoryId+date]',
+      categories: 'id, group, order, hidden',
+      monthlyBudgets: 'id, yearMonth, categoryId, [yearMonth+categoryId]',
+      monthlyMeta: 'yearMonth',
+      settings: 'id',
+      assetValuations: 'categoryId',
+      learningProgress: 'contentId, contentType',
+      curriculumProgress: 'curriculumId',
+      indicatorCryptoCache: 'market',
+      briefingState: 'id',
     })
   }
 }

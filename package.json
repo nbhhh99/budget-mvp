@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "preview": "vite preview",
     "test": "vitest run",
-    "collect:briefing": "tsx scripts/collect-briefing/index.ts"
+    "collect:briefing": "tsx scripts/collect-briefing/index.ts",
+    "collect:indicators": "tsx scripts/collect-indicators/index.ts"
   },
   "dependencies": {
     "dexie": "^4.4.5",

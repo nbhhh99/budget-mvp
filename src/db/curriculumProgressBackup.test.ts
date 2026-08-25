@@ -6,7 +6,7 @@ import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from './schema'
 import { buildBackupFile, restoreFromBackup, resetAllData } from './backup'
-import type { CurriculumProgress } from '../types/models'
+import type { BriefingState, CurriculumProgress } from '../types/models'
 
 function progress(overrides: Partial<CurriculumProgress> = {}): CurriculumProgress {
   return {
@@ -89,5 +89,74 @@ describe('curriculumProgress backup/restore round-trip', () => {
     await resetAllData()
 
     expect(await db.curriculumProgress.count()).toBe(0)
+  })
+})
+
+describe('briefingState backup/restore round-trip', () => {
+  beforeEach(async () => {
+    await db.briefingState.clear()
+  })
+
+  const state: BriefingState = {
+    id: 'state',
+    daily: { dateKey: '2026-08-25', generatedAt: '2026-08-25T00:00:00.000Z', indicatorSnapshotGeneratedAt: '2026-08-25T00:00:00.000Z' },
+    weekly: { weekId: '2026-W35', generatedAt: '2026-08-24T00:00:00.000Z' },
+    monthly: { monthId: '2026-08', generatedAt: '2026-08-01T00:00:00.000Z' },
+  }
+
+  it('backup includes briefingState and restores it after a round-trip', async () => {
+    await db.briefingState.put(state)
+
+    const backup = await buildBackupFile()
+    expect(backup.data.briefingState).toEqual([state])
+
+    await db.briefingState.clear()
+    await restoreFromBackup(backup)
+
+    const restored = await db.briefingState.get('state')
+    expect(restored).toEqual(state)
+  })
+
+  it('restoring an older backup with no briefingState key leaves the table empty (backward compatible)', async () => {
+    await db.briefingState.put(state)
+    const legacyBackup = await buildBackupFile()
+    delete (legacyBackup.data as { briefingState?: BriefingState[] }).briefingState
+
+    await restoreFromBackup(legacyBackup)
+
+    expect(await db.briefingState.count()).toBe(0)
+  })
+
+  it('resetAllData clears briefingState', async () => {
+    await db.briefingState.put(state)
+    await resetAllData()
+    expect(await db.briefingState.count()).toBe(0)
+  })
+})
+
+describe('indicatorCryptoCache — excluded from backup, cleared on restore/reset', () => {
+  beforeEach(async () => {
+    await db.indicatorCryptoCache.clear()
+  })
+
+  it('is not included in the backup file at all', async () => {
+    await db.indicatorCryptoCache.put({ market: 'KRW-BTC', value: 1, change: null, changeRate: null, fetchedAt: '2026-08-25T00:00:00.000Z' })
+    const backup = await buildBackupFile()
+    expect('indicatorCryptoCache' in backup.data).toBe(false)
+  })
+
+  it('is cleared by restoreFromBackup even though it is not part of the backup file', async () => {
+    await db.indicatorCryptoCache.put({ market: 'KRW-BTC', value: 1, change: null, changeRate: null, fetchedAt: '2026-08-25T00:00:00.000Z' })
+    const backup = await buildBackupFile()
+
+    await restoreFromBackup(backup)
+
+    expect(await db.indicatorCryptoCache.count()).toBe(0)
+  })
+
+  it('is cleared by resetAllData', async () => {
+    await db.indicatorCryptoCache.put({ market: 'KRW-ETH', value: 1, change: null, changeRate: null, fetchedAt: '2026-08-25T00:00:00.000Z' })
+    await resetAllData()
+    expect(await db.indicatorCryptoCache.count()).toBe(0)
   })
 })

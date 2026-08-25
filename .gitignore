@@ -13,6 +13,11 @@ dist-ssr
 dev-dist
 *.local
 
+# 실제 API 키가 담긴 로컬 환경변수 파일 — .env.example만 커밋 대상이다.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

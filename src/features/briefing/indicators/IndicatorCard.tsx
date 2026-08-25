@@ -1,0 +1,59 @@
+import { Link } from 'react-router-dom'
+import type { MarketIndicator } from '../../../types/models'
+import { DIRECTION_ICON, FRESHNESS_LABEL, MARKET_STATUS_LABEL, computeFreshness, formatChangeText, formatKstDateTime, getDirection } from '../../../domain'
+import './IndicatorCard.css'
+
+interface IndicatorCardProps {
+  indicator: MarketIndicator
+}
+
+// 준비 중(pending)이거나 값이 없는 카드는 눌러도 상세로 이동하지 않는다(§7).
+export function IndicatorCard({ indicator }: IndicatorCardProps) {
+  const now = new Date()
+  const freshness = computeFreshness(indicator, now)
+  const direction = getDirection(indicator.change)
+  const hasValue = indicator.value !== null
+
+  const content = (
+    <>
+      <p className="indicator-card__name">{indicator.name}</p>
+      {hasValue ? (
+        <>
+          <p className="indicator-card__value">
+            {indicator.value!.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}
+            <span className="indicator-card__unit"> {indicator.unit}</span>
+          </p>
+          <p className={`indicator-card__change indicator-card__change--${direction}`}>
+            <span aria-hidden="true">{DIRECTION_ICON[direction]}</span> {formatChangeText(indicator.change, indicator.changeRate)}
+          </p>
+          <p className="indicator-card__meta">기준일 {indicator.referenceDate}</p>
+        </>
+      ) : (
+        <p className="indicator-card__pending">{FRESHNESS_LABEL[indicator.freshness]}</p>
+      )}
+      <p className="indicator-card__status">
+        {freshness === 'stale' && <span className="indicator-card__status-badge">{FRESHNESS_LABEL.stale}</span>}
+        {indicator.marketStatus !== 'open' && indicator.marketStatus !== 'unknown' && (
+          <span className="indicator-card__status-badge">{MARKET_STATUS_LABEL[indicator.marketStatus]}</span>
+        )}
+      </p>
+      <p className="indicator-card__source">
+        출처 {indicator.sourceName} · {formatKstDateTime(indicator.updatedAt)}
+      </p>
+    </>
+  )
+
+  if (!hasValue) {
+    return (
+      <div className="indicator-card indicator-card--disabled" aria-disabled="true">
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <Link to={`/learn/briefing/indicators/${indicator.id}`} className="indicator-card">
+      {content}
+    </Link>
+  )
+}

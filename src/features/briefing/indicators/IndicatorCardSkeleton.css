@@ -1,0 +1,48 @@
+.indicator-card-skeleton {
+  min-height: var(--touch-target);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-3);
+}
+
+.indicator-card-skeleton__line {
+  border-radius: 6px;
+  background-color: var(--color-surface-alt);
+  background-image: linear-gradient(90deg, var(--color-surface-alt) 0%, var(--color-border) 50%, var(--color-surface-alt) 100%);
+  background-size: 200% 100%;
+  animation: indicator-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.indicator-card-skeleton__line--name {
+  width: 50%;
+  height: 12px;
+  margin-bottom: 10px;
+}
+
+.indicator-card-skeleton__line--value {
+  width: 70%;
+  height: 20px;
+  margin-bottom: 10px;
+}
+
+.indicator-card-skeleton__line--change {
+  width: 60%;
+  height: 12px;
+}
+
+@keyframes indicator-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator-card-skeleton__line {
+    animation: none;
+    background-image: none;
+  }
+}

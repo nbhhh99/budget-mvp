@@ -15,7 +15,8 @@ npm.cmd run preview   # 빌드 결과 미리보기
 npm.cmd run lint      # oxlint
 npm.cmd run format    # prettier --write
 npm.cmd run test      # vitest
-npm.cmd run collect:briefing   # 재무 브리핑 데이터 수집 스크립트 (아래 "재무 브리핑" 참고)
+npm.cmd run collect:briefing     # 재무 브리핑 데이터 수집 스크립트 (아래 "재무 브리핑" 참고)
+npm.cmd run collect:indicators   # 오늘의 경제지표 수집 스크립트 (아래 "오늘의 경제지표" 참고)
 ```
 
 폰에서 개발 서버에 접속하려면 같은 Wi-Fi에서 `npm.cmd run dev -- --host`로 실행한 뒤
@@ -42,9 +43,11 @@ src/
   pwa/         서비스워커 등록, 설치 프롬프트
   utils/       날짜·금액 포맷 유틸
 scripts/
-  collect-briefing/  재무 브리핑 데이터 수집 스크립트 (GitHub Actions에서 실행)
+  collect-briefing/    재무 브리핑 데이터 수집 스크립트 (GitHub Actions에서 실행)
+  collect-indicators/  오늘의 경제지표 수집 스크립트 (GitHub Actions에서 실행)
 public/
   data/briefings/    재무 브리핑 정적 JSON (YYYY-MM.json, index.json)
+  data/indicators/   오늘의 경제지표 정적 JSON (latest.json, history/{id}.json)
   data/learning/     개념 카드(concepts.json), 이번 달 돈 공부(monthly/YYYY-MM.json, index.json)
   illustrations/     "공부하기" 허브 카드 이미지
 ```
@@ -167,3 +170,78 @@ variables → Actions에 등록해야 한다. **키가 없어도 앱 빌드와 �
   한다 — 단일 공식 API로 조회할 수 있는 대상이 아니기 때문이다.
 - 이 앱은 일반 정보를 정리해 보여줄 뿐이며, **금융·세무·법률 자문이 아니다.** 특정 상품
   매수·매도를 권유하지 않고, 수익률·환율·금리의 미래 방향을 단정하지 않는다.
+
+## 오늘의 경제지표
+
+재무 브리핑 화면 하단에 있는, 환율·주식·유가·국내 기름값·금·코인·거시지표 카드 섹션.
+서술형 재무 브리핑(월간, 사람 검수)과 달리 **숫자 + 공식 출처만 다루는 별도 파이프라인**이라
+사람 검수 없이 자동 검증만으로 매일 갱신된다. 화면 상단의 "오늘의 변화"(일간)·"이번 주
+요약"(주간)도 이 지표를 규칙 기반 문장으로 요약한 것이다(§8B/§8C, LLM 호출 없음).
+
+### 데이터 흐름
+
+```
+공식 API(환율·주식·국내유가) → GitHub Actions 수집·검증(scripts/collect-indicators)
+  → 이상치·빈 응답 차단, 기존 정상 데이터 보존 → lint/test/build 통과 시에만 main에 직접 커밋
+  → 기존 deploy.yml이 빌드·배포 → public/data/indicators/*.json이 정적 파일로 배포됨
+  → 앱이 같은 출처의 JSON을 fetch(+ 코인만 예외: 브라우저가 업비트 API를 직접 호출)
+```
+
+재무 브리핑과 달리 **draft PR 없이 main에 바로 커밋한다** — 서술 없는 순수 수치·출처
+데이터라 사실 검수가 필요하지 않다고 판단했기 때문이다(사용자와 합의). 대신 워크플로가
+지표 데이터 파일만 커밋 범위로 삼고(앱 소스코드는 건드리지 않음), 커밋 전에
+`lint`/`test`/`build`를 모두 통과해야 한다.
+
+### 지표별 실제 출처와 현재 상태
+
+| 카테고리 | 출처 | 상태 |
+|---|---|---|
+| 환율(원/달러·원/100엔·원/유로) | 한국수출입은행 환율정보 API | 구현 완료(`EXIMBANK_API_KEY` 필요) |
+| 국내 휘발유·경유 | 한국석유공사 오피넷 API | 구현 완료(`OPINET_API_KEY` 필요) |
+| 코인(BTC/ETH) | 업비트 공개 시세 API | 구현 완료(키 불필요, 브라우저 직접 호출) |
+| 거시지표(기준금리·물가·실업률·성장률) | 기존 재무 브리핑에서 파생 | 구현 완료(새 수집 없음) |
+| KOSPI·KOSDAQ | 금융위원회_지수시세정보(공공데이터포털) | **스텁** — API 존재는 확인, 정확한 요청 엔드포인트 미확인 |
+| KRX 금시장(국내 금) | 금융위원회_일반상품시세정보(공공데이터포털) | **스텁** — 위와 동일 사유 |
+| 국제유가(WTI·Brent) | 미국 EIA Open Data API | **스텁** — API는 확인, 정확한 series id 미확인. 두바이유는 공식 무료 API 자체가 없어 미지원 |
+| 해외 주가지수(S&P500·NASDAQ), 국제 금 | Alpha Vantage(상업적 제공업체) | **스텁** — 공식 무료 API를 찾지 못해 검토한 대안, 엔드포인트·한도 미확인 |
+
+스텁인 지표는 키를 설정해도 화면에 "데이터 제공 준비 중"으로 표시된다 — 정확한 요청
+형식을 확인한 뒤 `scripts/collect-indicators/sources/*.ts`의 TODO 주석 자리를 채우면 된다.
+
+### 자동 갱신 (GitHub Actions)
+
+`.github/workflows/collect-indicators.yml`이 평일 16:30(KST) 자동 실행되며, Actions 탭에서
+**Run workflow**로 수동 실행도 가능하다. 로컬에서 직접 실행하려면:
+
+```powershell
+npm.cmd run collect:indicators
+```
+
+### 필요한 GitHub Secrets
+
+| Secret | 용도 | 발급처 |
+|---|---|---|
+| `EXIMBANK_API_KEY` | 환율 | https://www.data.go.kr/data/3068846/openapi.do |
+| `OPINET_API_KEY` | 국내 휘발유·경유 | https://www.data.go.kr/data/15150932/openapi.do |
+| `DATA_GO_KR_API_KEY` | KOSPI·KOSDAQ·KRX 금시장(현재 스텁) | https://www.data.go.kr/data/15094807/openapi.do, https://www.data.go.kr/data/15094805/openapi.do |
+| `EIA_API_KEY` | WTI·Brent 국제유가(현재 스텁) | https://www.eia.gov/opendata/register.php |
+| `ALPHA_VANTAGE_API_KEY` | 해외 주가지수·국제 금(현재 스텁) | https://www.alphavantage.co/support/#api-key |
+
+각 변수의 상세 설명(필수 여부, 미설정 시 동작)은 `.env.example`을 참고한다.
+
+### 캐시와 오프라인
+
+정적 JSON(`public/data/indicators/`)은 재무 브리핑과 동일하게 서비스워커 빌드 시점
+프리캐시로 오프라인 지원을 받는다. 코인만 예외로, 기기 IndexedDB(`indicatorCryptoCache`
+테이블)에 15분 TTL로 캐시해 화면 진입 시 stale-while-revalidate로 갱신한다 — 15분이
+지나지 않았으면 재요청하지 않고, 오프라인이면 마지막 캐시값과 "오프라인 저장값" 표시를
+그대로 보여준다. 이 캐시는 재조회하면 다시 채워지는 값이라 백업 대상에서 제외했다(전체
+초기화 시에는 함께 비워진다).
+
+### 한계
+
+- 위 표의 "스텁" 지표 4종은 API 존재·이용조건만 확인했고, 정확한 요청 엔드포인트(또는
+  시리즈 ID, 심볼 지원 범위)를 이 세션에서 확인하지 못해 추측으로 채우지 않았다
+  (`collect-briefing`의 BOK ECOS·KOSIS 스텁과 동일한 원칙).
+- `DATA_GO_KR_API_KEY`를 설정해도, 활용신청이 각 API별로 승인돼야 실제 호출이
+  가능하다(보통 즉시~단기 승인).

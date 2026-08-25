@@ -2,6 +2,7 @@ import { db } from './schema'
 import { seedDefaultsIfEmpty } from './init'
 import type {
   AssetValuation,
+  BriefingState,
   Category,
   CurriculumProgress,
   LearningProgress,
@@ -11,7 +12,7 @@ import type {
   Transaction,
 } from '../types/models'
 
-export const BACKUP_SCHEMA_VERSION = 4
+export const BACKUP_SCHEMA_VERSION = 5
 
 export interface BackupFile {
   schemaVersion: number
@@ -25,21 +26,33 @@ export interface BackupFile {
     assetValuations?: AssetValuation[] // schemaVersion 1 백업에는 없을 수 있다
     learningProgress?: LearningProgress[] // schemaVersion 1~2 백업에는 없을 수 있다
     curriculumProgress?: CurriculumProgress[] // schemaVersion 1~3 백업에는 없을 수 있다
+    briefingState?: BriefingState[] // schemaVersion 1~4 백업에는 없을 수 있다. indicatorCryptoCache는
+    // 15분이면 다시 채워지는 캐시라 백업 대상에서 제외한다(§12).
   }
 }
 
 export async function buildBackupFile(): Promise<BackupFile> {
-  const [transactions, categories, monthlyBudgets, monthlyMeta, settings, assetValuations, learningProgress, curriculumProgress] =
-    await Promise.all([
-      db.transactions.toArray(),
-      db.categories.toArray(),
-      db.monthlyBudgets.toArray(),
-      db.monthlyMeta.toArray(),
-      db.settings.toArray(),
-      db.assetValuations.toArray(),
-      db.learningProgress.toArray(),
-      db.curriculumProgress.toArray(),
-    ])
+  const [
+    transactions,
+    categories,
+    monthlyBudgets,
+    monthlyMeta,
+    settings,
+    assetValuations,
+    learningProgress,
+    curriculumProgress,
+    briefingState,
+  ] = await Promise.all([
+    db.transactions.toArray(),
+    db.categories.toArray(),
+    db.monthlyBudgets.toArray(),
+    db.monthlyMeta.toArray(),
+    db.settings.toArray(),
+    db.assetValuations.toArray(),
+    db.learningProgress.toArray(),
+    db.curriculumProgress.toArray(),
+    db.briefingState.toArray(),
+  ])
 
   return {
     schemaVersion: BACKUP_SCHEMA_VERSION,
@@ -53,6 +66,7 @@ export async function buildBackupFile(): Promise<BackupFile> {
       assetValuations,
       learningProgress,
       curriculumProgress,
+      briefingState,
     },
   }
 }
@@ -95,9 +109,9 @@ export function validateBackupFile(input: unknown): BackupValidationResult {
       errors.push(`백업 파일의 "${key}" 항목이 올바르지 않습니다.`)
     }
   }
-  // assetValuations/learningProgress/curriculumProgress는 이전 schemaVersion 백업에는
-  // 없을 수 있으므로, 있을 때만 배열인지 확인한다.
-  for (const optionalKey of ['assetValuations', 'learningProgress', 'curriculumProgress']) {
+  // assetValuations/learningProgress/curriculumProgress/briefingState는 이전
+  // schemaVersion 백업에는 없을 수 있으므로, 있을 때만 배열인지 확인한다.
+  for (const optionalKey of ['assetValuations', 'learningProgress', 'curriculumProgress', 'briefingState']) {
     if (data[optionalKey] !== undefined && !Array.isArray(data[optionalKey])) {
       errors.push(`백업 파일의 "${optionalKey}" 항목이 올바르지 않습니다.`)
     }
@@ -127,6 +141,8 @@ export async function restoreFromBackup(file: BackupFile): Promise<void> {
       db.assetValuations,
       db.learningProgress,
       db.curriculumProgress,
+      db.briefingState,
+      db.indicatorCryptoCache,
     ],
     async () => {
       await Promise.all([
@@ -138,6 +154,10 @@ export async function restoreFromBackup(file: BackupFile): Promise<void> {
         db.assetValuations.clear(),
         db.learningProgress.clear(),
         db.curriculumProgress.clear(),
+        db.briefingState.clear(),
+        // 캐시는 백업에 없으므로 복원본 시점과 어긋난 값이 남지 않도록 비워둔다
+        // (§12 — 캐시는 백업 대상이 아니며, 재조회하면 다시 채워진다).
+        db.indicatorCryptoCache.clear(),
       ])
       await Promise.all([
         db.transactions.bulkAdd(file.data.transactions),
@@ -151,6 +171,7 @@ export async function restoreFromBackup(file: BackupFile): Promise<void> {
         // 구분되어 한 테이블에 함께 들어있어, 특별한 분기 없이 통째로 복원하면
         // 두 커리큘럼의 진행 기록이 모두 그대로 보존된다.
         db.curriculumProgress.bulkAdd(file.data.curriculumProgress ?? []),
+        db.briefingState.bulkAdd(file.data.briefingState ?? []),
       ])
     },
   )
@@ -169,6 +190,8 @@ export async function resetAllData(): Promise<void> {
       db.assetValuations,
       db.learningProgress,
       db.curriculumProgress,
+      db.briefingState,
+      db.indicatorCryptoCache,
     ],
     async () => {
       await Promise.all([
@@ -180,6 +203,8 @@ export async function resetAllData(): Promise<void> {
         db.assetValuations.clear(),
         db.learningProgress.clear(),
         db.curriculumProgress.clear(),
+        db.briefingState.clear(),
+        db.indicatorCryptoCache.clear(),
       ])
     },
   )
