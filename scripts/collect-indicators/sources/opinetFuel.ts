@@ -1,4 +1,6 @@
-import type { CollectedIndicator } from '../types'
+import type { CollectedIndicator, ProviderResult } from '../types'
+
+const PROVIDER = 'opinet-fuel'
 
 // 한국석유공사 오피넷 "전국 평균가격" Open API. 공공데이터포털에 등록돼 있다:
 // https://www.data.go.kr/data/15150932/openapi.do (무료)
@@ -27,11 +29,11 @@ function toNumber(raw: string | number | undefined): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-export async function collectOpinetFuel(): Promise<CollectedIndicator[] | null> {
+export async function collectOpinetFuel(): Promise<ProviderResult> {
   const apiKey = process.env.OPINET_API_KEY
   if (!apiKey) {
     console.log('[opinet-fuel] OPINET_API_KEY가 없어 건너뜁니다.')
-    return null
+    return { status: 'missing_key', provider: PROVIDER }
   }
 
   try {
@@ -40,12 +42,18 @@ export async function collectOpinetFuel(): Promise<CollectedIndicator[] | null> 
     url.searchParams.set('out', 'json')
 
     const res = await fetch(url)
-    if (!res.ok) throw new Error(`오피넷 API 요청 실패: ${res.status}`)
+    if (res.status === 401 || res.status === 403) {
+      console.warn(`[opinet-fuel] 인증 실패(HTTP ${res.status}) — OPINET_API_KEY 값 또는 이용 승인 상태를 확인해야 합니다.`)
+      return { status: 'unauthorized', provider: PROVIDER, code: `HTTP ${res.status}` }
+    }
+    if (!res.ok) {
+      return { status: 'failed', provider: PROVIDER, reason: `HTTP ${res.status}`, httpStatus: res.status }
+    }
     const json = (await res.json()) as { RESULT?: { OIL?: OpinetOilRow[] } }
     const rows = json.RESULT?.OIL
     if (!Array.isArray(rows) || rows.length === 0) {
       console.warn('[opinet-fuel] 응답에 OIL 데이터가 없습니다(형식이 예상과 다르거나 데이터 없음).')
-      return null
+      return { status: 'invalid_response', provider: PROVIDER, reason: 'RESULT.OIL 배열이 비어 있거나 없습니다.' }
     }
 
     const today = new Date()
@@ -74,9 +82,12 @@ export async function collectOpinetFuel(): Promise<CollectedIndicator[] | null> 
         marketStatus: 'unknown',
       })
     }
-    return items.length > 0 ? items : null
+    if (items.length === 0) {
+      return { status: 'invalid_response', provider: PROVIDER, reason: '대상 유종(B027/D047) 코드가 응답에 없습니다.' }
+    }
+    return { status: 'success', provider: PROVIDER, indicators: items }
   } catch (err) {
-    console.warn('[opinet-fuel] 수집 실패, 건너뜁니다:', err)
-    return null
+    console.warn('[opinet-fuel] 수집 실패:', err)
+    return { status: 'failed', provider: PROVIDER, reason: err instanceof Error ? err.message : String(err) }
   }
 }

@@ -43,18 +43,28 @@ jobs:
       # 자동 수집 결과는 절대 main에 바로 반영하지 않는다 — 항상 draft 상태 PR로
       # 열어서, 사람이 문구를 검수하고 status를 "reviewed"로 바꾼 뒤에만 병합한다
       # (§10). PR이 main에 머지되면 기존 deploy.yml이 그대로 빌드·배포한다.
-      - name: Open a draft PR if anything changed
+      #
+      # 브랜치 이름에 run_id를 넣지 않고 "연월 하나당 브랜치 하나"로 고정한다 —
+      # 그래야 같은 달에 실행이 여러 번 있어도(주간 스케줄 + 수동 실행) peter-evans가
+      # 매번 새 PR을 만들지 않고 기존 열린 PR을 그대로 갱신한다(§10 "이미 열린 동일
+      # 월 PR이 있으면 새 PR을 계속 만들지 않고 기존 PR 갱신"). collect-briefing/
+      # index.ts가 신규·변경 항목이 없으면 파일을 아예 다시 쓰지 않으므로, 이 스텝은
+      # git diff가 없으면 자동으로 아무 PR도 만들지도 갱신하지도 않는다.
+      - name: Open or update the draft PR if anything changed
         uses: peter-evans/create-pull-request@v6
         with:
           commit-message: 'chore(briefing): 자동 수집 결과 갱신 (검수 필요)'
-          branch: briefing-draft/${{ inputs.yearMonth || 'auto' }}-${{ github.run_id }}
+          branch: briefing-draft/${{ inputs.yearMonth || 'auto' }}
           title: '[재무 브리핑] 자동 수집 결과 검토 필요'
           body: |
-            GitHub Actions가 공식 자료를 자동으로 수집한 결과입니다.
+            GitHub Actions가 공식 자료를 자동으로 수집한 결과입니다. 이미 검수(reviewed)된
+            달이었어도, 이번에 새로 확인된 자료가 있으면 그 항목만 이 PR에 추가·갱신됩니다
+            (기존에 검수된 다른 항목은 그대로 보존됩니다).
 
-            - `public/data/briefings/*.json`의 새 항목은 모두 `status: "draft"`입니다.
-            - 이 PR을 머지하기 전에, 각 항목의 문구·수치·출처를 직접 확인하고
-              문제가 없으면 해당 파일의 `status`를 `"reviewed"`로 바꿔주세요.
-            - `reviewed`로 바뀌지 않은 항목은 앱 기본 화면에 노출되지 않습니다.
-            - 이미 검수(reviewed)된 달의 파일은 이 스크립트가 덮어쓰지 않습니다.
+            - `public/data/briefings/*.json`은 이 PR에서 다시 `status: "draft"`입니다.
+            - 이 PR을 머지하기 전에, **신규·변경 항목만** 문구·수치·출처를 확인하고
+              문제가 없으면 해당 파일의 `status`를 `"reviewed"`로, `reviewedAt`을
+              오늘 날짜로 바꿔주세요.
+            - `reviewed`로 바뀌지 않은 달은 앱 기본 화면에 노출되지 않습니다.
+            - 어떤 항목이 신규/변경인지는 이 워크플로 실행의 Job Summary에 표로 남습니다.
           labels: briefing-draft

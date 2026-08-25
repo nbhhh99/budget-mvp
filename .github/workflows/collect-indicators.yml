@@ -2,12 +2,28 @@ name: Collect Economic Indicators
 
 # 환율·주식·유가·금 같은 숫자형 지표는 서술형 재무 브리핑과 달리 사람의 사실
 # 검수가 필요 없어(단순 수치 + 공식 출처), draft PR 없이 검증만 통과하면 main에
-# 바로 커밋한다. 평일(한국 기준) 하루 1회, 한국 장마감과 금융위 API의 T+1 13시
-# 갱신 시점 이후로 잡는다.
+# 바로 커밋한다.
+#
+# 공급자마다 실제 발표 시각이 달라(§13) 하나의 cron으로는 맞지 않는다. 세 개의
+# cron을 한 워크플로에 등록하고, 어느 cron이 이번 실행을 트리거했는지는
+# `github.event.schedule`로 구분해 그 그룹의 소스만 수집한다(GitHub Actions cron은
+# UTC 기준이라 KST 환산을 아래 각 줄에 명시한다):
+#   - '30 7 * * 1-5'  = KST 16:30 평일 → domestic(환율·KOSPI·KOSDAQ·KRX 금)
+#   - '0 22 * * *'    = KST(다음날) 07:00 매일 → fuel(국내 휘발유·경유)
+#   - '0 0 * * 1-5'   = KST 09:00 평일 → global(해외지수·WTI·Brent)
+# 예약 실행은 GitHub Actions 사정으로 지연될 수 있으므로, 화면에는 이 예약 시각이
+# 아니라 실제 수집된 updatedAt·referenceDate를 표시한다(App 쪽 §13 요구사항).
 on:
   schedule:
-    - cron: '30 7 * * 1-5' # UTC 07:30 = KST 16:30, 평일
+    - cron: '30 7 * * 1-5' # KST 16:30 평일 — 환율·KOSPI·KOSDAQ·KRX 금
+    - cron: '0 22 * * *' # KST(다음날) 07:00 매일 — 국내 휘발유·경유
+    - cron: '0 0 * * 1-5' # KST 09:00 평일 — 해외지수·WTI·Brent
   workflow_dispatch:
+    inputs:
+      group:
+        description: '수집할 그룹 (domestic/fuel/global/all). 비우면 all(전체)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -25,14 +41,28 @@ jobs:
           cache: npm
       - run: npm ci
 
+      - name: Resolve which group to collect
+        id: group
+        run: |
+          GROUP="${{ inputs.group }}"
+          if [ -z "$GROUP" ]; then
+            case "${{ github.event.schedule }}" in
+              '30 7 * * 1-5') GROUP=domestic ;;
+              '0 22 * * *') GROUP=fuel ;;
+              '0 0 * * 1-5') GROUP=global ;;
+              *) GROUP=all ;;
+            esac
+          fi
+          echo "group=$GROUP" >> "$GITHUB_OUTPUT"
+          echo "이번 실행 그룹: $GROUP"
+
       - name: Run collector
         env:
           EXIMBANK_API_KEY: ${{ secrets.EXIMBANK_API_KEY }}
           OPINET_API_KEY: ${{ secrets.OPINET_API_KEY }}
           DATA_GO_KR_API_KEY: ${{ secrets.DATA_GO_KR_API_KEY }}
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
-          ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
-        run: npm run collect:indicators
+        run: npm run collect:indicators -- --group=${{ steps.group.outputs.group }}
 
       - name: Check for changes
         id: diff
@@ -63,6 +93,11 @@ jobs:
       # 앱 소스코드는 이 커밋에 절대 포함되지 않는다. 사람 검수 PR 없이 바로
       # main에 반영하기로 사용자와 합의했다(순수 숫자 + 출처 데이터라 서술형
       # 재무 브리핑과 달리 사실 검수가 필요하지 않다는 판단).
+      #
+      # main이 그 사이 다른 커밋으로 앞서갔으면(예: 이 워크플로의 다른 그룹 실행과
+      # 겹치거나, 사람이 그 사이 직접 push함) 단순 git push는 실패한다. 그럴 때는
+      # 무관한 변경을 버리지 않고 최신 main을 다시 받아 rebase한 뒤 한 번 더
+      # 시도한다(§15 "main push 충돌 시 최신 main을 다시 가져와 안전하게 재시도").
       - name: Commit and push
         if: steps.diff.outputs.changed == 'true'
         run: |
@@ -70,5 +105,14 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/data/indicators
           REF_DATE=$(jq -r '.generatedAt' public/data/indicators/latest.json | cut -c1-10)
-          git commit -m "chore(indicators): 경제지표 자동 갱신 (${REF_DATE} 기준)"
-          git push
+          git commit -m "chore(indicators): 경제지표 자동 갱신 (${REF_DATE} 기준, ${{ steps.group.outputs.group }})"
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "push 실패, 최신 main을 받아 재시도합니다 (시도 $attempt)"
+            git fetch origin main
+            git rebase origin/main
+          done
+          echo "3회 재시도 후에도 push에 실패했습니다."
+          exit 1
