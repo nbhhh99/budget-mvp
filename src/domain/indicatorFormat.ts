@@ -16,20 +16,23 @@ export const DIRECTION_ICON: Record<IndicatorDirection, string> = {
   flat: '–',
 }
 
+// §14 화면 상태 문구: 사용자에게는 "왜 안 되는지"의 내부 원인(키 미등록·인증
+// 오류·호출 한도 등, ProviderResult) 대신 이 6가지로만 보여준다 — 최신 데이터/
+// 발표 대기/시장 휴장/업데이트 지연/데이터 연동 준비 중/일시적으로 불러올 수 없음.
 export const MARKET_STATUS_LABEL: Record<MarketStatus, string> = {
   open: '장중',
   closed: '장 마감',
   holiday: '휴장',
-  'not-released': '미발표',
+  'not-released': '발표 대기',
   delayed: '업데이트 지연',
   unknown: '상태 확인 불가',
 }
 
 export const FRESHNESS_LABEL: Record<IndicatorFreshness, string> = {
   fresh: '최신',
-  stale: '이전 데이터 사용 중',
-  unavailable: '데이터 없음',
-  pending: '데이터 제공 준비 중',
+  stale: '업데이트 지연',
+  unavailable: '일시적으로 불러올 수 없음',
+  pending: '데이터 연동 준비 중',
 }
 
 export const CATEGORY_LABEL: Record<IndicatorCategory, string> = {
