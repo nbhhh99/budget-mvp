@@ -1,29 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ScreenHeader } from '../../components/ScreenHeader'
-import { categoriesRepo, transactionsRepo } from '../../db'
-import type {
-  BriefingCategory,
-  BriefingIndex,
-  BriefingItem,
-  BriefingPolicyStatus,
-  BriefingRegion,
-} from '../../types/models'
-import {
-  computeHeldAssetTypes,
-  listReviewedYearMonths,
-  computeLatestReviewedYearMonth,
-  resolveBriefingView,
-  scoreBriefingItems,
-  selectSummaryItems,
-  type ScoredBriefingItem,
-} from '../../domain'
+import type { BriefingCategory, BriefingIndex, BriefingItem, BriefingPolicyStatus, BriefingRegion } from '../../types/models'
+import { listReviewedYearMonths, computeLatestReviewedYearMonth, resolveBriefingView } from '../../domain'
 import { fetchBriefingIndex, fetchBriefingMonth } from './briefingData'
 import { formatKoreanYearMonth } from '../../utils/date'
 import { formatKoreanWon } from '../../utils/format'
-import { TodaysChangesCard } from './TodaysChangesCard'
-import { MonthlyPersonalRecap } from './MonthlyPersonalRecap'
-import { IndicatorSection } from './indicators/IndicatorSection'
-import type { FinancialBriefing } from '../../types/models'
 import './BriefingScreen.css'
 
 // 금리처럼 %는 숫자를 그대로 보여주고, 예금자보호 한도처럼 원 단위 금액은
@@ -33,7 +14,7 @@ function formatBriefingValue(value: number, unit: string): string {
   return `${value}${unit}`
 }
 
-const REGION_LABEL: Record<BriefingRegion, string> = { korea: '국내 경제', global: '세계 경제' }
+const REGION_LABEL: Record<BriefingRegion, string> = { korea: '국내', global: '해외' }
 const CATEGORY_LABEL: Record<BriefingCategory, string> = {
   interest_rate: '금리',
   inflation: '물가',
@@ -53,22 +34,15 @@ const POLICY_STATUS_LABEL: Record<BriefingPolicyStatus, string> = {
   under_review: '입법·검토 중',
   ending: '종료 예정',
 }
-const INSTITUTIONAL_CATEGORIES = new Set<BriefingCategory>([
-  'deposit_protection',
-  'pension',
-  'tax',
-  'financial_policy',
-])
 
-function regionClass(item: BriefingItem): 'korea' | 'global' | 'policy' {
-  if (INSTITUTIONAL_CATEGORIES.has(item.category)) return 'policy'
-  return item.region
-}
-
+// 재무 브리핑은 정부 경제정책·세법·금융제도 변경·공식 통계 발표 같은 공공정보만
+// 다룬다. 개인 거래·예산·자산 데이터는 이 화면 어디에서도 읽지 않는다 — 카드
+// 노출 순서는 항상 발표일(referenceDate) 최신순이며, 사용자의 보유 자산에 따라
+// 달라지지 않는다.
 export function BriefingScreen() {
   const [index, setIndex] = useState<BriefingIndex | null>(null)
   const [yearMonth, setYearMonth] = useState<string | null>(null)
-  const [scored, setScored] = useState<ScoredBriefingItem[] | null>(null)
+  const [items, setItems] = useState<BriefingItem[] | null>(null)
   const [briefingMeta, setBriefingMeta] = useState<{
     generatedAt: string
     reviewedAt?: string
@@ -108,30 +82,27 @@ export function BriefingScreen() {
         return
       }
       setViewKind('loading')
-      const [{ briefing, skippedItemCount: skipped }, categories, transactions] =
-        await Promise.all([
-          fetchBriefingMonth(yearMonth as string),
-          categoriesRepo.getAllCategories(),
-          transactionsRepo.getAllTransactions(),
-        ])
+      const { briefing, skippedItemCount: skipped } = await fetchBriefingMonth(yearMonth)
       if (cancelled) return
 
       const view = resolveBriefingView({
         online: navigator.onLine,
         fetched: briefing,
-        cached: null, // 실제 오프라인 폴백은 서비스워커의 네트워크 캐시가 담당한다(§8)
+        cached: null, // 실제 오프라인 폴백은 서비스워커의 네트워크 캐시가 담당한다
         skippedItemCount: skipped,
       })
 
       if (view.kind !== 'ready' && view.kind !== 'offline_cached') {
         setViewKind('no_data')
         setNoDataOnline(view.kind === 'no_data' ? view.online : navigator.onLine)
-        setScored(null)
+        setItems(null)
         return
       }
 
-      const heldAssetTypes = computeHeldAssetTypes(categories, transactions)
-      setScored(scoreBriefingItems(view.briefing.items, heldAssetTypes))
+      // 관련도 점수 없이 발표일(referenceDate) 최신순으로만 정렬한다 — 개인
+      // 보유자산에 따라 순서가 달라지지 않는다.
+      const sorted = [...view.briefing.items].sort((a, b) => b.referenceDate.localeCompare(a.referenceDate))
+      setItems(sorted)
       setBriefingMeta({
         generatedAt: view.briefing.generatedAt,
         reviewedAt: view.briefing.reviewedAt,
@@ -146,44 +117,17 @@ export function BriefingScreen() {
     }
   }, [yearMonth, index])
 
-  const summary = useMemo(() => (scored ? selectSummaryItems(scored) : null), [scored])
   const availableMonths = index ? listReviewedYearMonths(index.entries) : []
-
-  // 거시지표(기준금리·물가·실업률·성장률) 카드는 새로 수집하지 않고 이미 불러온
-  // 검수완료 브리핑에서 파생시킨다(§2/§5) — scored는 ScoredBriefingItem[]라
-  // BriefingItem[]으로도 쓸 수 있다.
-  const latestBriefing: FinancialBriefing | null = useMemo(() => {
-    if (!yearMonth || !briefingMeta || !scored) return null
-    return {
-      yearMonth,
-      generatedAt: briefingMeta.generatedAt,
-      reviewedAt: briefingMeta.reviewedAt,
-      status: 'reviewed',
-      summary: briefingMeta.summary,
-      items: scored,
-    }
-  }, [yearMonth, briefingMeta, scored])
-
-  function handleSelectFromSummary(id: string) {
-    setExpandedId(id)
-    requestAnimationFrame(() => {
-      document
-        .getElementById(`briefing-item-${id}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }
 
   return (
     <div className="briefing-screen">
-      <ScreenHeader title="이번 달 재무 브리핑" />
+      <ScreenHeader title="재무 브리핑" />
 
       <div className="briefing-screen__body">
         <p className="briefing-screen__disclaimer">
-          공식 자료를 바탕으로 정리한 일반 정보입니다. 투자 자문이 아니며, 매수·매도를
-          권유하지 않습니다.
+          정부 정책·세금·금융제도 변경과 공식 통계 발표를 정리한 공공정보입니다. 투자 자문이
+          아니며, 매수·매도를 권유하지 않습니다.
         </p>
-
-        <TodaysChangesCard />
 
         {availableMonths.length > 1 && yearMonth && (
           <label className="briefing-screen__month-picker">
@@ -213,8 +157,8 @@ export function BriefingScreen() {
             <div className="briefing-screen__meta">
               <span>{formatKoreanYearMonth(yearMonth)} 기준</span>
               <span>
-                마지막 업데이트{' '}
-                {new Date(briefingMeta.reviewedAt ?? briefingMeta.generatedAt).toLocaleString(
+                마지막 검토일{' '}
+                {new Date(briefingMeta.reviewedAt ?? briefingMeta.generatedAt).toLocaleDateString(
                   'ko-KR',
                 )}
               </span>
@@ -233,37 +177,10 @@ export function BriefingScreen() {
 
             <p className="briefing-screen__summary">{briefingMeta.summary}</p>
 
-            <MonthlyPersonalRecap yearMonth={yearMonth} />
-
-            {summary && (
-              <section className="briefing-screen__summary-section">
-                <h2 className="briefing-screen__section-title">이번 달 한눈에 보기</h2>
-                <SummaryGroup
-                  label={REGION_LABEL.korea}
-                  bucketClass="korea"
-                  items={summary.korea}
-                  onSelect={handleSelectFromSummary}
-                />
-                <SummaryGroup
-                  label={REGION_LABEL.global}
-                  bucketClass="global"
-                  items={summary.global}
-                  onSelect={handleSelectFromSummary}
-                />
-                <SummaryGroup
-                  label="제도 변경"
-                  bucketClass="policy"
-                  items={summary.policy}
-                  onSelect={handleSelectFromSummary}
-                />
-              </section>
-            )}
-
-            {scored && scored.length > 0 && (
+            {items && items.length > 0 && (
               <section className="briefing-screen__detail-section">
-                <h2 className="briefing-screen__section-title">상세 내용</h2>
                 <ul className="briefing-screen__card-list">
-                  {scored.map((item) => (
+                  {items.map((item) => (
                     <BriefingCard
                       key={item.id}
                       item={item}
@@ -276,46 +193,7 @@ export function BriefingScreen() {
             )}
           </>
         )}
-
-        <IndicatorSection latestBriefing={latestBriefing} />
       </div>
-    </div>
-  )
-}
-
-function SummaryGroup({
-  label,
-  bucketClass,
-  items,
-  onSelect,
-}: {
-  label: string
-  bucketClass: 'korea' | 'global' | 'policy'
-  items: ScoredBriefingItem[]
-  onSelect: (id: string) => void
-}) {
-  if (items.length === 0) return null
-  return (
-    <div className={`briefing-summary-group briefing-summary-group--${bucketClass}`}>
-      <h3 className="briefing-summary-group__label">{label}</h3>
-      <ul className="briefing-summary-group__list">
-        {items.map((item) => (
-          <li key={item.id}>
-            <button
-              type="button"
-              className="briefing-summary-group__item"
-              onClick={() => onSelect(item.id)}
-            >
-              <span className="briefing-summary-group__title">{item.title}</span>
-              {item.value !== undefined && (
-                <span className="briefing-summary-group__value">
-                  {formatBriefingValue(item.value, item.unit ?? '')}
-                </span>
-              )}
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }
@@ -325,13 +203,12 @@ function BriefingCard({
   expanded,
   onToggle,
 }: {
-  item: ScoredBriefingItem
+  item: BriefingItem
   expanded: boolean
   onToggle: () => void
 }) {
-  const bucket = regionClass(item)
   return (
-    <li id={`briefing-item-${item.id}`} className={`briefing-card briefing-card--${bucket}`}>
+    <li id={`briefing-item-${item.id}`} className="briefing-card">
       <button
         type="button"
         className="briefing-card__header"
@@ -339,9 +216,7 @@ function BriefingCard({
         aria-expanded={expanded}
       >
         <span className="briefing-card__badges">
-          <span className="briefing-card__region-badge">
-            {bucket === 'policy' ? '제도 변경' : REGION_LABEL[item.region]}
-          </span>
+          <span className="briefing-card__region-badge">{REGION_LABEL[item.region]}</span>
           <span className="briefing-card__category-badge">{CATEGORY_LABEL[item.category]}</span>
         </span>
         <span className="briefing-card__title">{item.title}</span>
@@ -365,14 +240,14 @@ function BriefingCard({
       {expanded && (
         <div className="briefing-card__detail">
           <p className="briefing-card__section">
-            <strong>무슨 일이 있었나</strong> {item.factSummary}
+            <strong>핵심 내용</strong> {item.factSummary}
           </p>
           <p className="briefing-card__section">
             <strong>왜 중요한가</strong> {item.significance}
           </p>
           {item.assetImplications.length > 0 && (
             <div className="briefing-card__section">
-              <strong>내 자산에 어떤 의미인가</strong>
+              <strong>생활에 영향을 줄 수 있는 경로</strong>
               <ul>
                 {item.assetImplications.map((implication, i) => (
                   <li key={i}>{implication.explanation}</li>
@@ -390,6 +265,10 @@ function BriefingCard({
               </ul>
             </div>
           )}
+          <div className="briefing-card__dates">
+            <span>발표일 {item.referenceDate}</span>
+            {item.effectiveDate && <span>시행일 {item.effectiveDate}</span>}
+          </div>
           <div className="briefing-card__sources">
             <strong>출처</strong>
             <ul>
@@ -405,7 +284,6 @@ function BriefingCard({
                 </li>
               ))}
             </ul>
-            <span className="briefing-card__reference-date">기준일 {item.referenceDate}</span>
           </div>
         </div>
       )}

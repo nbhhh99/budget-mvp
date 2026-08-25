@@ -94,16 +94,8 @@ describe('validateBackupFile', () => {
     expect(result.errors.some((e) => e.includes('curriculumProgress'))).toBe(true)
   })
 
-  it('accepts an older backup that has no briefingState array (added later)', () => {
-    const file = validBackup()
-    expect('briefingState' in file.data).toBe(false)
+  it('accepts an older backup that has a leftover briefingState key (feature removed, key now ignored)', () => {
+    const file = { ...validBackup(), data: { ...validBackup().data, briefingState: [{ id: 'state' }] } }
     expect(validateBackupFile(file).valid).toBe(true)
-  })
-
-  it('rejects a file where briefingState is present but not an array', () => {
-    const file = { ...validBackup(), data: { ...validBackup().data, briefingState: 'oops' } }
-    const result = validateBackupFile(file)
-    expect(result.valid).toBe(false)
-    expect(result.errors.some((e) => e.includes('briefingState'))).toBe(true)
   })
 })

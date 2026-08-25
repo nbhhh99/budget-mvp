@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import type { MarketIndicator } from '../../../types/models'
-import { DIRECTION_ICON, FRESHNESS_LABEL, MARKET_STATUS_LABEL, computeFreshness, formatChangeText, formatKstDateTime, getDirection } from '../../../domain'
+import type { MarketIndicator } from '../../types/models'
+import { DIRECTION_ICON, FRESHNESS_LABEL, MARKET_STATUS_LABEL, computeFreshness, formatChangeText, formatKstDateTime, getDirection } from '../../domain'
 import './IndicatorCard.css'
 
 interface IndicatorCardProps {
@@ -52,7 +52,7 @@ export function IndicatorCard({ indicator }: IndicatorCardProps) {
   }
 
   return (
-    <Link to={`/learn/briefing/indicators/${indicator.id}`} className="indicator-card">
+    <Link to={`/indicators/${indicator.id}`} className="indicator-card">
       {content}
     </Link>
   )

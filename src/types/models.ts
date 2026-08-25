@@ -353,20 +353,3 @@ export interface CryptoIndicatorCache {
   fetchedAt: string // ISO datetime
 }
 
-// §8/§9: 일간/주간/월간 브리핑을 중복 생성하지 않기 위한 상태. 단일 행(PK 'state').
-export interface BriefingState {
-  id: 'state'
-  daily?: {
-    dateKey: string // 'YYYY-MM-DD', KST 기준
-    generatedAt: string
-    indicatorSnapshotGeneratedAt: string // 이 값이 바뀌지 않으면 재생성하지 않는다
-  }
-  weekly?: {
-    weekId: string // 'YYYY-Www' (ISO 주차)
-    generatedAt: string
-  }
-  monthly?: {
-    monthId: string // 'YYYY-MM'
-    generatedAt: string
-  }
-}

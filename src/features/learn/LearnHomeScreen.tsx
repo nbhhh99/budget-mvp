@@ -5,13 +5,6 @@ import './LearnHomeScreen.css'
 
 const CARDS = [
   {
-    to: '/learn/briefing',
-    title: '재무 브리핑',
-    description: '국내외 경제 흐름이 내 자산에 갖는 의미를 살펴봐요.',
-    image: 'financial-briefing.png',
-    icon: '🌍',
-  },
-  {
     to: '/learn/life-economy',
     title: '생활로 읽는 경제',
     description: '금리·환율·물가와 정책이 내 생활에 어떻게 이어지는지 알아봐요.',

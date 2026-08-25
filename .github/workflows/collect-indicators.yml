@@ -69,5 +69,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/data/indicators
-          git commit -m "chore(indicators): 경제지표 자동 갱신"
+          REF_DATE=$(jq -r '.generatedAt' public/data/indicators/latest.json | cut -c1-10)
+          git commit -m "chore(indicators): 경제지표 자동 갱신 (${REF_DATE} 기준)"
           git push

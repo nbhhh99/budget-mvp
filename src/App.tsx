@@ -10,6 +10,7 @@ import { MonthlyListScreen } from './features/transactions/MonthlyListScreen'
 import { BudgetScreen } from './features/budgets/BudgetScreen'
 import { AssetsScreen } from './features/assets/AssetsScreen'
 import { BriefingScreen } from './features/briefing/BriefingScreen'
+import { IndicatorsScreen } from './features/indicators/IndicatorsScreen'
 import { LearnHomeScreen } from './features/learn/LearnHomeScreen'
 import { ConceptListScreen } from './features/learn/ConceptListScreen'
 import { ConceptDetailScreen } from './features/learn/ConceptDetailScreen'
@@ -32,7 +33,7 @@ const StatsScreen = lazy(() =>
 )
 // 지표 상세 화면도 미니 차트에 Recharts를 쓰므로 같은 이유로 지연 로드한다.
 const IndicatorDetailScreen = lazy(() =>
-  import('./features/briefing/indicators/IndicatorDetailScreen').then((m) => ({ default: m.IndicatorDetailScreen })),
+  import('./features/indicators/IndicatorDetailScreen').then((m) => ({ default: m.IndicatorDetailScreen })),
 )
 
 function App() {
@@ -57,8 +58,9 @@ function App() {
               <Route path="briefing" element={<Navigate to="/learn/briefing" replace />} />
               <Route path="learn" element={<LearnHomeScreen />} />
               <Route path="learn/briefing" element={<BriefingScreen />} />
+              <Route path="indicators" element={<IndicatorsScreen />} />
               <Route
-                path="learn/briefing/indicators/:indicatorId"
+                path="indicators/:indicatorId"
                 element={
                   <Suspense fallback={<div className="route-loading">불러오는 중…</div>}>
                     <IndicatorDetailScreen />

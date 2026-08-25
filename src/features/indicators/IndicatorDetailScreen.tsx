@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { ScreenHeader } from '../../../components/ScreenHeader'
-import type { IndicatorHistoryPoint, MarketIndicator } from '../../../types/models'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import type { IndicatorHistoryPoint, MarketIndicator } from '../../types/models'
 import {
+  CATEGORY_CONCEPT_IDS,
   DIRECTION_ICON,
   FRESHNESS_LABEL,
   MARKET_STATUS_LABEL,
@@ -14,10 +15,11 @@ import {
   formatChangeText,
   formatKstDateTime,
   getDirection,
-} from '../../../domain'
-import { CHART_GRID_STROKE, CHART_TICK_STYLE, CHART_TOOLTIP_STYLE } from '../../stats/charts/chartTheme'
-import { fetchBriefingIndex, fetchBriefingMonth } from '../briefingData'
-import { fetchIndicatorHistory, fetchIndicatorSnapshot } from '../indicatorData'
+} from '../../domain'
+import { CONCEPTS } from '../../content/concepts'
+import { CHART_GRID_STROKE, CHART_TICK_STYLE, CHART_TOOLTIP_STYLE } from '../stats/charts/chartTheme'
+import { fetchBriefingIndex, fetchBriefingMonth } from '../briefing/briefingData'
+import { fetchIndicatorHistory, fetchIndicatorSnapshot } from './indicatorData'
 import { loadCryptoIndicators } from './loadCryptoIndicators'
 import './IndicatorDetailScreen.css'
 
@@ -76,8 +78,8 @@ export function IndicatorDetailScreen() {
         <ScreenHeader title="지표 상세" />
         <div className="indicator-detail__body">
           <p className="indicator-detail__state">이 지표를 찾을 수 없어요.</p>
-          <Link to="/learn/briefing" className="indicator-detail__back-link">
-            재무 브리핑으로 돌아가기
+          <Link to="/indicators" className="indicator-detail__back-link">
+            경제지표로 돌아가기
           </Link>
         </div>
       </div>
@@ -87,6 +89,9 @@ export function IndicatorDetailScreen() {
   const direction = getDirection(indicator.change)
   const freshness = computeFreshness(indicator, new Date())
   const chartData = history.map((p) => ({ x: p.referenceDate, value: p.value }))
+  const relatedConcepts = (CATEGORY_CONCEPT_IDS[indicator.category] ?? [])
+    .map((id) => CONCEPTS.find((c) => c.id === id))
+    .filter((c): c is (typeof CONCEPTS)[number] => c !== undefined && c.status === 'reviewed')
 
   return (
     <div>
@@ -153,6 +158,19 @@ export function IndicatorDetailScreen() {
           </p>
         </section>
 
+        {relatedConcepts.length > 0 && (
+          <section className="indicator-detail__section">
+            <h2 className="indicator-detail__heading">관련 개념</h2>
+            <div className="indicator-detail__concept-chips">
+              {relatedConcepts.map((c) => (
+                <Link key={c.id} to={`/learn/concepts/${c.id}`} className="indicator-detail__concept-chip">
+                  {c.title} 자세히 보기 ›
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="indicator-detail__section">
           <h2 className="indicator-detail__heading">출처</h2>
           <p className="indicator-detail__paragraph">
@@ -169,8 +187,8 @@ export function IndicatorDetailScreen() {
           </p>
         </section>
 
-        <Link to="/learn/briefing" className="indicator-detail__back-link">
-          ‹ 재무 브리핑으로 돌아가기
+        <Link to="/indicators" className="indicator-detail__back-link">
+          ‹ 경제지표로 돌아가기
         </Link>
       </div>
     </div>

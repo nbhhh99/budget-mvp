@@ -17,9 +17,9 @@ export const DIRECTION_ICON: Record<IndicatorDirection, string> = {
 }
 
 export const MARKET_STATUS_LABEL: Record<MarketStatus, string> = {
-  open: '거래 중',
-  closed: '휴장',
-  holiday: '휴장(공휴일)',
+  open: '장중',
+  closed: '장 마감',
+  holiday: '휴장',
   'not-released': '미발표',
   delayed: '업데이트 지연',
   unknown: '상태 확인 불가',
@@ -40,6 +40,30 @@ export const CATEGORY_LABEL: Record<IndicatorCategory, string> = {
   gold: '금',
   crypto: '코인',
   macro: '거시지표',
+}
+
+// 카테고리별 전달경로 한 줄 — 원인을 단정하지 않고 "~할 수 있어요"로 헤지한다.
+// 지표 상세 화면(IndicatorDetailScreen)의 "생활에 전달될 수 있는 경로" 섹션에서 쓴다.
+export const PATHWAY_TEMPLATE: Record<IndicatorCategory, string> = {
+  exchange: '수입 원료비 변화를 거쳐 일부 상품·서비스 가격에 시차를 두고 반영될 수 있어요.',
+  stock: '시장 전반의 투자심리를 보여주는 지표 중 하나예요.',
+  oil: '연료비·운송비를 거쳐 여러 물가에 영향을 줄 수 있어요.',
+  fuel: '자동차를 이용한다면 주유비 부담에 직접 영향을 줄 수 있어요.',
+  gold: '금은 안전자산으로 여겨져, 시장의 위험 인식과 함께 움직이는 경우가 있어요.',
+  crypto: '24시간 거래되는 시장이라 변동성이 클 수 있어요.',
+  macro: '가계 대출·예금 금리나 생활비 흐름과 연결될 수 있어요.',
+}
+
+// 지표 상세 화면의 "관련 개념" 링크에 쓸 돈 개념 사전 id — 정의를 복제하지 않고
+// id로만 연결한다(§12). 카테고리 단위의 대표 개념만 골랐다.
+export const CATEGORY_CONCEPT_IDS: Record<IndicatorCategory, string[]> = {
+  exchange: ['exchange-rate-and-foreign-assets', 'foreign-currency-asset'],
+  stock: ['stock', 'stock-index'],
+  oil: ['commodity', 'oil-shock'],
+  fuel: ['commodity'],
+  gold: ['commodity'],
+  crypto: ['digital-asset'],
+  macro: ['base-rate', 'consumer-price-index', 'unemployment', 'economic-growth-rate'],
 }
 
 export function getDirection(change: number | null | undefined): IndicatorDirection {

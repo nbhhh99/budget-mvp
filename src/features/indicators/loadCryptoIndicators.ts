@@ -1,14 +1,14 @@
-import type { MarketIndicator } from '../../../types/models'
-import { computeFreshness, shouldRefetchCrypto } from '../../../domain'
-import { fetchUpbitTicker } from '../upbitClient'
-import { indicatorCryptoCacheRepo } from '../../../db'
+import type { MarketIndicator } from '../../types/models'
+import { computeFreshness, shouldRefetchCrypto } from '../../domain'
+import { fetchUpbitTicker } from './upbitClient'
+import { indicatorCryptoCacheRepo } from '../../db'
 
 export const CRYPTO_MARKETS: { market: string; id: string; name: string }[] = [
   { market: 'KRW-BTC', id: 'crypto-btc', name: '비트코인(BTC/KRW)' },
   { market: 'KRW-ETH', id: 'crypto-eth', name: '이더리움(ETH/KRW)' },
 ]
 
-// IndicatorSection(목록)과 IndicatorDetailScreen(상세) 둘 다 코인 카드를 그려야
+// IndicatorsScreen(목록)과 IndicatorDetailScreen(상세) 둘 다 코인 카드를 그려야
 // 해서 공통 함수로 뺐다. 캐시가 15분 이내면 재요청하지 않고(stale-while-revalidate,
 // §3/§4), 오프라인이면 마지막 캐시값 + '오프라인 저장값' 취급이 되도록 freshness를
 // 계산해서 돌려준다.

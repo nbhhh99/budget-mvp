@@ -198,6 +198,13 @@ export function HomeScreen() {
           ))}
         </div>
 
+        <Link to="/learn/briefing" className="home-screen__briefing-card">
+          <span className="home-screen__briefing-label">재무 브리핑</span>
+          <span className="home-screen__briefing-desc">
+            정부 정책·세금·금융제도 변경과 공식 통계 발표를 확인해요.
+          </span>
+        </Link>
+
         {recommended && (
           <Link to={`/learn/monthly/${recommended.module.id}`} className="home-screen__learning-card">
             <span className="home-screen__learning-label">

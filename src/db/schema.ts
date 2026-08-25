@@ -1,7 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type {
   AssetValuation,
-  BriefingState,
   Category,
   CryptoIndicatorCache,
   CurriculumProgress,
@@ -22,7 +21,6 @@ export class BudgetDB extends Dexie {
   learningProgress!: EntityTable<LearningProgress, 'contentId'>
   curriculumProgress!: EntityTable<CurriculumProgress, 'curriculumId'>
   indicatorCryptoCache!: EntityTable<CryptoIndicatorCache, 'market'>
-  briefingState!: EntityTable<BriefingState, 'id'>
 
   constructor() {
     super('budget-mvp')
@@ -76,6 +74,23 @@ export class BudgetDB extends Dexie {
       curriculumProgress: 'curriculumId',
       indicatorCryptoCache: 'market',
       briefingState: 'id',
+    })
+
+    // briefingState는 개인 재무 브리핑(일간/주간 다이제스트) 생성 시각만 담던
+    // 테이블이었는데, 그 기능 자체를 없애면서 더 이상 쓰지 않는다. null로 지정하면
+    // Dexie가 이 스토어만 삭제하고 나머지 테이블은 전혀 건드리지 않는다 — 개인 금융
+    // 데이터(거래·예산·자산 등)는 이 업그레이드로 영향받지 않는다.
+    this.version(6).stores({
+      transactions: 'id, date, type, categoryId, [date+type], [categoryId+date]',
+      categories: 'id, group, order, hidden',
+      monthlyBudgets: 'id, yearMonth, categoryId, [yearMonth+categoryId]',
+      monthlyMeta: 'yearMonth',
+      settings: 'id',
+      assetValuations: 'categoryId',
+      learningProgress: 'contentId, contentType',
+      curriculumProgress: 'curriculumId',
+      indicatorCryptoCache: 'market',
+      briefingState: null,
     })
   }
 }
