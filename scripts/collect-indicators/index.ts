@@ -135,7 +135,13 @@ function buildIndicator(
   if (existing && existing.value !== null) {
     return { ...existing, freshness: 'stale' }
   }
-  // 3) 한 번도 수집된 적이 없으면(대부분 키 미설정) "준비 중"으로 표시한다.
+  // 3) 한 번도 수집된 적이 없으면(대부분 키 미설정) "준비 중"으로 표시한다. 이미
+  //    직전 실행에서도 pending이었다면 그 값을 그대로 재사용한다 — 매번 nowIso로
+  //    새로 채우면 실제로는 아무것도 바뀐 게 없는데도 파일 내용이 매일 달라져서
+  //    "변경사항이 있을 때만 커밋"이 무력화되고 매일 빈 커밋만 쌓이게 된다.
+  if (existing && existing.value === null && existing.freshness === 'pending') {
+    return existing
+  }
   return {
     id: manifestEntry.id,
     category: manifestEntry.category,
@@ -181,6 +187,18 @@ async function main() {
     if (useNew && newItem) {
       await updateHistory(manifestEntry.id, newItem.referenceDate, newItem.value)
     }
+  }
+
+  // 지표 내용 자체가 이전과 완전히 같으면(전부 여전히 pending이거나, 기존 값이
+  // 그대로 보존된 경우) generatedAt조차 갱신하지 않고 파일을 다시 쓰지 않는다 —
+  // GitHub Actions의 "변경사항이 있을 때만 커밋" 단계가 실제로 아무 것도 하지
+  // 않게 만들어, 실질적인 변화가 없는데 매일 빈 커밋이 쌓이는 것을 막는다.
+  const unchanged =
+    existingSnapshot !== null && JSON.stringify(indicators) === JSON.stringify(existingSnapshot.indicators)
+
+  if (unchanged) {
+    console.log('[collect-indicators] 이전 실행과 내용이 완전히 같아 latest.json을 다시 쓰지 않습니다.')
+    return
   }
 
   const snapshot: IndicatorSnapshot = { generatedAt: nowIso, indicators }

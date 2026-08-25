@@ -1,7 +1,13 @@
 .app-layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  /* min-height였으면 콘텐츠가 한 화면보다 길어질 때 이 컨테이너 자체가 늘어나
+     버려서(내부 스크롤이 아니라 페이지 전체가 스크롤됨) 하단 탭이 콘텐츠에
+     밀려 올라가거나 콘텐츠가 그 위로 스크롤되는 문제가 생긴다. height로 뷰포트에
+     고정해야 아래 .app-layout__content의 flex:1 + overflow-y가 실제로 "이
+     영역 안에서만" 스크롤되고, 하단 탭은 항상 그 아래 제자리에 남는다. */
+  height: 100vh;
+  height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
   background-color: var(--color-bg);
@@ -9,5 +15,6 @@
 
 .app-layout__content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
