@@ -326,4 +326,38 @@ export const LEARNING_SOURCES: LearningSource[] = [
     reviewedAt: '2026-08-25',
     sourceType: 'institutional',
   },
+
+  // ── 생활로 읽는 경제 12개 과정 신규 출처(2026-08-25 조사) ──────────────
+  {
+    id: 'opinet-info',
+    name: '오피넷(유가정보서비스)',
+    publisher: '한국석유공사',
+    url: 'https://www.opinet.co.kr',
+    reviewedAt: '2026-08-25',
+    sourceType: 'official',
+  },
+  {
+    id: 'fao-food-price-index',
+    name: 'FAO Food Price Index',
+    publisher: 'Food and Agriculture Organization of the United Nations(FAO)',
+    url: 'https://www.fao.org/worldfoodsituation/foodpricesindex/en/',
+    reviewedAt: '2026-08-25',
+    sourceType: 'official',
+  },
+  {
+    id: 'reb-info',
+    name: '부동산통계정보시스템(R-ONE)',
+    publisher: '한국부동산원',
+    url: 'https://www.reb.or.kr',
+    reviewedAt: '2026-08-25',
+    sourceType: 'official',
+  },
+  {
+    id: 'nts-info',
+    name: '국세청 홈페이지',
+    publisher: '국세청',
+    url: 'https://www.nts.go.kr',
+    reviewedAt: '2026-08-25',
+    sourceType: 'official',
+  },
 ]

@@ -1,0 +1,365 @@
+.life-economy-module__body {
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.life-economy-module__state {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-6) 0;
+}
+
+.life-economy-module__meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.life-economy-module__step {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.life-economy-module__description {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.life-economy-module__meta {
+  display: flex;
+  gap: var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+/* ── 본문(§7 10단 구성) ─────────────────────────────────────────── */
+
+.life-economy-body {
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  /* 표·다이어그램류 콘텐츠가 없어 가로 스크롤이 생기지 않지만, 혹시라도 넘치는
+     콘텐츠가 있어도 페이지 자체가 가로로 스크롤되지 않도록 방지한다. */
+  overflow-x: hidden;
+}
+
+.life-economy-body__heading {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.life-economy-body__heading:first-child {
+  margin-top: 0;
+}
+
+.life-economy-body__question {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.life-economy-body__paragraph {
+  margin: 0 0 var(--space-2);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+/* ── 한눈에 보는 전달경로: 모바일에서도 가로 스크롤 없이 세로로 읽는다 ── */
+
+.life-economy-body__path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.life-economy-body__path-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.life-economy-body__path-arrow {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.life-economy-body__path-label {
+  min-height: var(--touch-target);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: var(--radius-control);
+  background-color: var(--color-blue-soft);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+/* ── 내 생활에서는(생활 영향 카드) ─────────────────────────────── */
+
+.life-economy-body__impact-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.life-economy-body__impact-card {
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+  padding: var(--space-3);
+}
+
+.life-economy-body__impact-situation {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.life-economy-body__impact-text {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── 사람마다 영향이 다른 이유 ─────────────────────────────────── */
+
+.life-economy-body__compare-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.life-economy-body__compare-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+  padding: var(--space-3);
+}
+
+.life-economy-body__compare-side {
+  flex: 1;
+}
+
+.life-economy-body__compare-label {
+  margin: 0 0 2px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.life-economy-body__compare-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── 오해 확인 카드 ────────────────────────────────────────────── */
+
+.life-economy-body__myth-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.life-economy-body__myth-card {
+  border-radius: var(--radius-control);
+  background-color: var(--color-orange-soft);
+  padding: var(--space-3);
+}
+
+.life-economy-body__myth-text {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.life-economy-body__myth-correction {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── 내가 확인할 것 ────────────────────────────────────────────── */
+
+.life-economy-body__check-list {
+  margin: 0;
+  padding-left: 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.life-economy-body__check-item {
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* ── 관련 개념 ─────────────────────────────────────────────────── */
+
+.life-economy-body__concept-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.life-economy-body__concept-chip {
+  display: inline-block;
+  min-height: 34px;
+  line-height: 34px;
+  border-radius: 999px;
+  background-color: var(--color-lavender-soft);
+  color: var(--color-text);
+  padding: 0 var(--space-3);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ── 본문 완료 버튼 ────────────────────────────────────────────── */
+
+.life-economy-module__footer {
+  margin-bottom: var(--space-4);
+}
+
+.life-economy-module__done-button {
+  width: 100%;
+  min-height: 52px;
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-text);
+  color: var(--color-surface);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.life-economy-module__done-button--done {
+  background-color: var(--color-mint-soft);
+  color: var(--color-text);
+}
+
+/* ── 확인 문제 ─────────────────────────────────────────────────── */
+
+.life-economy-module__quiz-section {
+  margin-bottom: var(--space-4);
+}
+
+.life-economy-module__quiz-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+}
+
+/* ── 재무 브리핑 연결(10단계 전용) ─────────────────────────────── */
+
+.life-economy-module__closing-cta {
+  display: block;
+  min-height: var(--touch-target);
+  line-height: var(--touch-target);
+  border-radius: var(--radius-control);
+  background-color: var(--color-blue-soft);
+  color: var(--color-text);
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  margin-bottom: var(--space-4);
+}
+
+/* ── 하단 이동 ─────────────────────────────────────────────────── */
+
+.life-economy-module__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.life-economy-module__nav-link,
+.life-economy-module__list-link {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.life-economy-module__list-link {
+  display: inline-block;
+  margin-top: var(--space-3);
+}
+
+.life-economy-module__done-card {
+  border-radius: var(--radius-card);
+  background-color: var(--color-mint-soft);
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.life-economy-module__done-title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.life-economy-module__done-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.life-economy-module__next-label {
+  margin: 0 0 var(--space-1);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.life-economy-module__next-title {
+  margin: 0 0 var(--space-3);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.life-economy-module__primary-button {
+  width: 100%;
+  min-height: var(--touch-target);
+  border-radius: var(--radius-control);
+  background-color: var(--color-text);
+  color: var(--color-surface);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .life-economy-body,
+  .life-economy-module__done-card {
+    transition: none;
+  }
+}

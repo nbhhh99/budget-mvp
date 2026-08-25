@@ -1,0 +1,93 @@
+// curriculumProgress가 백업/복원/전체초기화에 실제로 포함되는지, 그리고 서로 다른
+// curriculumVersion(차근차근 경제사·생활로 읽는 경제)의 진행 기록이 뒤섞이지 않고
+// 함께 보존되는지 확인하는 회귀 테스트. Dexie는 IndexedDB가 필요해 fake-indexeddb로
+// 메모리 내 구현을 주입한다.
+import 'fake-indexeddb/auto'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { db } from './schema'
+import { buildBackupFile, restoreFromBackup, resetAllData } from './backup'
+import type { CurriculumProgress } from '../types/models'
+
+function progress(overrides: Partial<CurriculumProgress> = {}): CurriculumProgress {
+  return {
+    curriculumId: 'x',
+    status: 'in_progress',
+    completedItemIds: [],
+    curriculumVersion: 'economic-history-v1',
+    ...overrides,
+  }
+}
+
+describe('curriculumProgress backup/restore round-trip', () => {
+  beforeEach(async () => {
+    await db.curriculumProgress.clear()
+  })
+
+  it('backup includes curriculumProgress rows from every curriculum version', async () => {
+    await db.curriculumProgress.bulkAdd([
+      progress({ curriculumId: 'history-origin-of-money', curriculumVersion: 'economic-history-v1' }),
+      progress({ curriculumId: 'life-economy-intro', curriculumVersion: 'real-life-economy-v1' }),
+    ])
+
+    const backup = await buildBackupFile()
+    expect(backup.data.curriculumProgress).toHaveLength(2)
+  })
+
+  it('preserves progress records from multiple curriculum versions through a backup/restore round-trip', async () => {
+    await db.curriculumProgress.bulkAdd([
+      progress({
+        curriculumId: 'history-origin-of-money',
+        curriculumVersion: 'economic-history-v1',
+        status: 'completed',
+        completedItemIds: ['history-origin-of-money-body', 'history-origin-of-money-quiz'],
+        completedAt: '2026-08-20T00:00:00.000Z',
+      }),
+      progress({
+        curriculumId: 'life-economy-intro',
+        curriculumVersion: 'real-life-economy-v1',
+        status: 'in_progress',
+        completedItemIds: ['life-economy-intro-body'],
+      }),
+    ])
+
+    const backup = await buildBackupFile()
+
+    await db.curriculumProgress.clear()
+    expect(await db.curriculumProgress.count()).toBe(0)
+
+    await restoreFromBackup(backup)
+
+    const restored = await db.curriculumProgress.toArray()
+    expect(restored).toHaveLength(2)
+    const byVersion = new Map(restored.map((p) => [p.curriculumVersion, p]))
+    expect(byVersion.get('economic-history-v1')?.status).toBe('completed')
+    expect(byVersion.get('economic-history-v1')?.completedItemIds).toEqual([
+      'history-origin-of-money-body',
+      'history-origin-of-money-quiz',
+    ])
+    expect(byVersion.get('real-life-economy-v1')?.status).toBe('in_progress')
+    expect(byVersion.get('real-life-economy-v1')?.completedItemIds).toEqual(['life-economy-intro-body'])
+  })
+
+  it('restoring an older backup with no curriculumProgress key leaves the table empty (backward compatible)', async () => {
+    await db.curriculumProgress.bulkAdd([progress({ curriculumId: 'a' })])
+    const legacyBackup = await buildBackupFile()
+    // schemaVersion 1~3 백업 파일에는 이 키 자체가 없었다.
+    delete (legacyBackup.data as { curriculumProgress?: CurriculumProgress[] }).curriculumProgress
+
+    await restoreFromBackup(legacyBackup)
+
+    expect(await db.curriculumProgress.count()).toBe(0)
+  })
+
+  it('resetAllData clears curriculumProgress for every curriculum version', async () => {
+    await db.curriculumProgress.bulkAdd([
+      progress({ curriculumId: 'a', curriculumVersion: 'economic-history-v1' }),
+      progress({ curriculumId: 'b', curriculumVersion: 'real-life-economy-v1' }),
+    ])
+
+    await resetAllData()
+
+    expect(await db.curriculumProgress.count()).toBe(0)
+  })
+})

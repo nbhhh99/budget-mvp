@@ -80,4 +80,17 @@ describe('validateBackupFile', () => {
     expect(result.valid).toBe(false)
     expect(result.errors.some((e) => e.includes('learningProgress'))).toBe(true)
   })
+
+  it('accepts an older backup that has no curriculumProgress array (added later)', () => {
+    const file = validBackup()
+    expect('curriculumProgress' in file.data).toBe(false)
+    expect(validateBackupFile(file).valid).toBe(true)
+  })
+
+  it('rejects a file where curriculumProgress is present but not an array', () => {
+    const file = { ...validBackup(), data: { ...validBackup().data, curriculumProgress: 'oops' } }
+    const result = validateBackupFile(file)
+    expect(result.valid).toBe(false)
+    expect(result.errors.some((e) => e.includes('curriculumProgress'))).toBe(true)
+  })
 })

@@ -6,6 +6,7 @@ import { isModuleComplete } from './curriculum'
 import { CONCEPTS } from '../content/concepts'
 import { LEARNING_SOURCES } from '../content/learningSources'
 import { ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_MODULES, HISTORY_BODIES } from '../content/economicHistory'
+import { REAL_LIFE_ECONOMY_BODIES, REAL_LIFE_ECONOMY_CONTENTS, REAL_LIFE_ECONOMY_MODULES } from '../content/realLifeEconomy'
 
 describe('CONCEPTS (돈 개념 사전)', () => {
   it('is a non-empty array that passes strict validation', () => {
@@ -312,6 +313,111 @@ describe('신규 추가된 주식 용어 카드', () => {
     const allIds = CONCEPTS.map((c) => c.id)
     for (const id of NEW_STOCK_CONCEPT_IDS) {
       expect(allIds.filter((x) => x === id), id).toHaveLength(1)
+    }
+  })
+})
+
+describe('REAL_LIFE_ECONOMY_MODULES / REAL_LIFE_ECONOMY_CONTENTS (생활로 읽는 경제)', () => {
+  it('has exactly 12 modules with contiguous order 1..12', () => {
+    expect(REAL_LIFE_ECONOMY_MODULES).toHaveLength(12)
+    const orders = REAL_LIFE_ECONOMY_MODULES.map((m) => m.order).sort((a, b) => a - b)
+    expect(orders).toEqual(Array.from({ length: 12 }, (_, i) => i + 1))
+  })
+
+  it('has no duplicate module ids', () => {
+    const ids = REAL_LIFE_ECONOMY_MODULES.map((m) => m.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it("every module's itemIds exactly matches its actual content entries", () => {
+    for (const module of REAL_LIFE_ECONOMY_MODULES) {
+      const actualIds = REAL_LIFE_ECONOMY_CONTENTS.filter((c) => c.curriculumId === module.id)
+        .map((c) => c.id)
+        .sort()
+      expect([...module.itemIds].sort(), module.id).toEqual(actualIds)
+    }
+  })
+
+  it('has no orphan content entries pointing at a nonexistent module', () => {
+    const moduleIds = new Set(REAL_LIFE_ECONOMY_MODULES.map((m) => m.id))
+    for (const content of REAL_LIFE_ECONOMY_CONTENTS) {
+      expect(moduleIds.has(content.curriculumId), content.id).toBe(true)
+    }
+  })
+
+  it('no module has empty itemIds — this first version ships all 12 complete, no stubs', () => {
+    const stillStubbed = REAL_LIFE_ECONOMY_MODULES.filter((m) => m.itemIds.length === 0).map((m) => m.id)
+    expect(stillStubbed).toEqual([])
+  })
+
+  it('every module can actually reach completed', () => {
+    for (const module of REAL_LIFE_ECONOMY_MODULES) {
+      const contents = REAL_LIFE_ECONOMY_CONTENTS.filter((c) => c.curriculumId === module.id)
+      expect(isModuleComplete(contents, module.itemIds), module.id).toBe(true)
+    }
+  })
+
+  it('every quiz item has at least 3 choices and a valid correctIndex', () => {
+    for (const content of REAL_LIFE_ECONOMY_CONTENTS) {
+      if (content.type !== 'quiz' || !content.quiz) continue
+      expect(content.quiz.choices.length, content.id).toBeGreaterThanOrEqual(3)
+      expect(content.quiz.correctIndex, content.id).toBeGreaterThanOrEqual(0)
+      expect(content.quiz.correctIndex, content.id).toBeLessThan(content.quiz.choices.length)
+    }
+  })
+
+  it('the correct-answer position is not identical across every quiz (§9 요구사항: 정답 위치 분산)', () => {
+    const correctIndexes = REAL_LIFE_ECONOMY_CONTENTS.filter((c) => c.type === 'quiz' && c.quiz).map(
+      (c) => c.quiz!.correctIndex,
+    )
+    expect(new Set(correctIndexes).size).toBeGreaterThan(1)
+  })
+
+  it('every module has a matching REAL_LIFE_ECONOMY_BODIES entry with the required sections filled in', () => {
+    for (const module of REAL_LIFE_ECONOMY_MODULES) {
+      const body = REAL_LIFE_ECONOMY_BODIES[module.id]
+      expect(body, module.id).toBeDefined()
+      expect(body.todayQuestion.trim(), module.id).not.toBe('')
+      expect(body.quickAnswer.trim(), module.id).not.toBe('')
+      expect(body.transmissionPath.length, module.id).toBeGreaterThanOrEqual(4)
+      expect(body.transmissionPath.length, module.id).toBeLessThanOrEqual(7)
+      expect(body.lifeExamples.length, module.id).toBeGreaterThanOrEqual(3)
+      expect(body.myths.length, module.id).toBeGreaterThanOrEqual(1)
+      expect(body.checkItems.length, module.id).toBeGreaterThanOrEqual(1)
+    }
+  })
+
+  it("every module's sourceIds entry points at a source that exists in the catalog", () => {
+    const sourceIds = new Set(LEARNING_SOURCES.map((s) => s.id))
+    for (const module of REAL_LIFE_ECONOMY_MODULES) {
+      for (const sourceId of module.sourceIds ?? []) {
+        expect(sourceIds.has(sourceId), `${module.id} -> source ${sourceId}`).toBe(true)
+      }
+    }
+  })
+
+  it("every module's conceptIds entry points at a concept card that exists in CONCEPTS", () => {
+    const conceptIds = new Set(CONCEPTS.map((c) => c.id))
+    for (const module of REAL_LIFE_ECONOMY_MODULES) {
+      for (const conceptId of module.conceptIds ?? []) {
+        expect(conceptIds.has(conceptId), `${module.id} -> concept ${conceptId}`).toBe(true)
+      }
+    }
+  })
+
+  it('every module has a reviewedAt date on its content entries', () => {
+    for (const content of REAL_LIFE_ECONOMY_CONTENTS) {
+      expect(content.reviewedAt, content.id).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    }
+  })
+
+  it("only the tax/policy module (periodic content) is tagged 'periodic'; the rest are 'stable'", () => {
+    for (const module of REAL_LIFE_ECONOMY_MODULES) {
+      if (module.id === 'life-economy-tax-policy') {
+        expect(module.freshness, module.id).toBe('periodic')
+      } else {
+        expect(module.freshness, module.id).toBe('stable')
+      }
     }
   })
 })

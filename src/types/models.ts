@@ -268,6 +268,11 @@ export interface LearningContent {
   checklistItems?: string[] // type: 'checklist'
 }
 
+// 본문에 담긴 수치성 주장이 얼마나 자주 바뀔 수 있는지 표시한다. 'stable'은 전달구조·기본
+// 원리, 'periodic'은 세율·공제·정책처럼 정기 검토가 필요한 내용, 'current'는 금리·환율·유가처럼
+// 지금 시점의 값 — 'current'는 원칙적으로 본문에 실지 않고 재무 브리핑으로 연결한다.
+export type ContentFreshness = 'stable' | 'periodic' | 'current'
+
 export interface CurriculumModule {
   id: string
   order: number
@@ -280,6 +285,7 @@ export interface CurriculumModule {
   curriculumVersion?: string // 예: 'economic-history-v1'
   periodLabel?: string // 예: "선사~고대" — 경제사에서 시대 배지로 사용
   conceptIds?: string[] // 돈 개념 사전 연결(§17 — 본문에 정의를 복제하지 않고 id로만 참조)
+  freshness?: ContentFreshness
 }
 
 export type CurriculumStatus = 'not_started' | 'in_progress' | 'completed'

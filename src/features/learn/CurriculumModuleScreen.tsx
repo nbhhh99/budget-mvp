@@ -53,7 +53,7 @@ export function CurriculumModuleScreen() {
       const hasContent = (ECONOMIC_HISTORY_MODULES.find((m) => m.id === moduleId)?.itemIds.length ?? 0) > 0
 
       if (isUnlocked && hasContent) {
-        const started = await curriculumProgressRepo.ensureStarted(moduleId)
+        const started = await curriculumProgressRepo.ensureStarted(moduleId, ECONOMIC_HISTORY_VERSION)
         if (cancelled) return
         setInitiallyComplete(started.status === 'completed')
         setProgress(started)
@@ -82,7 +82,7 @@ export function CurriculumModuleScreen() {
   }
 
   async function handleComplete(contentId: string, contentType: 'example' | 'quiz') {
-    await curriculumProgressRepo.completeLearningItem(contentId, contentType)
+    await curriculumProgressRepo.completeLearningItem(contentId, contentType, ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_VERSION)
     await refreshProgress()
   }
 
