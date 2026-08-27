@@ -108,6 +108,29 @@ export function yyyymmddToIso(yyyymmdd: string): string {
   return `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`
 }
 
+const PERCENT_ENCODED_PATTERN = /%[0-9A-Fa-f]{2}/
+
+// 공공데이터포털이 발급하는 인증키는 포털 화면에 이미 URL-인코딩된 형태로 표시될
+// 때가 있다(예: '+'가 '%2B'로 인코딩됨). 그 형태를 그대로 GitHub Secrets에 등록해
+// URLSearchParams.set()에 넘기면, URLSearchParams가 값을 다시 인코딩하면서 '%'
+// 자체가 '%25'로 바뀌어 '%2B' → '%252B'처럼 이중 인코딩된다 — 서버는 이걸 다른
+// 키로 해석해 인증에 실패한다. 앞뒤 공백을 지우고, percent-encoding으로 보이는
+// 패턴(%XX)이 있으면 decodeURIComponent를 한 번만 적용해 "디코딩된 원문" 형태로
+// 맞춘 뒤 URLSearchParams에 넘긴다(그러면 인코딩은 정확히 한 번만 일어난다). 이미
+// 디코딩된 키(그런 패턴이 없는 키)는 그대로 쓴다. 잘린 percent-encoding처럼
+// malformed한 값이면 decodeURIComponent가 예외를 던지므로, 그 경우엔 디코딩을
+// 포기하고 trim만 적용한 원본을 그대로 쓴다 — 키를 지어내거나 잘라내지 않는다.
+// 키 값 자체는 어떤 조건에서도 로그에 남기지 않는다.
+export function normalizeServiceKey(rawKey: string): string {
+  const trimmed = rawKey.trim()
+  if (!PERCENT_ENCODED_PATTERN.test(trimmed)) return trimmed
+  try {
+    return decodeURIComponent(trimmed)
+  } catch {
+    return trimmed
+  }
+}
+
 export type DataGoKrFetchResult =
   | { kind: 'ok'; dateStr: string; rows: Record<string, unknown>[] }
   | { kind: 'no-data' }
@@ -117,7 +140,7 @@ export type DataGoKrFetchResult =
 
 async function fetchOnce(baseUrl: string, apiKey: string, dateStr: string): Promise<DataGoKrFetchResult> {
   const url = new URL(baseUrl)
-  url.searchParams.set('serviceKey', apiKey)
+  url.searchParams.set('serviceKey', normalizeServiceKey(apiKey))
   url.searchParams.set('resultType', 'json')
   url.searchParams.set('numOfRows', '100')
   url.searchParams.set('pageNo', '1')

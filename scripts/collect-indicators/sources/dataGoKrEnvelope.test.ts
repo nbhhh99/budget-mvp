@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { findLatestDataGoKr, parseDataGoKrResponse, toKstYyyymmdd, yyyymmddToIso } from './dataGoKrEnvelope'
+import { findLatestDataGoKr, normalizeServiceKey, parseDataGoKrResponse, toKstYyyymmdd, yyyymmddToIso } from './dataGoKrEnvelope'
 
 function jsonEnvelope(resultCode: string, resultMsg: string, items?: unknown): string {
   return JSON.stringify({
@@ -67,6 +67,38 @@ describe('parseDataGoKrResponse', () => {
   })
 })
 
+describe('normalizeServiceKey', () => {
+  it('앞뒤 공백을 지운다', () => {
+    expect(normalizeServiceKey('  abc123==  ')).toBe('abc123==')
+  })
+
+  it('percent-encoding이 있는 키는 한 번만 decodeURIComponent를 적용한다', () => {
+    // 원문 키 'ab+c/d=' 를 포털이 URL-인코딩해 배포한 형태를 가정한다.
+    const raw = 'ab%2Bc%2Fd%3D'
+    expect(normalizeServiceKey(raw)).toBe('ab+c/d=')
+  })
+
+  it('이미 디코딩된 키(percent 패턴이 없음)는 그대로 쓴다', () => {
+    const raw = 'ab+c/d='
+    expect(normalizeServiceKey(raw)).toBe('ab+c/d=')
+  })
+
+  it('malformed percent-encoding이면 디코딩을 포기하고 trim된 원본을 그대로 쓴다', () => {
+    const raw = 'abc%1' // 잘린 percent-encoding, decodeURIComponent가 던진다
+    expect(normalizeServiceKey(raw)).toBe('abc%1')
+  })
+
+  it('이중 인코딩을 정확히 한 번만 되돌린다(재인코딩 시 원래 인코딩과 동일해짐)', () => {
+    const raw = 'ab%2Bc%2Fd%3D'
+    const normalized = normalizeServiceKey(raw)
+    // URLSearchParams가 넘겨받은 값을 다시 인코딩하면(percent-encoding) 원래
+    // 포털이 준 인코딩 형태와 같아야 한다 — 즉 이중 인코딩(%25로 시작하는 값)이
+    // 생기지 않는다는 뜻이다.
+    const reEncoded = new URLSearchParams({ serviceKey: normalized }).toString()
+    expect(reEncoded).not.toContain('%25')
+  })
+})
+
 describe('toKstYyyymmdd / yyyymmddToIso', () => {
   it('KST 기준 YYYYMMDD 문자열을 만들고 ISO 형식으로 되돌릴 수 있다', () => {
     const dateStr = toKstYyyymmdd(new Date('2026-08-25T20:00:00Z')) // KST로는 08-26 05:00
@@ -78,6 +110,14 @@ describe('toKstYyyymmdd / yyyymmddToIso', () => {
 describe('findLatestDataGoKr', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  it('요청에는 정규화된(디코딩된) 키를 실어 보낸다(이중 인코딩 방지)', async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: true, status: 200, text: async () => jsonEnvelope('00', 'NORMAL SERVICE.', '') }))
+    vi.stubGlobal('fetch', fetchSpy)
+    await findLatestDataGoKr('https://example.com', 'ab%2Bc%2Fd%3D', new Date(), 1)
+    const requestedUrl = new URL(String(fetchSpy.mock.calls[0][0]))
+    expect(requestedUrl.searchParams.get('serviceKey')).toBe('ab+c/d=')
   })
 
   it('그 날짜에 자료가 없으면(resultCode 00 + 빈 items) 하루씩 거슬러 올라가 최신 영업일을 찾는다', async () => {

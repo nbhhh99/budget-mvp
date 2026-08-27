@@ -126,7 +126,11 @@ export async function collectOpinetFuel(): Promise<ProviderResult> {
 
   try {
     const url = new URL(OPINET_BASE)
-    url.searchParams.set('code', apiKey)
+    // 공식 파라미터명은 code가 아니라 certkey다 — 이전 구현이 잘못된 파라미터명을
+    // 써서 오피넷 서버가 인증키를 아예 받지 못하고 있었다(HTTP 200 + 빈 OIL
+    // 배열은 이 문제 때문일 가능성이 높다 — 미인증 요청도 정상 오퍼레이션으로
+    // 처리하되 데이터 없이 응답하는 API가 흔하다).
+    url.searchParams.set('certkey', apiKey)
     url.searchParams.set('out', 'json')
 
     const res = await fetch(url)
