@@ -1,4 +1,5 @@
 import type { CollectedIndicator, ProviderResult } from '../types'
+import { describeFetchError } from './fetchError'
 
 const PROVIDER = 'opinet-fuel'
 
@@ -206,6 +207,6 @@ export async function collectOpinetFuel(): Promise<ProviderResult> {
     return { status: 'success', provider: PROVIDER, indicators: items }
   } catch (err) {
     console.warn('[opinet-fuel] 수집 실패:', err)
-    return { status: 'failed', provider: PROVIDER, reason: err instanceof Error ? err.message : String(err) }
+    return { status: 'failed', provider: PROVIDER, reason: describeFetchError(err) }
   }
 }

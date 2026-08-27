@@ -1,3 +1,5 @@
+import { describeFetchError } from './fetchError'
+
 // 공공데이터포털(data.go.kr) REST API 공통 응답 처리 — fscIndex.ts·fscCommodity.ts가
 // 함께 쓴다(둘 다 apis.data.go.kr 위에 있고, 로그인 후 다운로드한 각 API의
 // "오픈API 활용자가이드" 문서에 실린 "2. OpenAPI 에러 코드정리" 표가 완전히 동일하다
@@ -125,7 +127,7 @@ async function fetchOnce(baseUrl: string, apiKey: string, dateStr: string): Prom
   try {
     res = await fetch(url)
   } catch (err) {
-    return { kind: 'error', detail: err instanceof Error ? err.message : String(err) }
+    return { kind: 'error', detail: describeFetchError(err) }
   }
   if (!res.ok) return { kind: 'error', detail: `HTTP ${res.status}` }
 
