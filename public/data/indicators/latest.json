@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T07:05:56.695Z",
+  "generatedAt": "2026-08-27T08:39:43.909Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -11,7 +11,7 @@
       "change": 1.5,
       "changeRate": 0.11,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T07:05:56.695Z",
+      "updatedAt": "2026-08-27T08:39:43.909Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
@@ -29,7 +29,7 @@
       "change": 0.78,
       "changeRate": 0.09,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T07:05:56.695Z",
+      "updatedAt": "2026-08-27T08:39:43.909Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
@@ -47,7 +47,7 @@
       "change": -1.23,
       "changeRate": -0.08,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T07:05:56.695Z",
+      "updatedAt": "2026-08-27T08:39:43.909Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
@@ -133,13 +133,13 @@
       "change": -2.44,
       "changeRate": -2.83,
       "referenceDate": "2026-08-25",
-      "updatedAt": "2026-08-27T05:31:54.069Z",
+      "updatedAt": "2026-08-27T08:39:43.909Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "oil-brent",
@@ -151,13 +151,13 @@
       "change": -4.47,
       "changeRate": -4.82,
       "referenceDate": "2026-08-25",
-      "updatedAt": "2026-08-27T05:31:54.069Z",
+      "updatedAt": "2026-08-27T08:39:43.909Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-gasoline",
