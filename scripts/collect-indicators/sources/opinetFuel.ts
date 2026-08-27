@@ -4,11 +4,9 @@ const PROVIDER = 'opinet-fuel'
 
 // 한국석유공사 오피넷 "전국 평균가격" Open API. 공공데이터포털에 등록돼 있다:
 // https://www.data.go.kr/data/15150932/openapi.do (무료)
-// 이 세션에서 실제로 요청을 보내 살아있는 엔드포인트인지 확인했다(무효 키로도
-// {"RESULT":{"OIL":[]}} 형태의 구조화된 JSON이 돌아온다 — 추측이 아니라 관측한 값이다).
-// 다만 유효한 키로 받은 실제 응답 필드명(PRODCD/PRICE/DIFF)까지는 이 세션에서
-// 검증하지 못해, 아래 파싱은 방어적으로 작성했다 — 필드명이 예상과 다르면 그
-// 항목만 조용히 건너뛰고(값을 지어내지 않음) 나머지 로직에는 영향을 주지 않는다.
+// 실제 GitHub Actions 실행에서 유효한 키로 호출했을 때 `RESULT.OIL 배열이 비어
+// 있거나 없는 응답 형식 오류`가 관측됐다 — 원인이 "정말 빈 배열"인지 "OIL 자체가
+// 없는 오류 응답"인지 이전 코드는 구분하지 못했다. 이번에 그 둘을 명확히 나눈다.
 const OPINET_BASE = 'https://www.opinet.co.kr/api/avgAllPrice.do'
 
 interface OpinetOilRow {
@@ -27,6 +25,51 @@ function toNumber(raw: string | number | undefined): number | null {
   if (raw === undefined) return null
   const n = typeof raw === 'number' ? raw : Number(String(raw).replace(/,/g, ''))
   return Number.isFinite(n) ? n : null
+}
+
+type OpinetParseOutcome =
+  | { kind: 'ok'; rows: OpinetOilRow[] }
+  | { kind: 'empty' } // RESULT.OIL이 실제로 빈 배열 — 정상 오류가 아니라 아직 발표 전일 가능성
+  | { kind: 'error'; reason: string } // RESULT/OIL 누락, XML, 파싱 실패 등 — 빈 배열과 다르게 취급
+
+// out=json으로 요청했는데 XML이 오거나, RESULT나 OIL 자체가 없는 경우는 "그날
+// 데이터가 없다"가 아니라 오류 응답일 가능성이 높다 — 절대 빈 배열로 뭉뚱그리지
+// 않고 실제로 무엇이 왔는지(다른 필드가 있는지, 타입이 무엇인지) 진단 가능한
+// 사유로 남긴다(§오류 응답을 단순한 빈 배열로 처리하지 않음).
+function parseOpinetResponse(rawText: string): OpinetParseOutcome {
+  const trimmed = rawText.trim()
+  if (trimmed.startsWith('<')) {
+    return { kind: 'error', reason: 'JSON(out=json)을 요청했지만 XML 응답을 받았습니다.' }
+  }
+
+  let json: unknown
+  try {
+    json = JSON.parse(trimmed)
+  } catch {
+    return { kind: 'error', reason: 'JSON 파싱에 실패했습니다.' }
+  }
+
+  const result = (json as { RESULT?: unknown }).RESULT
+  if (result === undefined || typeof result !== 'object' || result === null) {
+    return { kind: 'error', reason: '응답에 RESULT 객체가 없습니다.' }
+  }
+
+  const oil = (result as { OIL?: unknown }).OIL
+  if (oil === undefined) {
+    const otherKeys = Object.keys(result as Record<string, unknown>).slice(0, 10)
+    return {
+      kind: 'error',
+      reason: `RESULT에 OIL 필드가 없습니다(RESULT의 다른 필드: ${otherKeys.length ? otherKeys.join(', ') : '없음'}).`,
+    }
+  }
+  if (Array.isArray(oil)) {
+    return oil.length === 0 ? { kind: 'empty' } : { kind: 'ok', rows: oil as OpinetOilRow[] }
+  }
+  // 결과가 1건이면 배열이 아니라 단일 객체로 오는 API가 흔하다 — 배열로 정규화한다.
+  if (typeof oil === 'object' && oil !== null) {
+    return { kind: 'ok', rows: [oil as OpinetOilRow] }
+  }
+  return { kind: 'error', reason: `RESULT.OIL이 배열도 단일 객체도 아닙니다(타입: ${typeof oil}).` }
 }
 
 export async function collectOpinetFuel(): Promise<ProviderResult> {
@@ -49,13 +92,19 @@ export async function collectOpinetFuel(): Promise<ProviderResult> {
     if (!res.ok) {
       return { status: 'failed', provider: PROVIDER, reason: `HTTP ${res.status}`, httpStatus: res.status }
     }
-    const json = (await res.json()) as { RESULT?: { OIL?: OpinetOilRow[] } }
-    const rows = json.RESULT?.OIL
-    if (!Array.isArray(rows) || rows.length === 0) {
-      console.warn('[opinet-fuel] 응답에 OIL 데이터가 없습니다(형식이 예상과 다르거나 데이터 없음).')
-      return { status: 'invalid_response', provider: PROVIDER, reason: 'RESULT.OIL 배열이 비어 있거나 없습니다.' }
+
+    const text = await res.text()
+    const outcome = parseOpinetResponse(text)
+    if (outcome.kind === 'error') {
+      console.warn(`[opinet-fuel] 응답 형식 오류 — ${outcome.reason}`)
+      return { status: 'invalid_response', provider: PROVIDER, reason: outcome.reason }
+    }
+    if (outcome.kind === 'empty') {
+      console.warn('[opinet-fuel] RESULT.OIL이 빈 배열입니다(아직 발표 전일 수 있음).')
+      return { status: 'not_released', provider: PROVIDER }
     }
 
+    const rows = outcome.rows
     const today = new Date()
     const referenceDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
@@ -83,7 +132,12 @@ export async function collectOpinetFuel(): Promise<ProviderResult> {
       })
     }
     if (items.length === 0) {
-      return { status: 'invalid_response', provider: PROVIDER, reason: '대상 유종(B027/D047) 코드가 응답에 없습니다.' }
+      const seen = [...new Set(rows.map((r) => r.PRODCD).filter((c): c is string => Boolean(c)))].slice(0, 10)
+      return {
+        status: 'invalid_response',
+        provider: PROVIDER,
+        reason: `대상 유종(B027/D047) 코드가 응답에 없습니다. 실제 PRODCD: ${seen.length ? seen.join(', ') : '없음'}`,
+      }
     }
     return { status: 'success', provider: PROVIDER, indicators: items }
   } catch (err) {

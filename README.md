@@ -197,21 +197,22 @@ variables → Actions에 등록해야 한다. **키가 없어도 앱 빌드와 �
 | 카테고리 | 출처 | 상태 |
 |---|---|---|
 | 환율(원/달러·원/100엔·원/유로) | 한국수출입은행 환율정보 API | 구현 완료(`EXIMBANK_API_KEY` 필요) — 최근 7일 안에서 최신 영업일 조회, 인증 오류(result=3)·호출 한도 초과(result=4)를 데이터 없음과 구분 |
-| 국내 휘발유·경유 | 한국석유공사 오피넷 API | 구현 완료(`OPINET_API_KEY` 필요) — 필드명(PRODCD/PRICE/DIFF)은 유효한 키로 아직 실응답 검증을 못 해 방어적으로 파싱 |
+| 국내 휘발유·경유 | 한국석유공사 오피넷 API | 구현 완료(`OPINET_API_KEY` 필요) — 실제 GitHub Actions 실행에서 관측된 `RESULT.OIL 배열이 비어 있거나 없는 응답 형식 오류`를 계기로, "정말 빈 배열(발표 전)"/"OIL 필드 자체가 없는 오류 응답"/"결과 1건이라 배열이 아닌 단일 객체"/"JSON 요청에 XML 응답"을 각각 구분하도록 수정 |
 | 국제유가(WTI·Brent) | 미국 EIA Open Data API v2 | 구현 완료(`EIA_API_KEY` 필요) — series id(RWTC/RBRTE)는 EIA 공식 페이지에서 확인. 다만 유효한 키로 실응답을 받아보지는 못했다(다음 workflow_dispatch 실행에서 확인 필요). 두바이유는 공식 무료 API가 없어 미지원 |
 | 코인(BTC/ETH) | 업비트 공개 시세 API | 구현 완료(키 불필요, 브라우저 직접 호출) |
 | 거시지표(기준금리·물가·실업률·성장률) | 기존 재무 브리핑에서 파생 | 구현 완료(새 수집 없음) |
-| KOSPI·KOSDAQ | 금융위원회_지수시세정보(공공데이터포털) | **미구현** — API 존재·자동승인은 확인했지만, 정확한 요청 엔드포인트는 로그인 후 다운로드하는 활용자가이드 문서 안에만 있어 이 세션에서 열어보지 못했다 |
-| KRX 금시장(국내 금) | 금융위원회_일반상품시세정보(공공데이터포털) | **미구현** — 위와 동일 사유 |
+| KOSPI·KOSDAQ | 금융위원회_지수시세정보(공공데이터포털) | 구현 완료(`DATA_GO_KR_API_KEY` 필요) — 활용자가이드로 확인한 `GetMarketIndexInfoService/getStockMarketIndex` 엔드포인트·필드(basDt/idxNm/clpr/vs/fltRt) 사용. idxNm의 정확한 문자열 표기까지는 이 세션에서 실응답으로 확인하지 못해 "코스피"/"코스닥" 정확 일치로 매칭한다 — 다르면 다음 실행의 invalid_response 사유에 실제 idxNm 값이 그대로 남는다 |
+| KRX 금시장(국내 금) | 금융위원회_일반상품시세정보(공공데이터포털) | 구현 완료(`DATA_GO_KR_API_KEY` 필요) — `GetGeneralProductInfoService/getGoldPriceInfo`에서 "금 99.99_1Kg"(단축코드 04020000)만 선택해 원/kg → 원/g으로 환산. 국제 금(Alpha Vantage, 미구현)과 별도 지표(`gold-krx`)로 관리 |
 | 해외 주가지수(S&P 500·NASDAQ Composite) | — | **미구현** — FRED의 SP500·NASDAQCOM 두 시리즈 모두 "재배포 전 서면 사전승인 필요"로 분류돼 있어 그대로 쓸 수 없다. Alpha Vantage의 지수 전용 API(INDEX_DATA)는 프리미엄 전용이고, SPY·QQQ 같은 ETF로 대체 표시하는 것은 금지 조건에 해당해 시도하지 않았다 |
 | 국제 금 | — | **미구현** — Alpha Vantage의 신규 Gold/Silver 엔드포인트가 무료인지 공식 문서로 확정하지 못해 보류했다 |
 
-미구현 지표는 키를 설정해도 화면에 "데이터 연동 준비 중"으로 표시된다. KOSPI·KOSDAQ·KRX
-금시장은 `scripts/collect-indicators/sources/fscIndex.ts`·`fscCommodity.ts`의 주석에 적힌
-대로, data.go.kr에서 해당 API를 활용신청(자동승인)한 뒤 "활용자가이드" docx를 내려받아
-정확한 엔드포인트를 확인하면 구현할 수 있다. 해외지수·국제 금은 유료 라이선스(Alpha
-Vantage 유료 플랜, IEX Cloud, Twelve Data 등)를 쓸지, S&P/Nasdaq에 재배포 서면 허가를
-직접 요청할지를 사용자가 먼저 정해야 한다.
+KOSPI·KOSDAQ·KRX 금시장은 이 세션에서 유효한 `DATA_GO_KR_API_KEY`로 실응답을 받아
+검증하지는 못했다 — 키를 등록한 뒤 `workflow_dispatch`(그룹 `domestic`)로 한 번 확인이
+필요하다. data.go.kr 공통 응답 봉투 파싱(JSON/XML, resultCode 분류)은
+`scripts/collect-indicators/sources/dataGoKrEnvelope.ts`에 공유 로직으로 분리했다.
+해외지수·국제 금은 여전히 미구현이며, 유료 라이선스(Alpha Vantage 유료 플랜, IEX Cloud,
+Twelve Data 등)를 쓸지, S&P/Nasdaq에 재배포 서면 허가를 직접 요청할지를 사용자가 먼저
+정해야 한다.
 
 ### 자동 갱신 (GitHub Actions)
 
@@ -252,7 +253,7 @@ npm.cmd run collect:indicators -- --group=fuel   # 그룹 지정
 | `EXIMBANK_API_KEY` | 환율 | https://www.data.go.kr/data/3068846/openapi.do |
 | `OPINET_API_KEY` | 국내 휘발유·경유 | https://www.data.go.kr/data/15150932/openapi.do |
 | `EIA_API_KEY` | WTI·Brent 국제유가 | https://www.eia.gov/opendata/register.php |
-| `DATA_GO_KR_API_KEY` | KOSPI·KOSDAQ·KRX 금시장(현재 미구현 — 등록해도 당장은 쓰이지 않는다) | https://www.data.go.kr/data/15094807/openapi.do, https://www.data.go.kr/data/15094805/openapi.do |
+| `DATA_GO_KR_API_KEY` | KOSPI·KOSDAQ·KRX 금시장 | https://www.data.go.kr/data/15094807/openapi.do, https://www.data.go.kr/data/15094805/openapi.do |
 
 `ALPHA_VANTAGE_API_KEY`는 확인된 무료·정식 용도가 없어 더 이상 이 수집기가 참조하지
 않는다(위 "미구현" 항목 참고) — 해외지수·국제 금을 유료 API로 구현하기로 결정하면 그때
