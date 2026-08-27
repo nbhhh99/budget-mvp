@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T02:42:42.158Z",
+  "generatedAt": "2026-08-27T02:55:27.909Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -17,7 +17,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-jpy100-krw",
@@ -35,7 +35,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-eur-krw",
@@ -53,7 +53,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kospi",
@@ -139,7 +139,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "oil-brent",
@@ -157,7 +157,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-gasoline",
