@@ -69,15 +69,14 @@ export async function collectFscGold(): Promise<ProviderResult> {
   const row = findRow(rows)
   if (!row) {
     const seen = [...new Set(rows.map((r) => `${r.itmsNm ?? '?'}(${r.srtnCd ?? '?'})`))].slice(0, 10)
-    return {
-      status: 'invalid_response',
-      provider: PROVIDER,
-      reason: `응답에서 "${TARGET_ITMS_NM}"(${TARGET_SRTN_CD}) 종목을 찾지 못했습니다. 실제 종목: ${seen.length ? seen.join(', ') : '없음'}`,
-    }
+    const reason = `응답에서 "${TARGET_ITMS_NM}"(${TARGET_SRTN_CD}) 종목을 찾지 못했습니다. 실제 종목: ${seen.length ? seen.join(', ') : '없음'}`
+    console.warn(`[fsc-gold] ${reason}`)
+    return { status: 'invalid_response', provider: PROVIDER, reason }
   }
 
   const value = toNumber(row.clpr)
   if (value === null) {
+    console.warn('[fsc-gold] 금시세 종가(clpr) 값을 숫자로 해석하지 못했습니다.')
     return { status: 'invalid_response', provider: PROVIDER, reason: '금시세 종가(clpr) 값을 숫자로 해석하지 못했습니다.' }
   }
   const change = toNumber(row.vs)

@@ -202,11 +202,9 @@ export async function collectOpinetFuel(): Promise<ProviderResult> {
     }
     if (items.length === 0) {
       const seen = [...new Set(rows.map((r) => r.PRODCD).filter((c): c is string => Boolean(c)))].slice(0, 10)
-      return {
-        status: 'invalid_response',
-        provider: PROVIDER,
-        reason: `대상 유종(B027/D047) 코드가 응답에 없습니다. 실제 PRODCD: ${seen.length ? seen.join(', ') : '없음'}`,
-      }
+      const reason = `대상 유종(B027/D047) 코드가 응답에 없습니다. 실제 PRODCD: ${seen.length ? seen.join(', ') : '없음'}`
+      console.warn(`[opinet-fuel] ${reason}`)
+      return { status: 'invalid_response', provider: PROVIDER, reason }
     }
     return { status: 'success', provider: PROVIDER, indicators: items }
   } catch (err) {

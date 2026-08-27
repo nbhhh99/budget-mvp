@@ -70,11 +70,9 @@ export async function collectFscIndex(): Promise<ProviderResult> {
   const rows = latest.rows as IndexRow[]
   if (!TARGETS.some((t) => findRow(rows, t.idxNm))) {
     const seen = [...new Set(rows.map((r) => r.idxNm).filter((n): n is string => Boolean(n)))].slice(0, 10)
-    return {
-      status: 'invalid_response',
-      provider: PROVIDER,
-      reason: `응답에서 코스피/코스닥 지수를 찾지 못했습니다. 실제 idxNm 값: ${seen.length ? seen.join(', ') : '없음'}`,
-    }
+    const reason = `응답에서 코스피/코스닥 지수를 찾지 못했습니다. 실제 idxNm 값: ${seen.length ? seen.join(', ') : '없음'}`
+    console.warn(`[fsc-index] ${reason}`)
+    return { status: 'invalid_response', provider: PROVIDER, reason }
   }
 
   const referenceDate = yyyymmddToIso(latest.dateStr)
@@ -121,6 +119,7 @@ export async function collectFscIndex(): Promise<ProviderResult> {
   }
 
   if (items.length === 0) {
+    console.warn('[fsc-index] 코스피/코스닥 종가(clpr) 값을 숫자로 해석하지 못했습니다.')
     return { status: 'invalid_response', provider: PROVIDER, reason: '코스피/코스닥 종가(clpr) 값을 숫자로 해석하지 못했습니다.' }
   }
   return { status: 'success', provider: PROVIDER, indicators: items }
