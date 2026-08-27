@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { curriculumProgressRepo } from '../../db'
 import { REAL_LIFE_ECONOMY_CONTENTS, REAL_LIFE_ECONOMY_MODULES, REAL_LIFE_ECONOMY_VERSION } from '../../content/realLifeEconomy'
-import { computeModuleProgress, getModuleUiStatus, getRecommendedModule, getUnlockedModuleIds } from '../../domain'
+import { computeModuleProgress, getModuleUiStatus, getRecommendedModule } from '../../domain'
 import type { CurriculumProgress } from '../../types/models'
 import './LifeEconomyHomeScreen.css'
 
 const STATUS_LABEL: Record<string, string> = {
-  locked: '잠김',
   available: '시작하기',
   in_progress: '진행 중',
   completed: '완료',
@@ -16,7 +15,6 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_ICON: Record<string, string> = {
-  locked: '🔒',
   available: '○',
   in_progress: '◐',
   completed: '✓',
@@ -56,7 +54,6 @@ export function LifeEconomyHomeScreen() {
     )
   }
 
-  const unlocked = getUnlockedModuleIds(REAL_LIFE_ECONOMY_MODULES, progress)
   const progressByCurriculumId = new Map(progress.map((p) => [p.curriculumId, p]))
   const recommended = getRecommendedModule(REAL_LIFE_ECONOMY_MODULES, progress)
   const hasStarted = progress.length > 0
@@ -126,8 +123,8 @@ export function LifeEconomyHomeScreen() {
             <p className="life-economy-home__list-heading">전체 과정</p>
             <ul className="life-economy-home__list">
               {SORTED_MODULES.map((module) => {
-                const status = getModuleUiStatus(module, unlocked, progressByCurriculumId)
-                const isEnterable = status !== 'locked' && status !== 'unavailable'
+                const status = getModuleUiStatus(module, progressByCurriculumId)
+                const isEnterable = status !== 'unavailable'
                 const content = (
                   <>
                     <span className="life-economy-home__row-order">{module.order}.</span>

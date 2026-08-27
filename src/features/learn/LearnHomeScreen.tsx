@@ -1,10 +1,6 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { IllustrationImage } from './IllustrationImage'
-import { curriculumProgressRepo } from '../../db'
-import { TAX_LEARNING_VERSION, TAX_LESSONS } from '../../content/taxLearning'
-import { computeOverallTaxProgress } from '../../domain'
 import './LearnHomeScreen.css'
 
 const CARDS = [
@@ -52,33 +48,6 @@ const CARDS = [
   },
 ] as const
 
-// "생활 세금 공부" 카드에만 진행률 배지를 붙인다(§7 "0/25 완료") — 개인 거래·자산
-// 데이터는 전혀 읽지 않고, 세금 학습 전용 진행 기록(curriculumProgress, 버전
-// tax-learning-v1)만 조회한다.
-function TaxCourseProgressBadge() {
-  const [count, setCount] = useState<{ completed: number; total: number } | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      const progress = await curriculumProgressRepo.getCurriculumProgressForVersion(TAX_LEARNING_VERSION)
-      if (cancelled) return
-      setCount(computeOverallTaxProgress(TAX_LESSONS, progress))
-    }
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  if (!count) return null
-  return (
-    <p className="learn-home__card-progress">
-      {count.completed}/{count.total} 완료
-    </p>
-  )
-}
-
 export function LearnHomeScreen() {
   return (
     <div className="learn-home">
@@ -101,7 +70,6 @@ export function LearnHomeScreen() {
                 <div className="learn-home__card-text">
                   <h2 className="learn-home__card-title">{card.title}</h2>
                   <p className="learn-home__card-desc">{card.description}</p>
-                  {card.to === '/learn/tax' && <TaxCourseProgressBadge />}
                 </div>
               </Link>
             </li>

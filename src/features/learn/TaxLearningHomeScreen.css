@@ -189,10 +189,6 @@
   color: var(--color-income);
 }
 
-.tax-home__row-status--in_progress {
-  color: var(--color-saving);
-}
-
 /* ── 세금 일정 ─────────────────────────────────────────────────── */
 
 .tax-home__schedule {

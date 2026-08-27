@@ -7,17 +7,18 @@ import { computeOverallTaxProgress, computeStageProgress, getNextIncompleteLesso
 import type { CurriculumProgress } from '../../types/models'
 import './TaxLearningHomeScreen.css'
 
-type LessonStatus = 'completed' | 'in_progress' | 'not_started'
+// 학습을 열어보기만 해서는 어떤 기록도 생기지 않는다(TaxLearningLessonScreen이
+// 완료 버튼을 눌렀을 때만 진행 기록을 만든다) — 그래서 상태는 "완료"와
+// "시작 전" 둘뿐이다("진행 중"은 이 학습 구조상 아예 생길 수 없다: 과정 하나가
+// 필수 항목 1개뿐이라 완료 = 즉시 completed, 그 전까지는 기록 자체가 없다).
+type LessonStatus = 'completed' | 'not_started'
 
 function statusOf(lessonId: string, progressByLessonId: Map<string, CurriculumProgress>): LessonStatus {
-  const record = progressByLessonId.get(lessonId)
-  if (record?.status === 'completed') return 'completed'
-  if (record) return 'in_progress'
-  return 'not_started'
+  return progressByLessonId.get(lessonId)?.status === 'completed' ? 'completed' : 'not_started'
 }
 
-const STATUS_LABEL: Record<LessonStatus, string> = { completed: '완료', in_progress: '진행 중', not_started: '시작 전' }
-const STATUS_ICON: Record<LessonStatus, string> = { completed: '✓', in_progress: '◐', not_started: '○' }
+const STATUS_LABEL: Record<LessonStatus, string> = { completed: '완료', not_started: '시작 전' }
+const STATUS_ICON: Record<LessonStatus, string> = { completed: '✓', not_started: '○' }
 
 export function TaxLearningHomeScreen() {
   const [loaded, setLoaded] = useState(false)

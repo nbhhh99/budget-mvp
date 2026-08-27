@@ -22,51 +22,19 @@ export function computeModuleProgress(
   return { completed, total: required.length }
 }
 
-// §7: 진행 기록이 없으면 첫 과정만 열리고, 완료한 과정 다음 과정까지만 열린다.
-// 날짜·경과 기간은 전혀 쓰지 않는다.
-//
-// 예외: itemIds가 비어 있는 "준비 중" 과정(§14 — 검증된 콘텐츠가 아직 없어 완료가
-// 구조적으로 불가능한 과정)은 잠금 해제 기준에서 건너뛴다. 그렇지 않으면 이 과정이
-// 중간에 있을 때 완료가 영원히 불가능해서 그 뒤의 모든(콘텐츠가 준비된) 과정까지
-// 영구히 잠기게 된다. 준비 중 과정 자체는 계속 목록에 노출되고 "준비 중"으로
-// 표시되며, 콘텐츠가 채워지면 자연스럽게 일반 과정처럼 완료 조건이 적용된다.
-export function getUnlockedModuleIds(
-  curriculum: CurriculumModule[],
-  progress: CurriculumProgress[],
-): string[] {
-  const sorted = [...curriculum].sort((a, b) => a.order - b.order)
+export type ModuleUiStatus = 'available' | 'in_progress' | 'completed' | 'unavailable'
 
-  const completedIds = new Set(
-    progress.filter((item) => item.status === 'completed').map((item) => item.curriculumId),
-  )
-
-  const unlocked: string[] = []
-
-  for (const module of sorted) {
-    unlocked.push(module.id)
-    const isPlaceholder = module.itemIds.length === 0
-    if (!completedIds.has(module.id) && !isPlaceholder) {
-      break
-    }
-  }
-
-  return unlocked
-}
-
-export type ModuleUiStatus = 'locked' | 'available' | 'in_progress' | 'completed' | 'unavailable'
-
-// 화면에 표시할 상태만 계산하는 순수 함수 — 색상에만 의존하지 않고 텍스트로도
-// 구분할 수 있도록(§12) 별도 라벨은 화면 쪽에서 이 값에 매핑한다. 콘텐츠가 없는
-// 과정은 잠금 여부와 무관하게 항상 'unavailable'(준비 중)로 표시한다.
+// 화면에 표시할 상태만 계산하는 순수 함수 — 순차 잠금 없이 모든 과정을 처음부터
+// 자유롭게 선택할 수 있다(과거에는 이전 과정을 완료해야 다음이 열리는 잠금 구조가
+// 있었지만 제거했다). 콘텐츠가 없는(준비 중) 과정만 예외로 'unavailable'을
+// 반환한다 — 잠긴 게 아니라 아직 검증된 콘텐츠 자체가 없어서다.
 export function getModuleUiStatus(
   module: CurriculumModule,
-  unlockedModuleIds: string[],
   progressByCurriculumId: Map<string, CurriculumProgress>,
 ): ModuleUiStatus {
   if (module.itemIds.length === 0) return 'unavailable'
   const progress = progressByCurriculumId.get(module.id)
   if (progress?.status === 'completed') return 'completed'
-  if (!unlockedModuleIds.includes(module.id)) return 'locked'
   if (progress?.status === 'in_progress') return 'in_progress'
   return 'available'
 }
@@ -79,6 +47,8 @@ export interface RecommendedModule {
 // §8: 완료되지 않은 첫 번째 과정을 추천한다. 자산 구성이나 수익률로 임의로
 // 고르지 않는다. 모든 과정이 완료되면 null(화면에서 전체 완료 메시지 표시).
 // 콘텐츠가 없는 "준비 중" 과정은 추천하지 않는다(추천해도 학습을 시작할 수 없음).
+// 잠금 여부와 무관하게 순서(order)만 본다 — 순차 잠금이 없어졌어도 "다음 학습"
+// 추천 자체는 여전히 순서대로 안내하는 게 자연스럽다.
 export function getRecommendedModule(
   curriculum: CurriculumModule[],
   progress: CurriculumProgress[],

@@ -24,11 +24,12 @@ export function TaxLearningLessonScreen() {
     async function load() {
       if (!lessonId) return
       setLoaded(false)
-      // §요구사항: "모든 과정을 처음부터 자유롭게 선택 가능" — 잠금 확인 없이 항상
-      // ensureStarted를 호출한다(경제사·생활로 읽는 경제와 달리 unlock 검사가 없다).
-      const started = await curriculumProgressRepo.ensureStarted(lessonId, TAX_LEARNING_VERSION)
+      // 단순히 화면을 열어보기만 해도 진행 기록이 생기면 목록에서 "진행 중"으로
+      // 잘못 표시된다 — 방문만으로는 어떤 기록도 만들거나 건드리지 않고, 기존
+      // 기록이 있는지 읽기만 한다(ensureStarted는 완료 버튼을 눌렀을 때만 호출).
+      const existing = await curriculumProgressRepo.getCurriculumProgress(lessonId)
       if (cancelled) return
-      setProgress(started)
+      setProgress(existing ?? null)
       setLoaded(true)
     }
     load()
