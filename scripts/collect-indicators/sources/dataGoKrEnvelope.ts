@@ -129,7 +129,16 @@ async function fetchOnce(baseUrl: string, apiKey: string, dateStr: string): Prom
   } catch (err) {
     return { kind: 'error', detail: describeFetchError(err) }
   }
-  if (!res.ok) return { kind: 'error', detail: `HTTP ${res.status}` }
+  if (!res.ok) {
+    // 실제 GitHub Actions 실행에서 fsc-index·fsc-gold 둘 다 HTTP 403을 그대로
+    // 받았다 — resultCode 본문(20 SERVICE_ACCESS_DENIED_ERROR 등)까지 가지 않고
+    // 게이트웨이 단계에서 거부된 것으로 보인다. 401/403은 원인이 명확하므로 generic
+    // error(=failed)가 아니라 unauthorized로 분류해 화면·로그에서 구분되게 한다.
+    if (res.status === 401 || res.status === 403) {
+      return { kind: 'unauthorized', detail: `HTTP ${res.status}` }
+    }
+    return { kind: 'error', detail: `HTTP ${res.status}` }
+  }
 
   const text = await res.text()
   const outcome = parseDataGoKrResponse(text)

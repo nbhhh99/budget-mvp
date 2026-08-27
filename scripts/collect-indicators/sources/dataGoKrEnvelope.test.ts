@@ -109,9 +109,30 @@ describe('findLatestDataGoKr', () => {
     expect(result).toEqual({ kind: 'no-data' })
   })
 
-  it('HTTP 오류는 error로 보고한다', async () => {
+  it('그 외 HTTP 오류는 error로 보고한다', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500 })))
     const result = await findLatestDataGoKr('https://example.com', 'key', new Date())
     expect(result).toEqual({ kind: 'error', detail: 'HTTP 500' })
+  })
+
+  it('HTTP 401/403은 (resultCode 본문까지 가지 않아도) unauthorized로 보고한다', async () => {
+    // 실제 GitHub Actions 실행에서 fsc-index/fsc-gold가 JSON 오류 본문 대신
+    // 게이트웨이 단계의 HTTP 403을 그대로 받은 것을 반영한다.
+    const fetchSpy = vi.fn(async () => ({ ok: false, status: 403 }))
+    vi.stubGlobal('fetch', fetchSpy)
+    const result = await findLatestDataGoKr('https://example.com', 'key', new Date())
+    expect(result).toEqual({ kind: 'unauthorized', detail: 'HTTP 403' })
+    expect(fetchSpy).toHaveBeenCalledTimes(1) // 재시도하지 않고 즉시 전파
+  })
+
+  it('fetch 자체가 네트워크 계층에서 실패하면 원인(cause)까지 함께 보고한다', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new Error('fetch failed', { cause: new Error('getaddrinfo ENOTFOUND apis.data.go.kr') })
+      }),
+    )
+    const result = await findLatestDataGoKr('https://example.com', 'key', new Date())
+    expect(result).toEqual({ kind: 'error', detail: 'fetch failed: getaddrinfo ENOTFOUND apis.data.go.kr' })
   })
 })
