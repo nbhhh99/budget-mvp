@@ -201,13 +201,14 @@ variables → Actions에 등록해야 한다. **키가 없어도 앱 빌드와 �
 | 국제유가(WTI·Brent) | 미국 EIA Open Data API v2 | 구현 완료(`EIA_API_KEY` 필요) — series id(RWTC/RBRTE)는 EIA 공식 페이지에서 확인. 다만 유효한 키로 실응답을 받아보지는 못했다(다음 workflow_dispatch 실행에서 확인 필요). 두바이유는 공식 무료 API가 없어 미지원 |
 | 코인(BTC/ETH) | 업비트 공개 시세 API | 구현 완료(키 불필요, 브라우저 직접 호출) |
 | 거시지표(기준금리·물가·실업률·성장률) | 기존 재무 브리핑에서 파생 | 구현 완료(새 수집 없음) |
-| KOSPI·KOSDAQ | 금융위원회_지수시세정보(공공데이터포털) | 구현 완료(`DATA_GO_KR_API_KEY` 필요) — 사용자가 직접 내려받아 전달한 활용자가이드 문서로 엔드포인트(`GetMarketIndexInfoService/getStockMarketIndex`)·필드(basDt/idxNm/clpr/vs/fltRt)·오류코드 표를 확인해 구현했다. idxNm은 문서 예제에 정확히 "코스피"로 나온다("코스닥"은 대칭으로 추정) — 다르면 invalid_response 사유에 실제 idxNm 값이 그대로 남는다 |
-| KRX 금시장(국내 금) | 금융위원회_일반상품시세정보(공공데이터포털) | 구현 완료(`DATA_GO_KR_API_KEY` 필요) — `GetGeneralProductInfoService/getGoldPriceInfo`에서 "금 99.99_1Kg"(단축코드 04020000)만 선택. 문서 응답 예제(2022-09-19, clpr=74560)가 그 시점 실제 원/g 시세와 일치해, "1Kg"은 거래단위 표기일 뿐 clpr은 이미 원/g임을 확인했다(단위 환산 없음). 국제 금(Alpha Vantage, 미구현)과 별도 지표(`gold-krx`)로 관리 |
+| KOSPI·KOSDAQ | 금융위원회_지수시세정보(공공데이터포털) | 구현 완료(`DATA_GO_KR_API_KEY` 필요) — **실제 GitHub Actions 실행으로 검증 완료**(KOSPI·KOSDAQ 모두 `freshness: fresh`로 정상 반영). `idxNm`(지수명)을 요청 단계의 서버측 필터로 실어 보낸다 — 처음엔 클라이언트에서 `numOfRows=100` 한 페이지만 받아 걸러내다 실제 데이터가 뒤쪽 페이지에 있어 놓쳤던 문제를, 지수마다 `idxNm` 필터를 건 개별 요청으로 바꿔 해결했다 |
+| KRX 금시장(국내 금) | 금융위원회_일반상품시세정보(공공데이터포털) | 구현 완료(`DATA_GO_KR_API_KEY` 필요) — `GetGeneralProductInfoService/getGoldPriceInfo`를 `likeSrtnCd=4020000`(단축코드 포함 검색)으로 조회한 뒤, 응답에서 `srtnCd`가 정확히 "04020000"인 행을 우선 채택하고(문자열 변환·trim 후 비교), 없으면 종목명에 "금"·"99.99"·"1kg" 표기가 모두 있는 행을 보조 후보로 쓰되 그 사실을 로그에 남긴다 — 종목명 정확 일치 필터(`itmsNm`)로는 활용가이드의 2022년 예시 표기와 실제 표기가 달라 10일 내내 데이터를 못 찾던 문제를 이렇게 해결했다. 100g 등 다른 중량·국제 금과는 섞이지 않는다. 문서 응답 예제(2022-09-19, clpr=74560)가 그 시점 실제 원/g 시세와 일치해, "1Kg"은 거래단위 표기일 뿐 clpr은 이미 원/g임을 확인했다(단위 환산 없음) |
 | 해외 주가지수(S&P 500·NASDAQ Composite) | — | **미구현** — FRED의 SP500·NASDAQCOM 두 시리즈 모두 "재배포 전 서면 사전승인 필요"로 분류돼 있어 그대로 쓸 수 없다. Alpha Vantage의 지수 전용 API(INDEX_DATA)는 프리미엄 전용이고, SPY·QQQ 같은 ETF로 대체 표시하는 것은 금지 조건에 해당해 시도하지 않았다 |
 | 국제 금 | — | **미구현** — Alpha Vantage의 신규 Gold/Silver 엔드포인트가 무료인지 공식 문서로 확정하지 못해 보류했다 |
 
-KOSPI·KOSDAQ·KRX 금시장은 유효한 `DATA_GO_KR_API_KEY`로 실응답을 받아 검증까지
-마쳐야 한다 — `workflow_dispatch`(그룹 `domestic`)로 확인한다. data.go.kr 공통 응답
+KOSPI·KOSDAQ은 실제 GitHub Actions 실행으로 검증을 마쳤다. KRX 금시장은 종목 필터를
+`itmsNm` 정확 일치에서 `likeSrtnCd` 코드 포함 검색으로 바꾼 뒤 재검증이 필요하다 —
+`workflow_dispatch`(그룹 `domestic`)로 확인한다. data.go.kr 공통 응답
 봉투 파싱(JSON/XML 이중 오류체계, resultCode → unauthorized/rate-limited/other-error
 분류, 자료 없음은 코드가 아니라 정상(00)+빈 items로 옴)은 두 API의 활용자가이드
 "OpenAPI 에러 코드정리" 표가 완전히 동일해
