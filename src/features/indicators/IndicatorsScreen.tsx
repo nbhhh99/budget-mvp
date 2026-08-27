@@ -77,8 +77,17 @@ export function IndicatorsScreen() {
     setRefreshing(false)
   }
 
+  // S&P 500·NASDAQ·국제 금처럼 공식 재배포 가능한 공급자를 아직 확정하지 못해
+  // "한 번도 시도한 적 없음"(pending) 상태인 지표는, unavailable(일시 장애)·
+  // stale(지연)과 달리 일반 카드로 보여줄 값 자체가 앞으로도 당분간 생기지
+  // 않는다 — 정상 카드와 같은 크기의 "고장 난 카드"로 매번 보여주는 대신, 아래
+  // 안내 영역에 이름만 한 번 나열한다. 수집기·latest.json·history는 건드리지
+  // 않는다 — 이건 순수하게 화면 표시 로직이다.
+  const visibleIndicators = indicators.filter((i) => !(i.value === null && i.freshness === 'pending'))
+  const pendingIndicators = indicators.filter((i) => i.value === null && i.freshness === 'pending')
+
   const grouped = new Map<IndicatorCategory, MarketIndicator[]>()
-  for (const indicator of indicators) {
+  for (const indicator of visibleIndicators) {
     const list = grouped.get(indicator.category) ?? []
     list.push(indicator)
     grouped.set(indicator.category, list)
@@ -126,6 +135,18 @@ export function IndicatorsScreen() {
               </div>
             )
           })}
+
+        {loaded && pendingIndicators.length > 0 && (
+          <section className="indicators-screen__pending" aria-labelledby="indicators-pending-heading">
+            <h2 id="indicators-pending-heading" className="indicators-screen__pending-title">
+              추후 연동 예정
+            </h2>
+            <p className="indicators-screen__pending-note">
+              {pendingIndicators.map((i) => i.name).join(', ')}은 정식 재배포가 가능한 데이터 공급원을 검토하고
+              있어요.
+            </p>
+          </section>
+        )}
       </div>
     </div>
   )

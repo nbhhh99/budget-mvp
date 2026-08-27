@@ -18,20 +18,21 @@ describe('resolveActiveTab', () => {
     expect(resolveActiveTab('/')).toBe('/')
   })
 
-  it('activates 홈 (not 공부하기) while viewing 재무 브리핑, since it has no tab of its own', () => {
-    expect(resolveActiveTab('/learn/briefing')).toBe('/')
-    expect(resolveActiveTab('/learn/briefing/indicators/fx-usd-krw')).toBe('/')
-  })
-
   it('activates 경제지표 for /indicators and its detail sub-route', () => {
     expect(resolveActiveTab('/indicators')).toBe('/indicators')
     expect(resolveActiveTab('/indicators/fx-usd-krw')).toBe('/indicators')
   })
 
-  it('activates 공부하기 for other /learn routes', () => {
+  it('activates 공부하기 for /learn and its sub-routes, including 재무 브리핑', () => {
     expect(resolveActiveTab('/learn')).toBe('/learn')
     expect(resolveActiveTab('/learn/concepts')).toBe('/learn')
     expect(resolveActiveTab('/learn/monthly/history-origin-of-money')).toBe('/learn')
+  })
+
+  it('activates 공부하기 (not 홈) for 재무 브리핑 and its nested routes — it lives under /learn', () => {
+    expect(resolveActiveTab('/learn/briefing')).toBe('/learn')
+    expect(resolveActiveTab('/learn/briefing/2026-08')).toBe('/learn')
+    expect(resolveActiveTab('/learn/briefing/indicators/fx-usd-krw')).toBe('/learn')
   })
 
   it('activates 설정 for settings routes', () => {

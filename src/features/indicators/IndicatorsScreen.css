@@ -62,3 +62,27 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 공식 재배포 가능한 공급자가 아직 없어 값 자체가 생기지 않는 지표(§pending)를
+   위한 안내 영역 — 카드 그리드가 아니라 조용한 안내문 하나로 끝난다. */
+.indicators-screen__pending {
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+}
+
+.indicators-screen__pending-title {
+  margin: 0 0 var(--space-1);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.indicators-screen__pending-note {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
