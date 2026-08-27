@@ -1,0 +1,266 @@
+.tax-home__body {
+  padding: 0 var(--space-4) var(--space-6);
+  /* 모바일 화면에서 긴 출처 링크·표 형태 콘텐츠가 있어도 가로 스크롤이 생기지
+     않도록 방지한다. */
+  overflow-x: hidden;
+}
+
+.tax-home__subtitle {
+  margin: 0 0 var(--space-4);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.tax-home__state {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-6) 0;
+}
+
+/* ── 전체 진행률 카드 ──────────────────────────────────────────── */
+
+.tax-home__progress-card {
+  border-radius: var(--radius-card);
+  background-color: var(--color-orange-soft);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.tax-home__progress-label {
+  margin: 0 0 var(--space-1);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.tax-home__progress-count {
+  margin: 0 0 var(--space-2);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.tax-home__progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  background-color: var(--color-surface);
+  overflow: hidden;
+}
+
+.tax-home__progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--color-orange);
+  transition: width 0.2s ease;
+}
+
+/* ── 이어서 학습하기 ───────────────────────────────────────────── */
+
+.tax-home__continue-card {
+  display: block;
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+  text-decoration: none;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.tax-home__continue-label {
+  margin: 0 0 var(--space-1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.tax-home__continue-title {
+  margin: 0 0 var(--space-3);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.tax-home__continue-cta {
+  display: inline-block;
+  min-height: var(--touch-target);
+  line-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
+  background-color: var(--color-text);
+  color: var(--color-surface);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.tax-home__done-card {
+  border-radius: var(--radius-card);
+  background-color: var(--color-mint-soft);
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.tax-home__done-title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.tax-home__done-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ── 단계별 학습 목록 ──────────────────────────────────────────── */
+
+.tax-home__stage {
+  margin-bottom: var(--space-4);
+}
+
+.tax-home__stage-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.tax-home__stage-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.tax-home__stage-count {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.tax-home__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tax-home__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-2) var(--space-3);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.tax-home__row-order {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  width: 22px;
+}
+
+.tax-home__row-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.tax-home__row-status {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.tax-home__row-status--completed {
+  color: var(--color-income);
+}
+
+.tax-home__row-status--in_progress {
+  color: var(--color-saving);
+}
+
+/* ── 세금 일정 ─────────────────────────────────────────────────── */
+
+.tax-home__schedule {
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.tax-home__schedule-list {
+  list-style: none;
+  margin: var(--space-2) 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tax-home__schedule-item {
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+  padding: var(--space-3);
+}
+
+.tax-home__schedule-period {
+  display: inline-block;
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-orange);
+}
+
+.tax-home__schedule-title {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.tax-home__schedule-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.tax-home__schedule-notice {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── 학습 자료 이용 안내 ───────────────────────────────────────── */
+
+.tax-home__disclaimer {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tax-home__progress-fill {
+    transition: none;
+  }
+}
