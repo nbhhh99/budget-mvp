@@ -15,9 +15,16 @@ export interface ManifestEntry {
 
 // 오래된 응답으로 최신값을 덮어쓰지 않는다 — 새 값의 기준일이 기존 값의 기준일보다
 // 과거면 쓰지 않는다(§15 "기준일 역행 금지").
+// 실제 GitHub Actions 실행에서 드러난 버그: 실제 값을 한 번도 못 얻은 지표(pending/
+// unavailable)의 referenceDate는 실제 거래일이 아니라 "그 실행 당시의 오늘"로
+// 채워진다(아래 buildIndicator의 null-값 분기). 나중에 진짜 값이 들어와도 그
+// referenceDate가 (T+1 지연 등으로) "오늘"보다 과거면 이 함수가 "역행"으로 오판해
+// 영원히 막아버린다 — 실제로 fsc-index가 이 문제로 정상 수집한 값을 계속
+// 버리고 있었다. existing.value가 null이면(비교할 실제 값 자체가 없다) 기준일
+// 비교 없이 항상 새 값을 받아들인다.
 export function shouldUseNewValue(existing: MarketIndicator | undefined, newItem: CollectedIndicator | undefined): boolean {
   if (!newItem) return false
-  if (!existing) return true
+  if (!existing || existing.value === null) return true
   return existing.referenceDate <= newItem.referenceDate
 }
 

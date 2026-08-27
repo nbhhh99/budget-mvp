@@ -106,13 +106,30 @@ jobs:
           git add public/data/indicators
           REF_DATE=$(jq -r '.generatedAt' public/data/indicators/latest.json | cut -c1-10)
           git commit -m "chore(indicators): 경제지표 자동 갱신 (${REF_DATE} 기준, ${{ steps.group.outputs.group }})"
+          # main을 고정으로 리베이스하면(과거 방식) workflow_dispatch를 아직 main에
+          # 없는 소스 파일이 있는 feature 브랜치에서 돌릴 때(예: 이 워크플로 자체를
+          # 검증하려고 같은 브랜치에 두 그룹을 거의 동시에 실행한 경우) main엔 없는
+          # 파일들이 전부 add/add 충돌로 잡혀 리베이스가 깨진다 — 실제로 겪은
+          # 문제다. 지금 실행 중인 바로 그 브랜치(GITHUB_REF_NAME)를 다시 받아
+          # 리베이스해야 항상 안전하다: 예약 실행은 항상 main이라 기존과 동일하게
+          # 동작하고, feature 브랜치에서의 workflow_dispatch도 올바르게 동작한다.
+          # 이 스텝은 bash -e로 실행돼(각 줄이 실패하면 스크립트 전체가 즉시
+          # 종료된다) git rebase 자체가 실패(충돌)해도 루프를 계속 돌게 하려면
+          # 반드시 if로 감싸야 한다 — 감싸지 않았을 때 실제로 겪은 문제다: 두
+          # 그룹이 거의 동시에 실행돼 서로 다른 커밋을 만들면 fetch까지는 성공해도
+          # rebase에서 내용 충돌(같은 latest.json의 다른 항목을 각자 수정)이 날 수
+          # 있는데, 이때 리베이스 실패가 -e에 걸려 1차 시도 만에 스크립트가 죽고
+          # 남은 재시도 기회(2·3차)를 전혀 못 써봤다.
           for attempt in 1 2 3; do
             if git push; then
               exit 0
             fi
-            echo "push 실패, 최신 main을 받아 재시도합니다 (시도 $attempt)"
-            git fetch origin main
-            git rebase origin/main
+            echo "push 실패, 최신 ${GITHUB_REF_NAME}을 받아 재시도합니다 (시도 $attempt)"
+            git fetch origin "$GITHUB_REF_NAME"
+            if ! git rebase "origin/$GITHUB_REF_NAME"; then
+              echo "리베이스 충돌 — 되돌리고 다음 시도로 넘어갑니다."
+              git rebase --abort
+            fi
           done
           echo "3회 재시도 후에도 push에 실패했습니다."
           exit 1
