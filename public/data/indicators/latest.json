@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T04:16:49.364Z",
+  "generatedAt": "2026-08-27T07:13:48.456Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -17,7 +17,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-jpy100-krw",
@@ -35,7 +35,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-eur-krw",
@@ -53,7 +53,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kospi",
@@ -163,35 +163,35 @@
       "id": "fuel-gasoline",
       "category": "fuel",
       "name": "전국 평균 휘발유",
-      "value": null,
+      "value": 1860.84,
       "unit": "원/리터",
-      "change": null,
-      "changeRate": null,
+      "change": -0.25,
+      "changeRate": -0.01,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T02:42:42.158Z",
+      "updatedAt": "2026-08-27T07:13:48.456Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "unavailable"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-diesel",
       "category": "fuel",
       "name": "전국 평균 경유",
-      "value": null,
+      "value": 1844.94,
       "unit": "원/리터",
-      "change": null,
-      "changeRate": null,
+      "change": -0.34,
+      "changeRate": -0.02,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T02:42:42.158Z",
+      "updatedAt": "2026-08-27T07:13:48.456Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "unavailable"
+      "freshness": "fresh"
     },
     {
       "id": "gold-krx",
