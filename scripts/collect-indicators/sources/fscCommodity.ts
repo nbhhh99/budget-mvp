@@ -62,6 +62,18 @@ export async function collectFscGold(): Promise<ProviderResult> {
   }
   if (latest.kind === 'no-data') {
     console.warn('[fsc-gold] 최근 10일 안에서 금시세 데이터를 찾지 못했습니다.')
+    // 진단용: itmsNm 필터 없이 오늘 날짜만 한 번 더(추가 조회 1회) 확인해, 실제로
+    // "금"을 포함한 종목명이 있는지 로그에 남긴다 — TARGET_ITMS_NM 표기가 문서
+    // 작성 시점(2022) 이후 바뀌었을 가능성을 다음 세션에서 바로 확인할 수 있게
+    // 한다(값을 지어내지 않고, 실제로 온 종목명만 그대로 보여준다).
+    const probe = await findLatestDataGoKr(BASE, apiKey, new Date(), 1)
+    if (probe.kind === 'ok') {
+      const goldLike = (probe.rows as GoldRow[])
+        .filter((r) => (r.itmsNm ?? '').includes('금'))
+        .map((r) => `${r.itmsNm}(${r.srtnCd})`)
+        .slice(0, 10)
+      console.warn(`[fsc-gold] 참고: 오늘자 응답에서 "금" 포함 종목명: ${goldLike.length ? goldLike.join(', ') : '없음'}`)
+    }
     return { status: 'not_released', provider: PROVIDER }
   }
 

@@ -115,6 +115,25 @@ describe('collectFscGold', () => {
     expect(result.status).toBe('not_released')
   })
 
+  it('자료를 못 찾으면 진단용으로 필터 없이 오늘자 종목명을 한 번 더 조회해 로그에 남긴다', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    let call = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        call += 1
+        // itmsNm 필터가 걸린 10번의 조회는 전부 빈 응답, 그다음 필터 없는
+        // 진단용 조회 1회는 실제 종목명이 담긴 응답을 준다.
+        if (call <= 10) return { ok: true, text: async () => envelope('00', 'NORMAL SERVICE.', '') }
+        return { ok: true, text: async () => okEnvelope([{ basDt: '20260827', srtnCd: '04020099', itmsNm: '미니금 99.99_100g' }]) }
+      }),
+    )
+    const result = await collectFscGold()
+    expect(result.status).toBe('not_released')
+    expect(warnSpy.mock.calls.some((c) => String(c[0]).includes('미니금 99.99_100g'))).toBe(true)
+    warnSpy.mockRestore()
+  })
+
   it('네트워크 오류는 failed로 보고한다', async () => {
     vi.stubGlobal(
       'fetch',
