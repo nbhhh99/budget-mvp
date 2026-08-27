@@ -42,6 +42,14 @@ function findRow(rows: IndexRow[], idxNm: string): IndexRow | undefined {
   return rows.find((r) => (r.idxNm ?? '').trim() === idxNm)
 }
 
+// 실제 GitHub Actions 실행에서 코스피/코스닥을 못 찾은 원인이 밝혀졌다: 이 API는
+// 그 날짜의 수백 개 지수를 idxNm 순서 없이(코드/등록 순으로 보이는) 내려주고,
+// numOfRows=100 한 페이지만 받아 클라이언트에서 걸러내면 코스피/코스닥이 뒤쪽
+// 페이지에 있을 때 영영 놓친다(실제로 "IT 서비스, K-샤프지수..." 같은 100건만
+// 받고 끝났다). 활용자가이드의 요청 메시지 명세에 idxNm이 "검색값과 지수명이
+// 일치하는 데이터를 검색"하는 서버측 필터로 문서화돼 있으므로, 지수마다 별도
+// 요청에 idxNm을 필터로 실어 보내 서버가 정확히 그 한 건만 돌려주게 한다 —
+// 페이지 수와 무관하게 항상 찾을 수 있다.
 export async function collectFscIndex(): Promise<ProviderResult> {
   const apiKey = process.env.DATA_GO_KR_API_KEY
   if (!apiKey) {
@@ -49,56 +57,68 @@ export async function collectFscIndex(): Promise<ProviderResult> {
     return { status: 'missing_key', provider: PROVIDER }
   }
 
-  const latest = await findLatestDataGoKr(BASE, apiKey, new Date())
-  if (latest.kind === 'unauthorized') {
-    console.warn(`[fsc-index] 인증/키 오류 — ${latest.detail}`)
-    return { status: 'unauthorized', provider: PROVIDER, code: latest.detail }
-  }
-  if (latest.kind === 'rate-limited') {
-    console.warn(`[fsc-index] 호출 한도 초과 — ${latest.detail}`)
-    return { status: 'rate_limited', provider: PROVIDER, code: latest.detail }
-  }
-  if (latest.kind === 'error') {
-    console.warn(`[fsc-index] 수집 실패 — ${latest.detail}`)
-    return { status: 'failed', provider: PROVIDER, reason: latest.detail }
-  }
-  if (latest.kind === 'no-data') {
-    console.warn('[fsc-index] 최근 10일 안에서 지수 데이터를 찾지 못했습니다.')
-    return { status: 'not_released', provider: PROVIDER }
-  }
-
-  const rows = latest.rows as IndexRow[]
-  if (!TARGETS.some((t) => findRow(rows, t.idxNm))) {
-    const seen = [...new Set(rows.map((r) => r.idxNm).filter((n): n is string => Boolean(n)))].slice(0, 10)
-    const reason = `응답에서 코스피/코스닥 지수를 찾지 못했습니다. 실제 idxNm 값: ${seen.length ? seen.join(', ') : '없음'}`
-    console.warn(`[fsc-index] ${reason}`)
-    return { status: 'invalid_response', provider: PROVIDER, reason }
-  }
-
-  const referenceDate = yyyymmddToIso(latest.dateStr)
-  // 전일 비교값과 교차검증하기 위한 하루 전 조회다(§제공 등락률과 직접 계산한
-  // 등락률 교차검증). 실패해도 치명적이지 않다 — 실패하면 교차검증만 건너뛰고
-  // API가 제공한 vs/fltRt를 그대로 신뢰한다.
-  const previous = await findLatestDataGoKr(BASE, apiKey, new Date(Date.parse(referenceDate) - 24 * 60 * 60 * 1000))
-  const previousRows = previous.kind === 'ok' ? (previous.rows as IndexRow[]) : null
-
   const items: CollectedIndicator[] = []
+  const notFound: string[] = []
+  let sawAnyDate = false
+
   for (const target of TARGETS) {
+    const latest = await findLatestDataGoKr(BASE, apiKey, new Date(), 10, { idxNm: target.idxNm })
+    if (latest.kind === 'unauthorized') {
+      console.warn(`[fsc-index] 인증/키 오류 — ${latest.detail}`)
+      return { status: 'unauthorized', provider: PROVIDER, code: latest.detail }
+    }
+    if (latest.kind === 'rate-limited') {
+      console.warn(`[fsc-index] 호출 한도 초과 — ${latest.detail}`)
+      return { status: 'rate_limited', provider: PROVIDER, code: latest.detail }
+    }
+    if (latest.kind === 'error') {
+      console.warn(`[fsc-index] ${target.name} 수집 실패 — ${latest.detail}`)
+      continue // 인증·한도 문제가 아니면 다른 지수는 계속 시도한다
+    }
+    if (latest.kind === 'no-data') {
+      console.warn(`[fsc-index] ${target.name}: 최근 10일 안에서 데이터를 찾지 못했습니다.`)
+      continue
+    }
+
+    sawAnyDate = true
+    const rows = latest.rows as IndexRow[]
     const row = findRow(rows, target.idxNm)
-    if (!row) continue
+    if (!row) {
+      // idxNm 필터를 걸었는데도 응답 행의 idxNm이 정확히 일치하지 않으면(예:
+      // API가 필터를 느슨하게 적용) 실제로 뭐가 왔는지 남긴다 — 지어내지 않는다.
+      const seen = [...new Set(rows.map((r) => r.idxNm).filter((n): n is string => Boolean(n)))].slice(0, 5)
+      notFound.push(`${target.name}(실제 idxNm: ${seen.length ? seen.join(', ') : '없음'})`)
+      continue
+    }
     const value = toNumber(row.clpr)
-    if (value === null) continue
+    if (value === null) {
+      console.warn(`[fsc-index] ${target.name} 종가(clpr) 값을 숫자로 해석하지 못했습니다.`)
+      continue
+    }
     const change = toNumber(row.vs)
     const changeRate = toNumber(row.fltRt)
+    const referenceDate = yyyymmddToIso(latest.dateStr)
 
-    const prevRow = previousRows ? findRow(previousRows, target.idxNm) : undefined
-    const prevValue = prevRow ? toNumber(prevRow.clpr) : null
-    if (prevValue !== null && change !== null) {
-      const expected = Number((value - prevValue).toFixed(2))
-      if (Math.abs(expected - change) > Math.max(1, value * 0.01)) {
-        console.warn(
-          `[fsc-index] ${target.name} API 제공 등락(vs=${change})이 직접 계산한 값(${expected})과 크게 달라 필드 해석을 재확인해야 합니다.`,
-        )
+    // 전일 비교값과 교차검증하기 위한 하루 전 조회다(§제공 등락률과 직접 계산한
+    // 등락률 교차검증). 실패해도 치명적이지 않다 — 실패하면 교차검증만 건너뛰고
+    // API가 제공한 vs/fltRt를 그대로 신뢰한다.
+    const previous = await findLatestDataGoKr(
+      BASE,
+      apiKey,
+      new Date(Date.parse(referenceDate) - 24 * 60 * 60 * 1000),
+      10,
+      { idxNm: target.idxNm },
+    )
+    if (previous.kind === 'ok') {
+      const prevRow = findRow(previous.rows as IndexRow[], target.idxNm)
+      const prevValue = prevRow ? toNumber(prevRow.clpr) : null
+      if (prevValue !== null && change !== null) {
+        const expected = Number((value - prevValue).toFixed(2))
+        if (Math.abs(expected - change) > Math.max(1, value * 0.01)) {
+          console.warn(
+            `[fsc-index] ${target.name} API 제공 등락(vs=${change})이 직접 계산한 값(${expected})과 크게 달라 필드 해석을 재확인해야 합니다.`,
+          )
+        }
       }
     }
 
@@ -118,9 +138,16 @@ export async function collectFscIndex(): Promise<ProviderResult> {
     })
   }
 
-  if (items.length === 0) {
-    console.warn('[fsc-index] 코스피/코스닥 종가(clpr) 값을 숫자로 해석하지 못했습니다.')
-    return { status: 'invalid_response', provider: PROVIDER, reason: '코스피/코스닥 종가(clpr) 값을 숫자로 해석하지 못했습니다.' }
+  if (items.length > 0) {
+    return { status: 'success', provider: PROVIDER, indicators: items }
   }
-  return { status: 'success', provider: PROVIDER, indicators: items }
+  if (notFound.length > 0) {
+    const reason = `대상 지수를 찾지 못했습니다: ${notFound.join(' / ')}`
+    console.warn(`[fsc-index] ${reason}`)
+    return { status: 'invalid_response', provider: PROVIDER, reason }
+  }
+  if (!sawAnyDate) {
+    return { status: 'not_released', provider: PROVIDER }
+  }
+  return { status: 'invalid_response', provider: PROVIDER, reason: '코스피/코스닥 종가(clpr) 값을 숫자로 해석하지 못했습니다.' }
 }

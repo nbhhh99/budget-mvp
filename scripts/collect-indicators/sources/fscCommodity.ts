@@ -15,6 +15,12 @@ const PROVIDER = 'fsc-gold'
 // 응답 예제(2022-09-19 기준 clpr=74560)가 그 시점의 실제 KRX 금 시세(원/g 기준)와
 // 일치해 확인했다(1kg 단위였다면 7천만 원대여야 한다). 그래서 단위 환산 없이 그대로
 // 쓴다 — "1Kg"는 시세를 매기는 거래 단위 표기일 뿐 가격 단위가 아니다.
+//
+// fsc-index에서 실제로 확인된 문제(numOfRows=100 한 페이지만 받아 클라이언트에서
+// 걸러내면 대상 종목이 다른 페이지에 있을 때 놓친다)와 같은 위험을 피하려고, 이
+// 종목도 활용자가이드에 문서화된 itmsNm 요청 필터("검색값과 종목명이 일치하는
+// 데이터를 검색")를 서버에 실어 보낸다 — 페이지 수와 무관하게 정확히 이 종목만
+// 돌려받는다.
 const BASE = 'https://apis.data.go.kr/1160100/service/GetGeneralProductInfoService/getGoldPriceInfo'
 const TARGET_ITMS_NM = '금 99.99_1Kg'
 const TARGET_SRTN_CD = '04020000'
@@ -34,12 +40,6 @@ function toNumber(raw: string | number | undefined): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-// srtnCd(단축코드)를 1차 키로, itmsNm(종목명)을 보조 확인으로 쓴다 — 코드가 문서에
-// 명시돼 있어 더 안정적이라고 판단했다.
-function findRow(rows: GoldRow[]): GoldRow | undefined {
-  return rows.find((r) => r.srtnCd === TARGET_SRTN_CD) ?? rows.find((r) => (r.itmsNm ?? '').trim() === TARGET_ITMS_NM)
-}
-
 export async function collectFscGold(): Promise<ProviderResult> {
   const apiKey = process.env.DATA_GO_KR_API_KEY
   if (!apiKey) {
@@ -47,7 +47,7 @@ export async function collectFscGold(): Promise<ProviderResult> {
     return { status: 'missing_key', provider: PROVIDER }
   }
 
-  const latest = await findLatestDataGoKr(BASE, apiKey, new Date())
+  const latest = await findLatestDataGoKr(BASE, apiKey, new Date(), 10, { itmsNm: TARGET_ITMS_NM })
   if (latest.kind === 'unauthorized') {
     console.warn(`[fsc-gold] 인증/키 오류 — ${latest.detail}`)
     return { status: 'unauthorized', provider: PROVIDER, code: latest.detail }
@@ -66,7 +66,10 @@ export async function collectFscGold(): Promise<ProviderResult> {
   }
 
   const rows = latest.rows as GoldRow[]
-  const row = findRow(rows)
+  // itmsNm 필터를 걸었으니 보통 이 한 건만 온다 — 그래도 srtnCd로 한 번 더
+  // 교차검증하고(1차 키가 더 안정적이라는 문서 근거), 못 찾으면(필터가 느슨하게
+  // 적용된 경우 대비) 실제로 뭐가 왔는지 그대로 남긴다.
+  const row = rows.find((r) => r.srtnCd === TARGET_SRTN_CD) ?? rows.find((r) => (r.itmsNm ?? '').trim() === TARGET_ITMS_NM)
   if (!row) {
     const seen = [...new Set(rows.map((r) => `${r.itmsNm ?? '?'}(${r.srtnCd ?? '?'})`))].slice(0, 10)
     const reason = `응답에서 "${TARGET_ITMS_NM}"(${TARGET_SRTN_CD}) 종목을 찾지 못했습니다. 실제 종목: ${seen.length ? seen.join(', ') : '없음'}`

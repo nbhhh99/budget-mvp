@@ -32,6 +32,14 @@ describe('collectFscGold', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
+  it('itmsNm을 요청 필터로 실어 보낸다(클라이언트 페이지네이션에 의존하지 않는다)', async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: true, text: async () => okEnvelope([{ basDt: '20260825', srtnCd: '04020000', clpr: '92000' }]) }))
+    vi.stubGlobal('fetch', fetchSpy)
+    await collectFscGold()
+    const requestedUrl = new URL(String(fetchSpy.mock.calls[0][0]))
+    expect(requestedUrl.searchParams.get('itmsNm')).toBe('금 99.99_1Kg')
+  })
+
   it('금 99.99_1Kg(04020000) 종목만 골라 clpr을 그대로 원/g으로 쓴다(1Kg은 거래단위 표기일 뿐 가격단위가 아님)', async () => {
     vi.stubGlobal(
       'fetch',

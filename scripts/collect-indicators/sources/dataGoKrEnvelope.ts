@@ -138,13 +138,26 @@ export type DataGoKrFetchResult =
   | { kind: 'rate-limited'; detail: string }
   | { kind: 'error'; detail: string }
 
-async function fetchOnce(baseUrl: string, apiKey: string, dateStr: string): Promise<DataGoKrFetchResult> {
+async function fetchOnce(
+  baseUrl: string,
+  apiKey: string,
+  dateStr: string,
+  extraParams?: Record<string, string>,
+): Promise<DataGoKrFetchResult> {
   const url = new URL(baseUrl)
   url.searchParams.set('serviceKey', normalizeServiceKey(apiKey))
   url.searchParams.set('resultType', 'json')
   url.searchParams.set('numOfRows', '100')
   url.searchParams.set('pageNo', '1')
   url.searchParams.set('basDt', dateStr)
+  // idxNm(지수명)·itmsNm(종목명) 같은 필터는 활용자가이드의 요청 메시지 명세에
+  // "검색값과 OO이 일치하는 데이터를 검색"으로 문서화된 서버측 정확 일치 필터다 —
+  // 클라이언트에서 최대 100건만 받아 걸러내면 그 페이지에 없는 지수는 영영 못
+  // 찾는다(실제로 fsc-index가 이 문제로 코스피/코스닥을 놓쳤다). 서버가 직접
+  // 필터링하게 하면 어떤 페이지에 있든 정확히 찾아온다.
+  if (extraParams) {
+    for (const [key, value] of Object.entries(extraParams)) url.searchParams.set(key, value)
+  }
 
   let res: Response
   try {
@@ -190,11 +203,12 @@ export async function findLatestDataGoKr(
   apiKey: string,
   startDate: Date,
   maxLookbackDays = 10,
+  extraParams?: Record<string, string>,
 ): Promise<DataGoKrFetchResult> {
   for (let i = 0; i < maxLookbackDays; i++) {
     const d = new Date(startDate.getTime() - i * 24 * 60 * 60 * 1000)
     const dateStr = toKstYyyymmdd(d)
-    const outcome = await fetchOnce(baseUrl, apiKey, dateStr)
+    const outcome = await fetchOnce(baseUrl, apiKey, dateStr, extraParams)
     if (outcome.kind !== 'no-data') return outcome
   }
   return { kind: 'no-data' }
