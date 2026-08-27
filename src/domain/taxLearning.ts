@@ -59,3 +59,14 @@ export function getAdjacentLessons(lessonId: string, lessons: TaxLesson[]): Adja
     next: index < sorted.length - 1 ? sorted[index + 1] : null,
   }
 }
+
+// TaxLearningLessonScreen이 각 확인 문제(QuizItem)에 부여하는 React key. 문제
+// 순번(index)만으로 키를 주면, React Router가 이전/다음 학습 이동에도 같은 화면
+// 컴포넌트 인스턴스를 재사용하는 한 같은 위치의 QuizItem이 그대로 재사용돼 이전
+// 학습에서 고른 답이 새 학습에 남는다 — key에 항상 lessonId를 포함해, 학습이
+// 바뀌면(React의 key 재조정 규칙에 따라) QuizItem이 강제로 새로 마운트되고
+// selectedIndex·acknowledged 같은 내부 상태가 초기화되게 한다. 같은 학습 안에서는
+// index가 같으면 항상 같은 키를 돌려줘 불필요하게 다시 마운트되지 않는다.
+export function quizItemKey(lessonId: string, index: number): string {
+  return `${lessonId}-${index}`
+}

@@ -4,7 +4,7 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { curriculumProgressRepo } from '../../db'
 import { TAX_LEARNING_CONTENTS, TAX_LEARNING_DISCLAIMER, TAX_LEARNING_VERSION, TAX_LESSONS, TAX_STAGES } from '../../content/taxLearning'
 import { LEARNING_SOURCES } from '../../content/learningSources'
-import { getAdjacentLessons } from '../../domain'
+import { getAdjacentLessons, quizItemKey } from '../../domain'
 import type { CurriculumProgress } from '../../types/models'
 import { QuizItem } from './curriculum/QuizItem'
 import './TaxLearningLessonScreen.css'
@@ -136,9 +136,14 @@ export function TaxLearningLessonScreen() {
           {/* 퀴즈는 저장하지 않는다 — 다시 방문할 때마다 새로 풀 수 있고(§요구사항
               "동일 학습을 다시 보면 다시 풀 수 있음"), 정답 여부와 무관하게 아래
               "학습 완료" 버튼과는 독립적으로 동작한다(§요구사항 "문제를 틀려도
-              학습 완료를 막지 않음"). */}
+              학습 완료를 막지 않음"). key를 문제 순번(i)만으로 주면 이전/다음
+              학습으로 이동해도 같은 위치의 QuizItem이 재사용돼(React Router가
+              같은 화면 컴포넌트 인스턴스를 그대로 재사용하므로) 이전 학습에서
+              고른 답이 새 학습에 그대로 남는 버그가 생긴다 — key에 lesson.id를
+              반드시 포함해 학습이 바뀌면 QuizItem이 확실히 새로 마운트되고
+              내부 상태(selectedIndex·acknowledged)가 초기화되게 한다. */}
           {lesson.quiz.map((q, i) => (
-            <div key={i} className="tax-lesson__quiz-item">
+            <div key={quizItemKey(lesson.id, i)} className="tax-lesson__quiz-item">
               <QuizItem
                 quiz={{ question: q.question, choices: q.choices, correctIndex: q.correctIndex, explanation: q.explanation }}
                 completed={false}

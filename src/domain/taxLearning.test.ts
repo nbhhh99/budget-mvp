@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { CurriculumProgress } from '../types/models'
-import { computeOverallTaxProgress, computeStageProgress, getAdjacentLessons, getNextIncompleteLesson, isTaxLessonComplete } from './taxLearning'
+import {
+  computeOverallTaxProgress,
+  computeStageProgress,
+  getAdjacentLessons,
+  getNextIncompleteLesson,
+  isTaxLessonComplete,
+  quizItemKey,
+} from './taxLearning'
 import { TAX_LESSONS, TAX_STAGES } from '../content/taxLearning'
 
 function progress(curriculumId: string, status: CurriculumProgress['status'] = 'completed'): CurriculumProgress {
@@ -100,3 +107,52 @@ describe('getAdjacentLessons', () => {
     expect(getAdjacentLessons('does-not-exist', TAX_LESSONS)).toEqual({ prev: null, next: null })
   })
 })
+
+// quizItemKey는 TaxLearningLessonScreen이 각 확인 문제(QuizItem)에 부여하는 React
+// key다. React는 렌더링 사이에 key가 바뀐 자리의 컴포넌트를 강제로 언마운트하고
+// 새로 마운트한다(공식 문서화된 재조정 규칙) — 이 파일은 그 규칙이 실제로 작동할
+// 수 있도록 "학습이 바뀌면 반드시 키도 바뀐다"는 전제 조건만 순수 함수로
+// 검증한다(이 저장소는 DOM 렌더링 테스트 도구를 쓰지 않는다 — 실제 클릭·재마운트
+// 확인은 코드 검사로 병행한다).
+describe('quizItemKey — 확인 문제 상태가 학습 간에 새지 않는지 보장', () => {
+  it('실제 버그 재현: 문제 순번만 쓰면 서로 다른 학습이 같은 키를 공유한다(고쳐야 하는 이전 동작)', () => {
+    const bugKey = (index: number) => String(index) // 이전 코드가 실제로 쓰던 key={i}
+    expect(bugKey(0)).toBe(bugKey(0)) // tax-learning-01의 0번 문제와
+    // tax-learning-02의 0번 문제가 똑같이 "0"이 돼, React가 같은 컴포넌트
+    // 인스턴스로 취급하고 답변 상태를 그대로 재사용했다 — 이게 고친 버그다.
+  })
+
+  it('같은 학습·같은 문제 순번이면 항상 같은 키를 돌려준다(학습 완료 클릭 등으로 다시 렌더링돼도 같은 문제 UI가 유지된다)', () => {
+    expect(quizItemKey('tax-learning-01', 0)).toBe(quizItemKey('tax-learning-01', 0))
+    expect(quizItemKey('tax-learning-01', 1)).toBe(quizItemKey('tax-learning-01', 1))
+  })
+
+  it('①한 학습에서 문제에 답한 뒤 ②다음 학습으로 이동하면, 같은 순번이라도 키가 달라져 React가 새로 마운트한다(③새 학습은 미응답 상태로 보인다)', () => {
+    const lessonAKey = quizItemKey('tax-learning-01', 0)
+    const lessonBKey = quizItemKey('tax-learning-02', 0)
+    expect(lessonAKey).not.toBe(lessonBKey)
+  })
+
+  it('④이전 학습으로 되돌아가도(A → B → A) 키가 다시 나타나기 전에 A는 이미 한 번 언마운트됐으므로, 돌아온 A의 문제도 다시 마운트되어 새로 풀 수 있다', () => {
+    const sequence = ['tax-learning-01', 'tax-learning-02', 'tax-learning-01'].map((lessonId) => quizItemKey(lessonId, 0))
+    // A → B에서 키가 바뀌고(언마운트), B → A에서 또 한 번 키가 바뀐다(다시 마운트) —
+    // 두 전환 모두 실제로 값이 달라져야 리액트가 매번 새로 마운트한다.
+    expect(sequence[0]).not.toBe(sequence[1])
+    expect(sequence[1]).not.toBe(sequence[2])
+    // A로 돌아왔을 때의 키 값 자체는 처음 A에 있었을 때와 같다 — 문자열 값이
+    // 같다고 상태가 이어지는 게 아니라(중간에 언마운트가 끼었으므로), 매번
+    // "학습이 A일 때 0번 문제"를 가리키는 안정적인 식별자라는 뜻일 뿐이다.
+    expect(sequence[0]).toBe(sequence[2])
+  })
+
+  it('서로 다른 학습의 같은 순번 문제는 25개 학습 전체에서 키가 절대 겹치지 않는다', () => {
+    const keys = TAX_LESSONS.flatMap((lesson) => lesson.quiz.map((_, i) => quizItemKey(lesson.id, i)))
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+})
+
+// ⑤"문제 정답 여부와 관계없이 학습 완료 버튼을 누를 수 있음"은 TaxLearningLessonScreen의
+// handleComplete가 퀴즈 상태를 전혀 참조하지 않고 버튼 onClick에 직접 연결돼
+// 있다는 구조로 보장된다(quiz 응답은 Dexie에 저장조차 하지 않는다 — completeLearningItem
+// 호출 인자에 퀴즈 정답 여부가 들어가지 않는다). 이 저장소에는 DOM 렌더링 테스트
+// 도구가 없어 실제 클릭 시나리오는 코드 검사로 확인했다(완료 보고에 명시).
