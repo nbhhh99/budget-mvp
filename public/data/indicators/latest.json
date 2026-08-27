@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T04:45:09.745Z",
+  "generatedAt": "2026-08-27T05:31:54.069Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -17,7 +17,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-jpy100-krw",
@@ -35,7 +35,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-eur-krw",
@@ -53,7 +53,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kospi",
@@ -133,7 +133,7 @@
       "change": -2.44,
       "changeRate": -2.83,
       "referenceDate": "2026-08-25",
-      "updatedAt": "2026-08-27T04:45:09.745Z",
+      "updatedAt": "2026-08-27T05:31:54.069Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
@@ -151,7 +151,7 @@
       "change": -4.47,
       "changeRate": -4.82,
       "referenceDate": "2026-08-25",
-      "updatedAt": "2026-08-27T04:45:09.745Z",
+      "updatedAt": "2026-08-27T05:31:54.069Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
