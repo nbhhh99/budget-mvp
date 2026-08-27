@@ -1,22 +1,27 @@
 // 공공데이터포털(data.go.kr) REST API 공통 응답 처리 — fscIndex.ts·fscCommodity.ts가
-// 함께 쓴다(둘 다 apis.data.go.kr 위에 있고 같은 봉투 규격을 공유한다).
-//
-// 이 포털의 API는 두 겹의 오류 체계를 갖는다(포털 자체의 공개 "오픈API 활용가이드"에
-// 문서화된 범포털 규격이며, 로그인 후에만 열람 가능한 개별 API 전용 활용자가이드와는
-// 다른 층이다 — 이 파일은 그 공개 규격만 다루고, 개별 API 고유 필드는 다루지 않는다):
-//   1) 서비스키 자체가 문제면(미등록·만료·IP제한·트래픽초과 등) resultType=json을
-//      요청해도 무시되고 XML `<OpenAPI_ServiceResponse><cmmMsgHeader>...` 봉투로
-//      내려온다 — 널리 알려진 동작이다.
-//   2) 서비스키가 정상이면 요청한 형식(JSON)으로 `response.header.resultCode`를
-//      담아 내려온다. '00'은 정상, '03'은 그 조회 조건에 해당하는 자료 없음
-//      (NODATA_ERROR — 휴장일이거나 아직 미발표), 그 외 코드는 포털 공통 오류코드다.
-// 두 층 모두 같은 오류코드 체계(01~99)를 쓰므로 classify() 하나로 함께 판정한다.
+// 함께 쓴다(둘 다 apis.data.go.kr 위에 있고, 로그인 후 다운로드한 각 API의
+// "오픈API 활용자가이드" 문서에 실린 "2. OpenAPI 에러 코드정리" 표가 완전히 동일하다
+// — 이 파일은 그 문서로 확인된 오류코드만 다룬다):
+//   1  APPLICATION_ERROR                                어플리케이션 에러
+//   10 INVALID_REQUEST_PARAMETER_ERROR                  잘못된 요청 파라메터 에러
+//   12 NO_OPENAPI_SERVICE_ERROR                          해당 오픈API서비스가 없거나 폐기됨
+//   20 SERVICE_ACCESS_DENIED_ERROR                       서비스 접근거부
+//   22 LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR  서비스 요청제한횟수 초과
+//   30 SERVICE_KEY_IS_NOT_REGISTERED_ERROR               등록되지 않은 서비스키
+//   31 DEADLINE_HAS_EXPIRED_ERROR                        기한 만료된 서비스키
+//   32 UNREGISTERED_IP_ERROR                             등록되지 않은 IP
+//   99 UNKNOWN_ERROR                                     기타에러
+// 문서에 "자료 없음"을 뜻하는 별도 코드가 없다 — 조회 조건에 해당하는 자료가 없는
+// 날(휴장일 등)은 resultCode 00(정상)에 totalCount 0으로 내려온다는 뜻이라,
+// items가 비어 있는 정상 응답은 findLatestDataGoKr가 "그 날짜엔 자료 없음"으로 보고
+// 하루 더 거슬러 올라간다(no-data와 동일하게 취급).
+// 서비스키 자체가 문제면(미등록·만료·IP제한 등) resultType=json을 요청해도 무시되고
+// XML `<OpenAPI_ServiceResponse><cmmMsgHeader>...` 공통 인증 오류 봉투로 내려오는
+// 것으로 널리 알려져 있다 — 이 계층은 개별 API 문서가 아니라 포털 공통 동작이지만,
+// 봉투 안의 코드 체계는 위와 같은 숫자를 쓰므로 classify() 하나로 함께 판정한다.
 export interface DataGoKrOk {
   kind: 'ok'
   items: Record<string, unknown>[]
-}
-export interface DataGoKrNoData {
-  kind: 'no-data'
 }
 export interface DataGoKrCodedError {
   kind: 'unauthorized' | 'rate-limited' | 'other-error'
@@ -27,17 +32,19 @@ export interface DataGoKrParseError {
   kind: 'parse-error'
   reason: string
 }
-export type DataGoKrOutcome = DataGoKrOk | DataGoKrNoData | DataGoKrCodedError | DataGoKrParseError
+export type DataGoKrOutcome = DataGoKrOk | DataGoKrCodedError | DataGoKrParseError
 
-const UNAUTHORIZED_CODES = new Set(['20', '30', '31', '32', '33'])
-const RATE_LIMITED_CODES = new Set(['21', '22'])
+// 활용자가이드 문서로 확인된 코드만 쓴다(추측 금지) — resultCode 필드 크기가 2라
+// 실제로는 "01"처럼 0으로 채워질 수 있어 숫자로 정규화해 비교한다.
+const UNAUTHORIZED_CODES = new Set([20, 30, 31, 32]) // 접근거부·미등록 키·기한만료·미등록 IP
+const RATE_LIMITED_CODES = new Set([22]) // 서비스 요청제한횟수 초과
 
 function classify(code: string, msg: string): DataGoKrOutcome {
   if (code === '00') return { kind: 'ok', items: [] }
-  if (code === '03') return { kind: 'no-data' }
-  if (UNAUTHORIZED_CODES.has(code)) return { kind: 'unauthorized', code, msg }
-  if (RATE_LIMITED_CODES.has(code)) return { kind: 'rate-limited', code, msg }
-  return { kind: 'other-error', code, msg }
+  const num = Number(code)
+  if (UNAUTHORIZED_CODES.has(num)) return { kind: 'unauthorized', code, msg }
+  if (RATE_LIMITED_CODES.has(num)) return { kind: 'rate-limited', code, msg }
+  return { kind: 'other-error', code, msg } // 1/10/12/99 및 문서에 없는 그 외 코드
 }
 
 // items는 표준 규격상 `{ item: [...] }`이지만, 결과가 1건이면 `{ item: {...} }`로
@@ -126,9 +133,9 @@ async function fetchOnce(baseUrl: string, apiKey: string, dateStr: string): Prom
   const outcome = parseDataGoKrResponse(text)
   switch (outcome.kind) {
     case 'ok':
-      return { kind: 'ok', dateStr, rows: outcome.items }
-    case 'no-data':
-      return { kind: 'no-data' }
+      // 활용자가이드 문서에 "자료 없음" 전용 코드가 없다 — 그 날짜에 해당하는 자료가
+      // 없으면(휴장일 등) resultCode 00 그대로 totalCount 0(빈 items)으로 내려온다.
+      return outcome.items.length === 0 ? { kind: 'no-data' } : { kind: 'ok', dateStr, rows: outcome.items }
     case 'unauthorized':
       return { kind: 'unauthorized', detail: `${outcome.code} ${outcome.msg}`.trim() }
     case 'rate-limited':

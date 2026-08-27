@@ -88,10 +88,45 @@ describe('collectOpinetFuel', () => {
     expect(result.reason).toContain('K015')
   })
 
-  it('401 응답이면 unauthorized로 구분한다', async () => {
+  it('401 응답은 인증키 오류로 구분한다', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 401 })))
     const result = await collectOpinetFuel()
-    expect(result).toEqual({ status: 'unauthorized', provider: 'opinet-fuel', code: 'HTTP 401' })
+    expect(result).toEqual({ status: 'unauthorized', provider: 'opinet-fuel', code: '인증키 오류로 추정 (HTTP 401)' })
+  })
+
+  it('403 응답은 API 활용 미승인으로 구분한다(401과 다른 사유)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 403 })))
+    const result = await collectOpinetFuel()
+    expect(result).toEqual({ status: 'unauthorized', provider: 'opinet-fuel', code: 'API 활용 미승인으로 추정 (HTTP 403)' })
+  })
+
+  it('HTTP 상태코드를 항상 기록한다(진단용)', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    stubFetch({ ok: true, status: 200, text: async () => JSON.stringify({ RESULT: { OIL: [] } }) })
+    await collectOpinetFuel()
+    expect(logSpy.mock.calls.some((call) => String(call[0]).includes('HTTP 상태코드: 200'))).toBe(true)
+    logSpy.mockRestore()
+  })
+
+  it('응답의 최상위 필드명은 기록하되 API 키는 어떤 로그에도 남기지 않는다', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    stubFetch({ ok: true, text: async () => JSON.stringify({ RESULT: {}, EXTRA_FIELD: 1 }) })
+    await collectOpinetFuel()
+    expect(logSpy.mock.calls.some((call) => String(call[0]).includes('EXTRA_FIELD'))).toBe(true)
+    const allLoggedText = [...logSpy.mock.calls, ...warnSpy.mock.calls].flat().map(String).join('\n')
+    expect(allLoggedText).not.toContain('test-key')
+    logSpy.mockRestore()
+    warnSpy.mockRestore()
+  })
+
+  it('RESULT는 있지만 OIL이 없을 때 API 오류코드·메시지가 있으면 그대로 노출한다', async () => {
+    stubFetch({ ok: true, text: async () => JSON.stringify({ RESULT: { CODE: 'ERR-001', MSG: '인증되지 않은 요청입니다.' } }) })
+    const result = await collectOpinetFuel()
+    expect(result.status).toBe('invalid_response')
+    if (result.status !== 'invalid_response') throw new Error('unreachable')
+    expect(result.reason).toContain('ERR-001')
+    expect(result.reason).toContain('인증되지 않은 요청입니다.')
   })
 
   it('네트워크 오류는 failed로 보고한다', async () => {

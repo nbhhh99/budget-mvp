@@ -90,8 +90,8 @@ describe('collectFscIndex', () => {
     expect(result.status).toBe('rate_limited')
   })
 
-  it('조회 기간 내내 자료가 없으면(휴장 연속 등) not_released를 반환한다', async () => {
-    const spy = vi.fn(async () => ({ ok: true, text: async () => envelope('03', 'NODATA_ERROR') }))
+  it('조회 기간 내내 자료가 없으면(휴장 연속 등, resultCode 00 + 빈 items) not_released를 반환한다', async () => {
+    const spy = vi.fn(async () => ({ ok: true, text: async () => envelope('00', 'NORMAL SERVICE.', '') }))
     vi.stubGlobal('fetch', spy)
     const result = await collectFscIndex()
     expect(result.status).toBe('not_released')

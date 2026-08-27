@@ -32,15 +32,15 @@ describe('collectFscGold', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
-  it('금 99.99_1Kg(04020000) 종목만 골라 원/kg을 원/g으로 환산한다', async () => {
+  it('금 99.99_1Kg(04020000) 종목만 골라 clpr을 그대로 원/g으로 쓴다(1Kg은 거래단위 표기일 뿐 가격단위가 아님)', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => ({
         ok: true,
         text: async () =>
           okEnvelope([
-            { basDt: '20260825', srtnCd: '04020001', itmsNm: '금 99.99_100g', clpr: '9200000', vs: '15000', fltRt: '0.16' },
-            { basDt: '20260825', srtnCd: '04020000', itmsNm: '금 99.99_1Kg', clpr: '92000000', vs: '150000', fltRt: '0.16' },
+            { basDt: '20260825', srtnCd: '04020001', itmsNm: '금 99.99_100g', clpr: '92000', vs: '150', fltRt: '0.16' },
+            { basDt: '20260825', srtnCd: '04020000', itmsNm: '금 99.99_1Kg', clpr: '92000', vs: '150', fltRt: '0.16' },
           ]),
       })),
     )
@@ -64,7 +64,7 @@ describe('collectFscGold', () => {
   it('srtnCd가 없어도 itmsNm으로 보조 매칭한다', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({ ok: true, text: async () => okEnvelope([{ basDt: '20260825', itmsNm: '금 99.99_1Kg', clpr: '92000000' }]) })),
+      vi.fn(async () => ({ ok: true, text: async () => okEnvelope([{ basDt: '20260825', itmsNm: '금 99.99_1Kg', clpr: '92000' }]) })),
     )
     const result = await collectFscGold()
     expect(result.status).toBe('success')
@@ -88,7 +88,7 @@ describe('collectFscGold', () => {
       'fetch',
       vi.fn(async () => ({
         ok: true,
-        text: async () => envelope('00', 'NORMAL SERVICE.', { item: { basDt: '20260825', srtnCd: '04020000', clpr: '92000000' } }),
+        text: async () => envelope('00', 'NORMAL SERVICE.', { item: { basDt: '20260825', srtnCd: '04020000', clpr: '92000' } }),
       })),
     )
     const result = await collectFscGold()
@@ -101,8 +101,8 @@ describe('collectFscGold', () => {
     expect(result).toEqual({ status: 'unauthorized', provider: 'fsc-gold', code: '20 SERVICE_ACCESS_DENIED_ERROR' })
   })
 
-  it('조회 기간 내내 자료가 없으면 not_released를 반환한다', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => envelope('03', 'NODATA_ERROR') })))
+  it('조회 기간 내내 자료가 없으면(resultCode 00 + 빈 items) not_released를 반환한다', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => envelope('00', 'NORMAL SERVICE.', '') })))
     const result = await collectFscGold()
     expect(result.status).toBe('not_released')
   })

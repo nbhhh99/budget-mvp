@@ -10,6 +10,11 @@ const PROVIDER = 'fsc-gold'
 // 대상 종목은 "금 99.99_1Kg"(단축코드 04020000)만 쓴다(국제 금과 섞지 않는다 —
 // gold-international은 이 파일이 아니라 alphaVantageMarkets.ts가 다루고, 그쪽은
 // 여전히 미구현이다).
+//
+// clpr은 종목명("...1Kg")과 달리 원/kg이 아니라 이미 원/g 단위다 — 활용자가이드의
+// 응답 예제(2022-09-19 기준 clpr=74560)가 그 시점의 실제 KRX 금 시세(원/g 기준)와
+// 일치해 확인했다(1kg 단위였다면 7천만 원대여야 한다). 그래서 단위 환산 없이 그대로
+// 쓴다 — "1Kg"는 시세를 매기는 거래 단위 표기일 뿐 가격 단위가 아니다.
 const BASE = 'https://apis.data.go.kr/1160100/service/GetGeneralProductInfoService/getGoldPriceInfo'
 const TARGET_ITMS_NM = '금 99.99_1Kg'
 const TARGET_SRTN_CD = '04020000'
@@ -71,18 +76,13 @@ export async function collectFscGold(): Promise<ProviderResult> {
     }
   }
 
-  const clprPerKg = toNumber(row.clpr)
-  if (clprPerKg === null) {
+  const value = toNumber(row.clpr)
+  if (value === null) {
     return { status: 'invalid_response', provider: PROVIDER, reason: '금시세 종가(clpr) 값을 숫자로 해석하지 못했습니다.' }
   }
-  const vsPerKg = toNumber(row.vs)
-  const fltRt = toNumber(row.fltRt) // 등락률(%)은 단위 환산과 무관하다.
-
+  const change = toNumber(row.vs)
+  const fltRt = toNumber(row.fltRt)
   const referenceDate = yyyymmddToIso(latest.dateStr)
-  // 종목이 1Kg 단위라 clpr·vs는 원/kg으로 내려온다 — 화면 표시 요구사항(원/g)에
-  // 맞춰 1000으로 나눈다.
-  const value = Number((clprPerKg / 1000).toFixed(2))
-  const change = vsPerKg !== null ? Number((vsPerKg / 1000).toFixed(2)) : null
 
   return {
     status: 'success',

@@ -26,10 +26,6 @@ describe('parseDataGoKrResponse', () => {
     expect(outcome).toEqual({ kind: 'ok', items: [] })
   })
 
-  it('resultCode 03은 no-data(그 조건에 해당하는 자료 없음)로 구분한다', () => {
-    expect(parseDataGoKrResponse(jsonEnvelope('03', 'NODATA_ERROR'))).toEqual({ kind: 'no-data' })
-  })
-
   it('resultCode 30(SERVICE_KEY_IS_NOT_REGISTERED_ERROR)은 unauthorized로 분류한다', () => {
     const outcome = parseDataGoKrResponse(jsonEnvelope('30', 'SERVICE_KEY_IS_NOT_REGISTERED_ERROR'))
     expect(outcome).toEqual({ kind: 'unauthorized', code: '30', msg: 'SERVICE_KEY_IS_NOT_REGISTERED_ERROR' })
@@ -40,9 +36,14 @@ describe('parseDataGoKrResponse', () => {
     expect(outcome).toEqual({ kind: 'rate-limited', code: '22', msg: 'LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR' })
   })
 
-  it('알 수 없는 코드는 other-error로 분류한다(데이터 없음으로 뭉개지 않는다)', () => {
+  it('활용자가이드에 있는 그 외 코드(1/10/12/99)는 other-error로 분류한다(빈 응답으로 뭉개지 않는다)', () => {
     const outcome = parseDataGoKrResponse(jsonEnvelope('99', 'UNKNOWN_ERROR'))
     expect(outcome).toEqual({ kind: 'other-error', code: '99', msg: 'UNKNOWN_ERROR' })
+  })
+
+  it('resultCode가 0으로 패딩되지 않아도(예: "1") 숫자로 정규화해 판정한다', () => {
+    const outcome = parseDataGoKrResponse(jsonEnvelope('1', 'APPLICATION_ERROR'))
+    expect(outcome).toEqual({ kind: 'other-error', code: '1', msg: 'APPLICATION_ERROR' })
   })
 
   it('서비스키 오류는 resultType=json 요청과 무관하게 XML 공통 인증 봉투로 온다', () => {
@@ -79,14 +80,14 @@ describe('findLatestDataGoKr', () => {
     vi.unstubAllGlobals()
   })
 
-  it('오늘 자료가 없으면(no-data) 하루씩 거슬러 올라가 최신 영업일을 찾는다', async () => {
+  it('그 날짜에 자료가 없으면(resultCode 00 + 빈 items) 하루씩 거슬러 올라가 최신 영업일을 찾는다', async () => {
+    // 활용자가이드에 "자료 없음" 전용 코드가 없다 — 휴장일 등은 정상(00) + 빈 items로 온다.
     let call = 0
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => {
         call += 1
-        const resultCode = call < 3 ? '03' : '00'
-        return { ok: true, status: 200, text: async () => jsonEnvelope(resultCode, '', call < 3 ? undefined : { item: { basDt: 'x' } }) }
+        return { ok: true, status: 200, text: async () => jsonEnvelope('00', 'NORMAL SERVICE.', call < 3 ? '' : { item: { basDt: 'x' } }) }
       }),
     )
     const result = await findLatestDataGoKr('https://example.com', 'key', new Date('2026-08-26T00:00:00Z'))
@@ -103,7 +104,7 @@ describe('findLatestDataGoKr', () => {
   })
 
   it('최대 조회 기간 안에 자료를 찾지 못하면 no-data를 반환한다', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, text: async () => jsonEnvelope('03', 'NODATA_ERROR') })))
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, text: async () => jsonEnvelope('00', 'NORMAL SERVICE.', '') })))
     const result = await findLatestDataGoKr('https://example.com', 'key', new Date(), 3)
     expect(result).toEqual({ kind: 'no-data' })
   })
