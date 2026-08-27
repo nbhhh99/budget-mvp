@@ -86,6 +86,11 @@ export async function collectFscGold(): Promise<ProviderResult> {
   const fltRt = toNumber(row.fltRt)
   const referenceDate = yyyymmddToIso(latest.dateStr)
 
+  // 값 자체는 공개 시세 정보라 비밀이 아니다 — 성공 시에도 남겨야, 이후 값이
+  // 화면에 실제로 반영되지 않을 때(예: 다른 단계의 이상치 검증에서 걸러짐)
+  // "애초에 못 가져온 것"과 "가져왔는데 버려진 것"을 구분할 수 있다.
+  console.log(`[fsc-gold] 수집 성공: ${value}원/g (${referenceDate})`)
+
   return {
     status: 'success',
     provider: PROVIDER,

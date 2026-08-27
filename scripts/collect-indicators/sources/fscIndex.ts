@@ -139,6 +139,10 @@ export async function collectFscIndex(): Promise<ProviderResult> {
   }
 
   if (items.length > 0) {
+    // 값 자체는 공개 시세 정보라 비밀이 아니다 — 성공 시에도 남겨야, 이후 값이
+    // 화면에 실제로 반영되지 않을 때(예: 다른 단계의 이상치 검증에서 걸러짐)
+    // "애초에 못 가져온 것"과 "가져왔는데 버려진 것"을 구분할 수 있다.
+    console.log(`[fsc-index] 수집 성공: ${items.map((i) => `${i.name}=${i.value}(${i.referenceDate})`).join(', ')}`)
     return { status: 'success', provider: PROVIDER, indicators: items }
   }
   if (notFound.length > 0) {
@@ -147,6 +151,7 @@ export async function collectFscIndex(): Promise<ProviderResult> {
     return { status: 'invalid_response', provider: PROVIDER, reason }
   }
   if (!sawAnyDate) {
+    console.warn('[fsc-index] 최근 10일 안에서 코스피/코스닥 데이터를 전혀 찾지 못했습니다.')
     return { status: 'not_released', provider: PROVIDER }
   }
   return { status: 'invalid_response', provider: PROVIDER, reason: '코스피/코스닥 종가(clpr) 값을 숫자로 해석하지 못했습니다.' }
