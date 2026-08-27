@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T07:13:48.456Z",
+  "generatedAt": "2026-08-27T07:16:21.138Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -11,13 +11,13 @@
       "change": 1.5,
       "changeRate": 0.11,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T04:16:49.364Z",
+      "updatedAt": "2026-08-27T07:16:21.138Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fx-jpy100-krw",
@@ -29,13 +29,13 @@
       "change": 0.78,
       "changeRate": 0.09,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T04:16:49.364Z",
+      "updatedAt": "2026-08-27T07:16:21.138Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fx-eur-krw",
@@ -47,13 +47,13 @@
       "change": -1.23,
       "changeRate": -0.08,
       "referenceDate": "2026-08-27",
-      "updatedAt": "2026-08-27T04:16:49.364Z",
+      "updatedAt": "2026-08-27T07:16:21.138Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "stock-kospi",
@@ -174,7 +174,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-diesel",
@@ -191,7 +191,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-krx",
