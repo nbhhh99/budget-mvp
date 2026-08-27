@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { curriculumProgressRepo } from '../../db'
 import { ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_MODULES, ECONOMIC_HISTORY_VERSION } from '../../content/economicHistory'
-import { computeModuleProgress, getModuleUiStatus, getRecommendedModule, getUnlockedModuleIds } from '../../domain'
+import { computeModuleProgress, getModuleUiStatus, getRecommendedModule } from '../../domain'
 import type { CurriculumProgress } from '../../types/models'
 import './CurriculumHomeScreen.css'
 
 const STATUS_LABEL: Record<string, string> = {
-  locked: '잠김',
   available: '열림',
   in_progress: '진행 중',
   completed: '완료',
@@ -16,7 +15,6 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_ICON: Record<string, string> = {
-  locked: '🔒',
   available: '○',
   in_progress: '◐',
   completed: '✓',
@@ -56,7 +54,6 @@ export function CurriculumHomeScreen() {
     )
   }
 
-  const unlocked = getUnlockedModuleIds(ECONOMIC_HISTORY_MODULES, progress)
   const progressByCurriculumId = new Map(progress.map((p) => [p.curriculumId, p]))
   const recommended = getRecommendedModule(ECONOMIC_HISTORY_MODULES, progress)
   const hasStarted = progress.length > 0
@@ -124,8 +121,8 @@ export function CurriculumHomeScreen() {
             <p className="curriculum-home__list-heading">전체 과정</p>
             <ul className="curriculum-home__list">
               {SORTED_MODULES.map((module) => {
-                const status = getModuleUiStatus(module, unlocked, progressByCurriculumId)
-                const isEnterable = status !== 'locked' && status !== 'unavailable'
+                const status = getModuleUiStatus(module, progressByCurriculumId)
+                const isEnterable = status !== 'unavailable'
                 const content = (
                   <>
                     <span className="curriculum-home__row-order">{module.order}.</span>

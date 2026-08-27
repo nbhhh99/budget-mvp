@@ -9,7 +9,7 @@ import {
   HISTORY_BODIES,
 } from '../../content/economicHistory'
 import { CONCEPTS } from '../../content/concepts'
-import { computeModuleProgress, getUnlockedModuleIds, isModuleComplete } from '../../domain'
+import { computeModuleProgress, isModuleComplete } from '../../domain'
 import type { CurriculumProgress } from '../../types/models'
 import { QuizItem } from './curriculum/QuizItem'
 import './CurriculumModuleScreen.css'
@@ -20,7 +20,6 @@ export function CurriculumModuleScreen() {
 
   const [loaded, setLoaded] = useState(false)
   const [progress, setProgress] = useState<CurriculumProgress | null>(null)
-  const [allProgress, setAllProgress] = useState<CurriculumProgress[]>([])
   // 이 화면을 열었을 때 이미 완료 상태였는지 — moduleId가 바뀔 때마다 새로 계산해야
   // 하므로(같은 컴포넌트 인스턴스가 이전/다음 과정 이동으로 재사용될 수 있음) ref가
   // 아니라 상태로 두고, moduleId가 바뀌는 effect 안에서만 한 번 설정한다.
@@ -44,15 +43,12 @@ export function CurriculumModuleScreen() {
       if (!moduleId) return
       setLoaded(false)
       setInitiallyComplete(null)
-      const filtered = await curriculumProgressRepo.getCurriculumProgressForVersion(ECONOMIC_HISTORY_VERSION)
-      if (cancelled) return
-      setAllProgress(filtered)
 
-      const unlocked = getUnlockedModuleIds(ECONOMIC_HISTORY_MODULES, filtered)
-      const isUnlocked = unlocked.includes(moduleId)
+      // 순차 잠금 없이 모든 과정을 처음부터 자유롭게 선택할 수 있다 — 콘텐츠가
+      // 준비된 과정인지만 확인한다.
       const hasContent = (ECONOMIC_HISTORY_MODULES.find((m) => m.id === moduleId)?.itemIds.length ?? 0) > 0
 
-      if (isUnlocked && hasContent) {
+      if (hasContent) {
         const started = await curriculumProgressRepo.ensureStarted(moduleId, ECONOMIC_HISTORY_VERSION)
         if (cancelled) return
         setInitiallyComplete(started.status === 'completed')
@@ -73,12 +69,8 @@ export function CurriculumModuleScreen() {
 
   async function refreshProgress() {
     if (!moduleId) return
-    const [updated, all] = await Promise.all([
-      curriculumProgressRepo.getCurriculumProgress(moduleId),
-      curriculumProgressRepo.getCurriculumProgressForVersion(ECONOMIC_HISTORY_VERSION),
-    ])
+    const updated = await curriculumProgressRepo.getCurriculumProgress(moduleId)
     setProgress(updated ?? null)
-    setAllProgress(all)
   }
 
   async function handleComplete(contentId: string, contentType: 'example' | 'quiz') {
@@ -108,8 +100,6 @@ export function CurriculumModuleScreen() {
     )
   }
 
-  const unlocked = getUnlockedModuleIds(ECONOMIC_HISTORY_MODULES, allProgress)
-  const isUnlocked = unlocked.includes(module.id)
   const hasContent = module.itemIds.length > 0
   const completedItemIds = progress?.completedItemIds ?? []
   const { completed: completedCount, total } = computeModuleProgress(contents, completedItemIds)
@@ -121,21 +111,6 @@ export function CurriculumModuleScreen() {
   const prevModule = currentIndex > 0 ? sortedModules[currentIndex - 1] : null
   const nextModule =
     currentIndex >= 0 && currentIndex < sortedModules.length - 1 ? sortedModules[currentIndex + 1] : null
-
-  if (!isUnlocked) {
-    return (
-      <div>
-        <ScreenHeader title={module.title} />
-        <div className="curriculum-module__body">
-          <p className="curriculum-module__description">{module.description}</p>
-          <p className="curriculum-module__state">🔒 이전 과정을 완료하면 열려요.</p>
-          <Link to="/learn/monthly" className="curriculum-module__list-link">
-            전체 과정으로 돌아가기
-          </Link>
-        </div>
-      </div>
-    )
-  }
 
   if (!hasContent || !historyBody || !bodyItem || !quizItem) {
     return (

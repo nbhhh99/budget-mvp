@@ -7,7 +7,9 @@ import assetsImage from '../assets/branding/btn-assets.webp'
 import { curriculumProgressRepo, settingsRepo } from '../db'
 import {
   computeModuleProgress,
+  computeOverallTaxProgress,
   getDailyQuote,
+  getNextIncompleteLesson,
   getRecommendedModule,
   resolveHouseholdSubtitle,
   resolveHouseholdTitle,
@@ -17,6 +19,7 @@ import {
 } from '../domain'
 import { ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_MODULES, ECONOMIC_HISTORY_VERSION } from '../content/economicHistory'
 import { REAL_LIFE_ECONOMY_CONTENTS, REAL_LIFE_ECONOMY_MODULES, REAL_LIFE_ECONOMY_VERSION } from '../content/realLifeEconomy'
+import { TAX_LEARNING_VERSION, TAX_LESSONS, type TaxLesson } from '../content/taxLearning'
 import { DAILY_QUOTES } from '../content/dailyQuotes'
 import { todayDateString } from '../utils/date'
 import { useToast } from '../components/toast/useToast'
@@ -116,6 +119,8 @@ export function HomeScreen() {
   const [recommendedProgress, setRecommendedProgress] = useState({ completed: 0, total: 0 })
   const [recommendedLifeEconomy, setRecommendedLifeEconomy] = useState<RecommendedModule | null>(null)
   const [recommendedLifeEconomyProgress, setRecommendedLifeEconomyProgress] = useState({ completed: 0, total: 0 })
+  const [nextTaxLesson, setNextTaxLesson] = useState<TaxLesson | null>(null)
+  const [taxProgress, setTaxProgress] = useState({ completed: 0, total: 0 })
 
   useEffect(() => {
     let cancelled = false
@@ -163,6 +168,20 @@ export function HomeScreen() {
         const p = progress.find((item) => item.curriculumId === result.module.id)
         setRecommendedLifeEconomyProgress(computeModuleProgress(contents, p?.completedItemIds ?? []))
       }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const progress = await curriculumProgressRepo.getCurriculumProgressForVersion(TAX_LEARNING_VERSION)
+      if (cancelled) return
+      setNextTaxLesson(getNextIncompleteLesson(TAX_LESSONS, progress))
+      setTaxProgress(computeOverallTaxProgress(TAX_LESSONS, progress))
     }
     load()
     return () => {
@@ -247,6 +266,18 @@ export function HomeScreen() {
             </span>
             <span className="home-screen__learning-progress">
               {recommendedProgress.completed}/{recommendedProgress.total} 완료
+            </span>
+          </Link>
+        )}
+
+        {nextTaxLesson && (
+          <Link to={`/learn/tax/${nextTaxLesson.id}`} className="home-screen__learning-card home-screen__learning-card--rose">
+            <span className="home-screen__learning-label">{taxProgress.completed > 0 ? '이어서 학습하기' : '다음 학습'}</span>
+            <span className="home-screen__learning-title">
+              {nextTaxLesson.order}. {nextTaxLesson.title}
+            </span>
+            <span className="home-screen__learning-progress">
+              {taxProgress.completed}/{taxProgress.total} 완료
             </span>
           </Link>
         )}

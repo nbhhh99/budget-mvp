@@ -265,6 +265,10 @@
   background-color: var(--color-orange-soft);
 }
 
+.home-screen__learning-card--rose {
+  background-color: var(--color-rose-soft);
+}
+
 /* ── 하단 오늘의 문구 ───────────────────────────────────────────── */
 
 .home-screen__quote {

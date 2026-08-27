@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  computeModuleProgress,
-  getModuleUiStatus,
-  getRecommendedModule,
-  getUnlockedModuleIds,
-  isModuleComplete,
-} from './curriculum'
+import { computeModuleProgress, getModuleUiStatus, getRecommendedModule, isModuleComplete } from './curriculum'
 import type { CurriculumModule, CurriculumProgress, LearningContent } from '../types/models'
 
 function module(id: string, order: number, itemIds: string[] = [`${id}-item`]): CurriculumModule {
@@ -59,101 +53,27 @@ describe('computeModuleProgress', () => {
   })
 })
 
-describe('getUnlockedModuleIds', () => {
-  const curriculum = [module('a', 1), module('b', 2), module('c', 3), module('d', 4)]
-
-  it('unlocks only the first module when there is no progress', () => {
-    expect(getUnlockedModuleIds(curriculum, [])).toEqual(['a'])
-  })
-
-  it('unlocks the second module immediately after the first is completed', () => {
-    expect(getUnlockedModuleIds(curriculum, [progress('a', 'completed')])).toEqual(['a', 'b'])
-  })
-
-  it('keeps the fourth module locked while the third is incomplete', () => {
-    const result = getUnlockedModuleIds(curriculum, [
-      progress('a', 'completed'),
-      progress('b', 'completed'),
-      progress('c', 'in_progress'),
-    ])
-    expect(result).toEqual(['a', 'b', 'c'])
-    expect(result).not.toContain('d')
-  })
-
-  it('keeps a completed module open even after later modules unlock', () => {
-    const result = getUnlockedModuleIds(curriculum, [
-      progress('a', 'completed'),
-      progress('b', 'completed'),
-    ])
-    expect(result).toContain('a')
-  })
-
-  it('unlocks every module once the last one is completed', () => {
-    const result = getUnlockedModuleIds(curriculum, [
-      progress('a', 'completed'),
-      progress('b', 'completed'),
-      progress('c', 'completed'),
-      progress('d', 'completed'),
-    ])
-    expect(result).toEqual(['a', 'b', 'c', 'd'])
-  })
-
-  it('skips over a placeholder (준비 중, no items) module instead of permanently blocking later modules', () => {
-    const withPlaceholder = [module('a', 1), module('placeholder', 2, []), module('c', 3)]
-    // 'a'만 완료했고 'placeholder'는 완료 기록이 없어도, itemIds가 비어 있어
-    // 통과시키고 'c'까지 열려야 한다.
-    const result = getUnlockedModuleIds(withPlaceholder, [progress('a', 'completed')])
-    expect(result).toEqual(['a', 'placeholder', 'c'])
-  })
-
-  it('still stops at a real module that follows a placeholder if that real module is incomplete', () => {
-    const modules = [module('a', 1, ['a-item']), module('placeholder', 2, []), module('c', 3, ['c-item'])]
-    const result = getUnlockedModuleIds(modules, [progress('a', 'completed')])
-    expect(result).toEqual(['a', 'placeholder', 'c'])
-    // c는 열려있지만(available) 완료되지 않았으므로 다음 모듈이 있었다면 잠겨야 한다
-    const modulesWithD = [...modules, module('d', 4)]
-    const resultWithD = getUnlockedModuleIds(modulesWithD, [progress('a', 'completed')])
-    expect(resultWithD).toEqual(['a', 'placeholder', 'c'])
-  })
-
-  it('does not depend on any date field (order/id only)', () => {
-    // progress에는애초에 날짜 필드가 잠금 계산에 관여하지 않는다 — completedAt이
-    // 있어도 없어도 결과가 같아야 한다.
-    const withDate: CurriculumProgress = { ...progress('a', 'completed'), completedAt: '2020-01-01T00:00:00.000Z' }
-    const withoutDate: CurriculumProgress = { ...progress('a', 'completed') }
-    expect(getUnlockedModuleIds(curriculum, [withDate])).toEqual(
-      getUnlockedModuleIds(curriculum, [withoutDate]),
-    )
-  })
-})
-
 describe('getModuleUiStatus', () => {
   const curriculum = [module('a', 1), module('b', 2)]
 
-  it('reports locked for a module beyond the unlocked frontier', () => {
-    const unlocked = getUnlockedModuleIds(curriculum, [])
+  it('reports available for any real module with no progress record, regardless of order(순차 잠금 없음)', () => {
     const byId = new Map<string, CurriculumProgress>()
-    expect(getModuleUiStatus(curriculum[1], unlocked, byId)).toBe('locked')
-  })
-
-  it('reports available for an unlocked module with no progress record', () => {
-    const unlocked = getUnlockedModuleIds(curriculum, [])
-    const byId = new Map<string, CurriculumProgress>()
-    expect(getModuleUiStatus(curriculum[0], unlocked, byId)).toBe('available')
+    expect(getModuleUiStatus(curriculum[0], byId)).toBe('available')
+    // 이전 과정(a)을 전혀 시작하지 않았어도 두 번째 과정(b)이 바로 들어갈 수 있다 —
+    // 과거의 순차 잠금 구조가 없어졌다는 회귀 테스트.
+    expect(getModuleUiStatus(curriculum[1], byId)).toBe('available')
   })
 
   it('reports in_progress and completed correctly', () => {
-    const unlocked = ['a']
     const byId = new Map([['a', progress('a', 'in_progress')]])
-    expect(getModuleUiStatus(curriculum[0], unlocked, byId)).toBe('in_progress')
+    expect(getModuleUiStatus(curriculum[0], byId)).toBe('in_progress')
     byId.set('a', progress('a', 'completed'))
-    expect(getModuleUiStatus(curriculum[0], unlocked, byId)).toBe('completed')
+    expect(getModuleUiStatus(curriculum[0], byId)).toBe('completed')
   })
 
-  it('reports unavailable(준비 중) for a module with no items regardless of lock state', () => {
+  it('reports unavailable(준비 중) for a module with no items — the only case content is withheld', () => {
     const placeholder = module('p', 5, [])
-    expect(getModuleUiStatus(placeholder, ['p'], new Map())).toBe('unavailable')
-    expect(getModuleUiStatus(placeholder, [], new Map())).toBe('unavailable')
+    expect(getModuleUiStatus(placeholder, new Map())).toBe('unavailable')
   })
 })
 
@@ -183,6 +103,15 @@ describe('getRecommendedModule', () => {
       progress('c', 'completed'),
     ])
     expect(result).toBeNull()
+  })
+
+  it('recommends module c directly even though a and b were never touched(순차 잠금 없이도 순서 안내는 유지)', () => {
+    const result = getRecommendedModule(curriculum, [progress('c', 'in_progress')])
+    // c가 진행 중이어도, 순서상 더 앞선 미완료 과정(a)을 먼저 추천한다 — 추천은
+    // "순서대로 안내"이지 "가장 최근에 만진 것"이 아니다. 이 동작 자체는 잠금
+    // 제거 이전과 동일하게 유지된다(잠금이 없어졌다고 추천 순서 로직이 바뀌지
+    // 않았음을 확인).
+    expect(result?.module.id).toBe('a')
   })
 
   it('skips placeholder (준비 중) modules and never recommends them', () => {
