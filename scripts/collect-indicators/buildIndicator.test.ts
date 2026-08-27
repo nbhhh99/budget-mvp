@@ -83,6 +83,14 @@ describe('shouldUseNewValue', () => {
   it('기준일이 과거로 역행하면 새 값을 쓰지 않는다', () => {
     expect(shouldUseNewValue(makeExisting({ referenceDate: '2026-08-25' }), makeCollected({ referenceDate: '2026-08-20' }))).toBe(false)
   })
+  it('기존 값이 null(pending/unavailable 플레이스홀더)이면 기준일과 무관하게 새 값을 쓴다', () => {
+    // 실제 GitHub Actions 실행에서 발견된 버그의 재현: 플레이스홀더의 referenceDate는
+    // 실제 거래일이 아니라 "그 실행 당시의 오늘"이라, 나중에 들어온 진짜 값이
+    // T+1 지연 등으로 그보다 과거 날짜여도(예: 오늘 07-27인데 실데이터는 07-26)
+    // 비교할 실제 기준선이 없으므로 무조건 받아들여야 한다.
+    const placeholder = makeExisting({ value: null, referenceDate: '2026-08-27', freshness: 'unavailable' })
+    expect(shouldUseNewValue(placeholder, makeCollected({ referenceDate: '2026-08-26' }))).toBe(true)
+  })
 })
 
 describe('buildIndicator', () => {

@@ -32,6 +32,14 @@ describe('collectFscGold', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
+  it('itmsNm을 요청 필터로 실어 보낸다(클라이언트 페이지네이션에 의존하지 않는다)', async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: true, text: async () => okEnvelope([{ basDt: '20260825', srtnCd: '04020000', clpr: '92000' }]) }))
+    vi.stubGlobal('fetch', fetchSpy)
+    await collectFscGold()
+    const requestedUrl = new URL(String(fetchSpy.mock.calls[0][0]))
+    expect(requestedUrl.searchParams.get('itmsNm')).toBe('금 99.99_1Kg')
+  })
+
   it('금 99.99_1Kg(04020000) 종목만 골라 clpr을 그대로 원/g으로 쓴다(1Kg은 거래단위 표기일 뿐 가격단위가 아님)', async () => {
     vi.stubGlobal(
       'fetch',
@@ -105,6 +113,25 @@ describe('collectFscGold', () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => envelope('00', 'NORMAL SERVICE.', '') })))
     const result = await collectFscGold()
     expect(result.status).toBe('not_released')
+  })
+
+  it('자료를 못 찾으면 진단용으로 필터 없이 오늘자 종목명을 한 번 더 조회해 로그에 남긴다', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    let call = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        call += 1
+        // itmsNm 필터가 걸린 10번의 조회는 전부 빈 응답, 그다음 필터 없는
+        // 진단용 조회 1회는 실제 종목명이 담긴 응답을 준다.
+        if (call <= 10) return { ok: true, text: async () => envelope('00', 'NORMAL SERVICE.', '') }
+        return { ok: true, text: async () => okEnvelope([{ basDt: '20260827', srtnCd: '04020099', itmsNm: '미니금 99.99_100g' }]) }
+      }),
+    )
+    const result = await collectFscGold()
+    expect(result.status).toBe('not_released')
+    expect(warnSpy.mock.calls.some((c) => String(c[0]).includes('미니금 99.99_100g'))).toBe(true)
+    warnSpy.mockRestore()
   })
 
   it('네트워크 오류는 failed로 보고한다', async () => {

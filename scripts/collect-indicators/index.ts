@@ -119,7 +119,18 @@ async function collectAll(group: Group): Promise<{ collected: CollectedIndicator
       })
     }
   })
-  return { collected: collected.filter((item) => isValidCollected(item, MANIFEST)), resultsByProvider }
+  const valid: CollectedIndicator[] = []
+  for (const item of collected) {
+    if (isValidCollected(item, MANIFEST)) {
+      valid.push(item)
+    } else {
+      // 공급자 함수가 성공을 반환했는데도 값이 이상치 범위를 벗어나 조용히
+      // 버려지면 진단이 어렵다(실제로 이런 경우를 겪었다) — 어떤 지표가, 어떤
+      // 값 때문에 걸러졌는지 남긴다. 값 자체는 비밀이 아니다.
+      console.warn(`[collect-indicators] ${item.id} 값(${item.value})이 허용 범위를 벗어나 이번 결과에서 제외합니다.`)
+    }
+  }
+  return { collected: valid, resultsByProvider }
 }
 
 async function updateHistory(id: string, referenceDate: string, value: number): Promise<void> {

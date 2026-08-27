@@ -15,6 +15,15 @@ function stubFetch(body: { ok: boolean; status?: number; text: () => Promise<str
 }
 
 describe('collectOpinetFuel', () => {
+  it('공식 파라미터명 certkey로 인증키를 전달한다(잘못된 code 파라미터 사용 금지)', async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: true, text: async () => JSON.stringify({ RESULT: { OIL: [] } }) }))
+    vi.stubGlobal('fetch', fetchSpy)
+    await collectOpinetFuel()
+    const requestedUrl = String(fetchSpy.mock.calls[0][0])
+    expect(requestedUrl).toContain('certkey=test-key')
+    expect(requestedUrl).not.toContain('code=test-key')
+  })
+
   it('키가 없으면 missing_key를 반환하고 fetch를 호출하지 않는다', async () => {
     delete process.env.OPINET_API_KEY
     const fetchSpy = vi.fn()
