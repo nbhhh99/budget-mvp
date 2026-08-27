@@ -48,6 +48,13 @@ describe('curriculumProgress backup/restore round-trip', () => {
         status: 'in_progress',
         completedItemIds: ['life-economy-intro-body'],
       }),
+      progress({
+        curriculumId: 'tax-learning-01',
+        curriculumVersion: 'tax-learning-v1',
+        status: 'completed',
+        completedItemIds: ['tax-learning-01-complete'],
+        completedAt: '2026-08-27T00:00:00.000Z',
+      }),
     ])
 
     const backup = await buildBackupFile()
@@ -58,7 +65,7 @@ describe('curriculumProgress backup/restore round-trip', () => {
     await restoreFromBackup(backup)
 
     const restored = await db.curriculumProgress.toArray()
-    expect(restored).toHaveLength(2)
+    expect(restored).toHaveLength(3)
     const byVersion = new Map(restored.map((p) => [p.curriculumVersion, p]))
     expect(byVersion.get('economic-history-v1')?.status).toBe('completed')
     expect(byVersion.get('economic-history-v1')?.completedItemIds).toEqual([
@@ -67,6 +74,25 @@ describe('curriculumProgress backup/restore round-trip', () => {
     ])
     expect(byVersion.get('real-life-economy-v1')?.status).toBe('in_progress')
     expect(byVersion.get('real-life-economy-v1')?.completedItemIds).toEqual(['life-economy-intro-body'])
+    // 생활 세금 공부(tax-learning-v1)도 다른 커리큘럼과 뒤섞이지 않고 그대로 보존된다.
+    expect(byVersion.get('tax-learning-v1')?.status).toBe('completed')
+    expect(byVersion.get('tax-learning-v1')?.completedItemIds).toEqual(['tax-learning-01-complete'])
+  })
+
+  it('restoring a backup taken before 생활 세금 공부 existed(no tax-learning-v1 rows at all) still restores the other curricula fine', async () => {
+    // 스키마 자체는 바뀌지 않았으므로(§요구사항 "기존 저장 키를 변경하거나
+    // 덮어쓰지 않음") 세금 학습 기능 이전에 만든 백업도 문제없이 복원돼야 한다 —
+    // curriculumProgress 배열이 세금 학습 레코드 없이 오는 경우의 회귀 테스트.
+    const preTaxBackup = await buildBackupFile()
+    preTaxBackup.data.curriculumProgress = [
+      progress({ curriculumId: 'history-origin-of-money', curriculumVersion: 'economic-history-v1', status: 'completed' }),
+    ]
+
+    await restoreFromBackup(preTaxBackup)
+
+    const restored = await db.curriculumProgress.toArray()
+    expect(restored).toHaveLength(1)
+    expect(restored[0].curriculumVersion).toBe('economic-history-v1')
   })
 
   it('restoring an older backup with no curriculumProgress key leaves the table empty (backward compatible)', async () => {

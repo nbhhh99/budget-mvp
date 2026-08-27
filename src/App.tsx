@@ -20,6 +20,8 @@ import { CurriculumHomeScreen } from './features/learn/CurriculumHomeScreen'
 import { CurriculumModuleScreen } from './features/learn/CurriculumModuleScreen'
 import { LifeEconomyHomeScreen } from './features/learn/LifeEconomyHomeScreen'
 import { LifeEconomyModuleScreen } from './features/learn/LifeEconomyModuleScreen'
+import { TaxLearningHomeScreen } from './features/learn/TaxLearningHomeScreen'
+import { TaxLearningLessonScreen } from './features/learn/TaxLearningLessonScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
 import { CategoryManagementScreen } from './features/categories/CategoryManagementScreen'
 import { LockSettingsScreen } from './features/settings/LockSettingsScreen'
@@ -75,6 +77,8 @@ function App() {
               <Route path="learn/monthly/:moduleId" element={<CurriculumModuleScreen />} />
               <Route path="learn/life-economy" element={<LifeEconomyHomeScreen />} />
               <Route path="learn/life-economy/:moduleId" element={<LifeEconomyModuleScreen />} />
+              <Route path="learn/tax" element={<TaxLearningHomeScreen />} />
+              <Route path="learn/tax/:lessonId" element={<TaxLearningLessonScreen />} />
               <Route
                 path="assets"
                 element={

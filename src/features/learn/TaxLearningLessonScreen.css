@@ -1,0 +1,235 @@
+.tax-lesson__body {
+  padding: 0 var(--space-4) var(--space-6);
+  overflow-x: hidden;
+}
+
+.tax-lesson__state {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-6) 0;
+}
+
+.tax-lesson__meta-row {
+  margin-bottom: var(--space-1);
+}
+
+.tax-lesson__step {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.tax-lesson__title {
+  margin: 0 0 var(--space-1);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.tax-lesson__base-year {
+  margin: 0 0 var(--space-4);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-orange);
+}
+
+/* ── 본문(§7 구성) ─────────────────────────────────────────────── */
+
+.tax-lesson-body {
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  overflow-x: hidden;
+}
+
+.tax-lesson-body__heading {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.tax-lesson-body__heading:first-child {
+  margin-top: 0;
+}
+
+.tax-lesson-body__question {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.tax-lesson-body__core {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.6;
+  background-color: var(--color-orange-soft);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+}
+
+.tax-lesson-body__paragraph {
+  margin: 0 0 var(--space-2);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+/* ── 숫자로 이해하기 ───────────────────────────────────────────── */
+
+.tax-lesson-body__number-card {
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+  padding: var(--space-3);
+}
+
+.tax-lesson-body__number-desc {
+  margin: 0 0 var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.tax-lesson-body__number-lines {
+  margin: 0 0 var(--space-2);
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tax-lesson-body__number-lines li {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  /* 계산식이 길어도 가로 스크롤 없이 줄바꿈된다. */
+  word-break: break-word;
+}
+
+.tax-lesson-body__number-caveat {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ── 헷갈리기 쉬운 점 ──────────────────────────────────────────── */
+
+.tax-lesson-body__pitfall-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tax-lesson-body__pitfall-item {
+  border-radius: var(--radius-control);
+  background-color: var(--color-lavender-soft);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* ── 확인 문제 ─────────────────────────────────────────────────── */
+
+.tax-lesson__quiz-section {
+  margin-bottom: var(--space-4);
+}
+
+.tax-lesson__quiz-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+}
+
+.tax-lesson__quiz-item + .tax-lesson__quiz-item {
+  margin-top: var(--space-3);
+}
+
+/* ── 공식 자료 ─────────────────────────────────────────────────── */
+
+.tax-lesson__sources {
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.tax-lesson__sources-list {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.tax-lesson__sources-list a {
+  color: var(--color-saving);
+  word-break: break-all;
+}
+
+/* ── 학습 완료 버튼 ────────────────────────────────────────────── */
+
+.tax-lesson__footer {
+  margin-bottom: var(--space-3);
+}
+
+.tax-lesson__done-button {
+  width: 100%;
+  min-height: 52px;
+  border: none;
+  border-radius: var(--radius-control);
+  background-color: var(--color-text);
+  color: var(--color-surface);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.tax-lesson__done-button--done {
+  background-color: var(--color-mint-soft);
+  color: var(--color-text);
+}
+
+.tax-lesson__disclaimer {
+  margin: 0 0 var(--space-4);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background-color: var(--color-surface-alt);
+}
+
+/* ── 하단 이동 ─────────────────────────────────────────────────── */
+
+.tax-lesson__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+.tax-lesson__nav-link,
+.tax-lesson__list-link {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.tax-lesson__list-link {
+  display: inline-block;
+}

@@ -34,6 +34,12 @@ describe('resolveActiveTab', () => {
     expect(resolveActiveTab('/learn/monthly/history-origin-of-money')).toBe('/learn')
   })
 
+  it('activates 공부하기 for 생활 세금 공부(list and lesson detail)', () => {
+    expect(resolveActiveTab('/learn/tax')).toBe('/learn')
+    expect(resolveActiveTab('/learn/tax/tax-learning-01')).toBe('/learn')
+    expect(resolveActiveTab('/learn/tax/tax-learning-25')).toBe('/learn')
+  })
+
   it('activates 설정 for settings routes', () => {
     expect(resolveActiveTab('/settings')).toBe('/settings')
     expect(resolveActiveTab('/settings/backup')).toBe('/settings')
