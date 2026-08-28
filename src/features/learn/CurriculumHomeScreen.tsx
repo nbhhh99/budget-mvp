@@ -85,7 +85,7 @@ export function CurriculumHomeScreen() {
           <Link to={`/learn/monthly/${recommended.module.id}`} className="curriculum-home__recommend-card">
             <p className="curriculum-home__recommend-label">현재 추천 과정</p>
             <p className="curriculum-home__recommend-title">
-              {recommended.module.order}단계 · {recommended.module.title}
+              {recommended.module.order}. {recommended.module.title}
             </p>
             <p className="curriculum-home__recommend-desc">{recommended.module.description}</p>
             {(() => {

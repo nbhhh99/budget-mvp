@@ -171,7 +171,7 @@ export function CurriculumModuleScreen() {
       <ScreenHeader title={module.title} />
       <div className="curriculum-module__body">
         <div className="curriculum-module__meta-row">
-          <p className="curriculum-module__step">{module.order}단계</p>
+          <p className="curriculum-module__step">{module.order}.</p>
           {module.periodLabel && <span className="curriculum-module__period">{module.periodLabel}</span>}
         </div>
         <p className="curriculum-module__description">{module.description}</p>

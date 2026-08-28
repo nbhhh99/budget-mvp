@@ -86,7 +86,7 @@ export function LifeEconomyHomeScreen() {
           <Link to={`/learn/life-economy/${recommended.module.id}`} className="life-economy-home__recommend-card">
             <p className="life-economy-home__recommend-label">현재 추천 과정</p>
             <p className="life-economy-home__recommend-title">
-              {recommended.module.order}단계 · {recommended.module.title}
+              {recommended.module.order}. {recommended.module.title}
             </p>
             <p className="life-economy-home__recommend-desc">{recommended.module.description}</p>
             {(() => {

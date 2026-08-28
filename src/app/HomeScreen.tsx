@@ -244,11 +244,9 @@ export function HomeScreen() {
             to={`/learn/life-economy/${recommendedLifeEconomy.module.id}`}
             className="home-screen__learning-card home-screen__learning-card--orange"
           >
-            <span className="home-screen__learning-label">
-              {recommendedLifeEconomy.status === 'in_progress' ? '이어서 학습하기' : '다음 학습'}
-            </span>
+            <span className="home-screen__learning-label">다음 학습</span>
             <span className="home-screen__learning-title">
-              {recommendedLifeEconomy.module.order}단계 · {recommendedLifeEconomy.module.title}
+              {recommendedLifeEconomy.module.order}. {recommendedLifeEconomy.module.title}
             </span>
             <span className="home-screen__learning-progress">
               {recommendedLifeEconomyProgress.completed}/{recommendedLifeEconomyProgress.total} 완료
@@ -262,7 +260,7 @@ export function HomeScreen() {
               {recommended.status === 'in_progress' ? '이어서 학습하기' : '다음 학습'}
             </span>
             <span className="home-screen__learning-title">
-              {recommended.module.order}단계 · {recommended.module.title}
+              {recommended.module.order}. {recommended.module.title}
             </span>
             <span className="home-screen__learning-progress">
               {recommendedProgress.completed}/{recommendedProgress.total} 완료
