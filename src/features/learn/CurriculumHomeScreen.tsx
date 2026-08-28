@@ -62,6 +62,10 @@ export function CurriculumHomeScreen() {
     <div>
       <ScreenHeader title="차근차근 경제사" />
       <div className="curriculum-home__body">
+        <p className="curriculum-home__subtitle">
+          돈과 은행이 지금의 모습으로 자리 잡기까지의 흐름을 시대 순서로 배워요.
+        </p>
+
         {!hasStarted && (
           <div className="curriculum-home__intro-card">
             <p className="curriculum-home__intro-text">
