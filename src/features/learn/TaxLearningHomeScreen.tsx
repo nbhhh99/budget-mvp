@@ -91,7 +91,7 @@ export function TaxLearningHomeScreen() {
             <section key={stage.id} className="tax-home__stage" aria-labelledby={`tax-stage-${stage.id}`}>
               <div className="tax-home__stage-header">
                 <h2 id={`tax-stage-${stage.id}`} className="tax-home__stage-title">
-                  {stage.order}단계 · {stage.title}
+                  {stage.order}. {stage.title}
                 </h2>
                 <span className="tax-home__stage-count">
                   {stageProgress.completed}/{stageProgress.total}

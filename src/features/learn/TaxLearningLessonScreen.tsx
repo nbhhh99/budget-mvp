@@ -82,7 +82,7 @@ export function TaxLearningLessonScreen() {
       <div className="tax-lesson__body">
         <div className="tax-lesson__meta-row">
           <p className="tax-lesson__step">
-            {stage.order}단계 · {stage.title} · {lesson.order}/25
+            {stage.order}. {stage.title} · {lesson.order}/25
           </p>
         </div>
         <h1 className="tax-lesson__title">{lesson.title}</h1>

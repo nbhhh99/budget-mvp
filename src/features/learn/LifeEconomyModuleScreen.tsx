@@ -171,7 +171,7 @@ export function LifeEconomyModuleScreen() {
       <ScreenHeader title={module.title} />
       <div className="life-economy-module__body">
         <div className="life-economy-module__meta-row">
-          <p className="life-economy-module__step">{module.order}단계</p>
+          <p className="life-economy-module__step">{module.order}.</p>
         </div>
         <p className="life-economy-module__description">{module.description}</p>
         <div className="life-economy-module__meta">
