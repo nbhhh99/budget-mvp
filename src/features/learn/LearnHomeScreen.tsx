@@ -35,7 +35,7 @@ const CARDS = [
   {
     to: '/learn/tax',
     title: '생활 세금 공부',
-    description: '월급부터 연말정산, 부수입, 투자·부동산·증여까지 생활 속 세금을 차근차근 이해해요.',
+    description: '월급부터 연말정산, 부수입, 투자·부동산·증여까지 생활 속 세금을 이해해요.',
     image: 'tax-learning.png',
     icon: '🧾',
   },

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { curriculumProgressRepo } from '../../db'
 import { TAX_LEARNING_DISCLAIMER, TAX_LEARNING_VERSION, TAX_LESSONS, TAX_SCHEDULE, TAX_SCHEDULE_NOTICE, TAX_STAGES } from '../../content/taxLearning'
-import { computeOverallTaxProgress, computeStageProgress, getNextIncompleteLesson } from '../../domain'
+import { computeStageProgress, getNextIncompleteLesson } from '../../domain'
 import type { CurriculumProgress } from '../../types/models'
 import './TaxLearningHomeScreen.css'
 
@@ -19,6 +19,8 @@ function statusOf(lessonId: string, progressByLessonId: Map<string, CurriculumPr
 
 const STATUS_LABEL: Record<LessonStatus, string> = { completed: '완료', not_started: '시작 전' }
 const STATUS_ICON: Record<LessonStatus, string> = { completed: '✓', not_started: '○' }
+
+const SORTED_LESSONS = [...TAX_LESSONS].sort((a, b) => a.order - b.order)
 
 export function TaxLearningHomeScreen() {
   const [loaded, setLoaded] = useState(false)
@@ -53,36 +55,29 @@ export function TaxLearningHomeScreen() {
   }
 
   const progressByLessonId = new Map(progress.map((p) => [p.curriculumId, p]))
-  const overall = computeOverallTaxProgress(TAX_LESSONS, progress)
   const next = getNextIncompleteLesson(TAX_LESSONS, progress)
+  const hasStarted = progress.length > 0
 
   return (
     <div>
       <ScreenHeader title="생활 세금 공부" />
       <div className="tax-home__body">
         <p className="tax-home__subtitle">
-          월급부터 연말정산, 부수입, 투자·부동산·증여까지 생활 속 세금을 차근차근 이해해요.
+          월급부터 연말정산, 부수입, 투자·부동산·증여까지 생활 속 세금을 이해해요.
         </p>
 
-        <div className="tax-home__progress-card">
-          <p className="tax-home__progress-label">전체 진행률</p>
-          <p className="tax-home__progress-count">
-            {overall.completed}/{overall.total} 완료
-          </p>
-          <div className="tax-home__progress-bar" role="progressbar" aria-valuenow={overall.completed} aria-valuemin={0} aria-valuemax={overall.total}>
-            <div className="tax-home__progress-fill" style={{ width: `${overall.total === 0 ? 0 : (overall.completed / overall.total) * 100}%` }} />
-          </div>
-        </div>
-
-        {next ? (
-          <Link to={`/learn/tax/${next.id}`} className="tax-home__continue-card">
-            <p className="tax-home__continue-label">이어서 학습하기</p>
-            <p className="tax-home__continue-title">
-              {next.order}. {next.title}
+        {!hasStarted && (
+          <div className="tax-home__intro-card">
+            <p className="tax-home__intro-meta">
+              {TAX_LESSONS.length}개 과정 · 학습 기한 없음 · 언제든 복습 가능
             </p>
-            <span className="tax-home__continue-cta">{overall.completed > 0 ? '이어보기' : '시작하기'}</span>
-          </Link>
-        ) : (
+            <Link to={`/learn/tax/${SORTED_LESSONS[0].id}`} className="tax-home__primary-button">
+              시작하기
+            </Link>
+          </div>
+        )}
+
+        {hasStarted && !next && (
           <div className="tax-home__done-card">
             <p className="tax-home__done-title">생활 세금 공부를 모두 완료했어요</p>
             <p className="tax-home__done-desc">완료한 과정은 언제든 다시 읽을 수 있어요.</p>
