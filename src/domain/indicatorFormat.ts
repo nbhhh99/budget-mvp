@@ -57,6 +57,46 @@ export const PATHWAY_TEMPLATE: Record<IndicatorCategory, string> = {
   macro: '가계 대출·예금 금리나 생활비 흐름과 연결될 수 있어요.',
 }
 
+// 카드별 "업데이트 주기" 안내 — 지표군이 언제 갱신되는지 보여준다. 아직 정식
+// 연동되지 않은 지표(S&P 500·NASDAQ Composite·국제 금)는 value가 없어
+// IndicatorCard가 hasValue로 게이팅해 이 문구 자체를 표시하지 않는다.
+export const UPDATE_SCHEDULE_LABEL: Record<IndicatorCategory, string> = {
+  exchange: '평일 오후 4시 30분',
+  stock: '평일 오후 4시 30분',
+  oil: '평일 오전 9시',
+  fuel: '매일 오전 7시',
+  gold: '평일 오후 4시 30분',
+  crypto: '화면 진입 시 확인',
+  macro: '재무 브리핑 업데이트 시 반영',
+}
+
+export type IndicatorBasisKind = 'reference' | 'observed'
+
+// 코인은 24시간 거래되는 시장이라 referenceDate가 공식 기관이 밝힌 기준일이
+// 아니라 조회한 날짜를 그대로 담고 있다(loadCryptoIndicators.ts) — 그래서
+// '기준일' 대신 '조회 시각'으로 안내한다. 그 외 카테고리는 공식 출처가 밝힌
+// 실제 기준일을 그대로 쓸 수 있다.
+const OBSERVED_TIME_CATEGORIES: ReadonlySet<IndicatorCategory> = new Set(['crypto'])
+
+export function getIndicatorBasisKind(category: IndicatorCategory): IndicatorBasisKind {
+  return OBSERVED_TIME_CATEGORIES.has(category) ? 'observed' : 'reference'
+}
+
+export const INDICATOR_BASIS_LABEL: Record<IndicatorBasisKind, string> = {
+  reference: '기준일',
+  observed: '조회 시각',
+}
+
+// referenceDate는 'YYYY-MM-DD' 문자열이다 — Date 객체를 거쳐 로컬 시간대로
+// 변환하면 자정 근처에서 하루가 밀릴 수 있어, 문자열을 직접 파싱해 시간대
+// 영향 없이 "2026. 8. 27." 형태로 표시한다.
+export function formatKstDate(dateString: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString)
+  if (!match) return dateString
+  const [, year, month, day] = match
+  return `${year}. ${Number(month)}. ${Number(day)}.`
+}
+
 // 지표 상세 화면의 "관련 개념" 링크에 쓸 돈 개념 사전 id — 정의를 복제하지 않고
 // id로만 연결한다(§12). 카테고리 단위의 대표 개념만 골랐다.
 export const CATEGORY_CONCEPT_IDS: Record<IndicatorCategory, string[]> = {
