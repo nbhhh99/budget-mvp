@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { curriculumProgressRepo } from '../../db'
-import { ECONOMIC_HISTORY_CONTENTS, ECONOMIC_HISTORY_MODULES, ECONOMIC_HISTORY_VERSION } from '../../content/economicHistory'
-import { computeModuleProgress, getModuleUiStatus, getRecommendedModule } from '../../domain'
+import { ECONOMIC_HISTORY_MODULES, ECONOMIC_HISTORY_VERSION } from '../../content/economicHistory'
+import { getModuleUiStatus, getRecommendedModule } from '../../domain'
 import type { CurriculumProgress } from '../../types/models'
 import './CurriculumHomeScreen.css'
 
@@ -79,29 +79,6 @@ export function CurriculumHomeScreen() {
               경제사 시작하기
             </Link>
           </div>
-        )}
-
-        {hasStarted && recommended && (
-          <Link to={`/learn/monthly/${recommended.module.id}`} className="curriculum-home__recommend-card">
-            <p className="curriculum-home__recommend-label">현재 추천 과정</p>
-            <p className="curriculum-home__recommend-title">
-              {recommended.module.order}. {recommended.module.title}
-            </p>
-            <p className="curriculum-home__recommend-desc">{recommended.module.description}</p>
-            {(() => {
-              const contents = ECONOMIC_HISTORY_CONTENTS.filter((c) => c.curriculumId === recommended.module.id)
-              const p = progressByCurriculumId.get(recommended.module.id)
-              const { completed, total } = computeModuleProgress(contents, p?.completedItemIds ?? [])
-              return (
-                <p className="curriculum-home__recommend-progress">
-                  진행률 {completed}/{total}
-                </p>
-              )
-            })()}
-            <span className="curriculum-home__recommend-cta">
-              {recommended.status === 'in_progress' ? '이어보기' : '시작하기'}
-            </span>
-          </Link>
         )}
 
         {hasStarted && !recommended && (

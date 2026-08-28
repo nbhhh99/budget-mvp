@@ -31,15 +31,19 @@
   color: var(--color-text-muted);
 }
 
-/* 모바일 기본 2열, 아주 좁은 화면에서만 1열로 자연스럽게 전환한다(§10/§11). */
+/* 모바일 기본 2열, 아주 좁은 화면에서만 1열로 자연스럽게 전환한다(§10/§11).
+   1fr 트랙은 기본적으로 min-width: auto라 자식의 줄바꿈 없는 콘텐츠(min-content)
+   만큼은 절대 줄어들지 않는다 — minmax(0, 1fr)로 자동 최소 크기를 0으로
+   명시해야 카드 안 텍스트 길이와 무관하게 트랙이 실제 사용 가능한 폭 안에
+   맞춰진다(그리드 "blowout" 방지). */
 .indicators-screen__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
 @media (max-width: 340px) {
   .indicators-screen__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
