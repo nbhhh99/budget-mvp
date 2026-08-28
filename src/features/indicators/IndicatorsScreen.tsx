@@ -7,6 +7,7 @@ import { fetchIndicatorSnapshot } from './indicatorData'
 import { loadCryptoIndicators } from './loadCryptoIndicators'
 import { IndicatorCard } from './IndicatorCard'
 import { IndicatorCardSkeleton } from './IndicatorCardSkeleton'
+import { INDICATOR_SCHEDULE_DISCLAIMER, INDICATOR_SCHEDULE_TIMEZONE_NOTE, INDICATOR_UPDATE_SCHEDULE } from './indicatorSchedule'
 import './IndicatorsScreen.css'
 
 // §10 요구대로 6개 섹션 헤더로 묶어 보여준다 — 표시 레이어의 그룹핑일 뿐,
@@ -52,7 +53,6 @@ export function IndicatorsScreen() {
   const [loaded, setLoaded] = useState(false)
   const [indicators, setIndicators] = useState<MarketIndicator[]>([])
   const [snapshotGeneratedAt, setSnapshotGeneratedAt] = useState<string | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -69,14 +69,6 @@ export function IndicatorsScreen() {
     }
   }, [])
 
-  async function handleRefresh() {
-    setRefreshing(true)
-    const result = await loadAllIndicators()
-    setIndicators(result.indicators)
-    setSnapshotGeneratedAt(result.snapshotGeneratedAt)
-    setRefreshing(false)
-  }
-
   const grouped = new Map<IndicatorCategory, MarketIndicator[]>()
   for (const indicator of indicators) {
     const list = grouped.get(indicator.category) ?? []
@@ -90,18 +82,27 @@ export function IndicatorsScreen() {
       <div className="indicators-screen__body">
         <p className="indicators-screen__subtitle">경제 흐름을 한눈에 확인해 보세요.</p>
 
-        <div className="indicators-screen__header">
-          {snapshotGeneratedAt ? (
-            <p className="indicators-screen__updated">
-              마지막 업데이트 {new Date(snapshotGeneratedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}
-            </p>
-          ) : (
-            <span />
-          )}
-          <button type="button" className="indicators-screen__refresh" onClick={handleRefresh} disabled={refreshing}>
-            {refreshing ? '새로고침 중…' : '새로고침'}
-          </button>
-        </div>
+        {snapshotGeneratedAt && (
+          <p className="indicators-screen__updated">
+            마지막 업데이트 {new Date(snapshotGeneratedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}
+          </p>
+        )}
+
+        <details className="indicators-screen__schedule">
+          <summary className="indicators-screen__schedule-summary">업데이트 주기 안내</summary>
+          <div className="indicators-screen__schedule-panel">
+            <p className="indicators-screen__schedule-tz">{INDICATOR_SCHEDULE_TIMEZONE_NOTE}</p>
+            {INDICATOR_UPDATE_SCHEDULE.map((group) => (
+              <div key={group.title} className="indicators-screen__schedule-group">
+                <p className="indicators-screen__schedule-title">{group.title}</p>
+                <p className="indicators-screen__schedule-time">{group.time}</p>
+                <p className="indicators-screen__schedule-targets">{group.targets}</p>
+                {group.note && <p className="indicators-screen__schedule-note">{group.note}</p>}
+              </div>
+            ))}
+            <p className="indicators-screen__schedule-disclaimer">{INDICATOR_SCHEDULE_DISCLAIMER}</p>
+          </div>
+        </details>
 
         {!loaded && (
           <div className="indicators-screen__grid">
