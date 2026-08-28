@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { curriculumProgressRepo } from '../../db'
-import { REAL_LIFE_ECONOMY_CONTENTS, REAL_LIFE_ECONOMY_MODULES, REAL_LIFE_ECONOMY_VERSION } from '../../content/realLifeEconomy'
-import { computeModuleProgress, getModuleUiStatus, getRecommendedModule } from '../../domain'
+import { REAL_LIFE_ECONOMY_MODULES, REAL_LIFE_ECONOMY_VERSION } from '../../content/realLifeEconomy'
+import { getModuleUiStatus, getRecommendedModule } from '../../domain'
 import type { CurriculumProgress } from '../../types/models'
 import './LifeEconomyHomeScreen.css'
 
@@ -80,29 +80,6 @@ export function LifeEconomyHomeScreen() {
               시작하기
             </Link>
           </div>
-        )}
-
-        {hasStarted && recommended && (
-          <Link to={`/learn/life-economy/${recommended.module.id}`} className="life-economy-home__recommend-card">
-            <p className="life-economy-home__recommend-label">현재 추천 과정</p>
-            <p className="life-economy-home__recommend-title">
-              {recommended.module.order}. {recommended.module.title}
-            </p>
-            <p className="life-economy-home__recommend-desc">{recommended.module.description}</p>
-            {(() => {
-              const contents = REAL_LIFE_ECONOMY_CONTENTS.filter((c) => c.curriculumId === recommended.module.id)
-              const p = progressByCurriculumId.get(recommended.module.id)
-              const { completed, total } = computeModuleProgress(contents, p?.completedItemIds ?? [])
-              return (
-                <p className="life-economy-home__recommend-progress">
-                  진행률 {completed}/{total}
-                </p>
-              )
-            })()}
-            <span className="life-economy-home__recommend-cta">
-              {recommended.status === 'in_progress' ? '이어보기' : '시작하기'}
-            </span>
-          </Link>
         )}
 
         {hasStarted && !recommended && (

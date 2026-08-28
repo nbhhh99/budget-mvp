@@ -42,54 +42,6 @@
   text-decoration: none;
 }
 
-.curriculum-home__recommend-card {
-  display: block;
-  border-radius: var(--radius-card);
-  background-color: var(--color-mint-soft);
-  padding: var(--space-4);
-  text-decoration: none;
-  color: var(--color-text);
-  margin-bottom: var(--space-4);
-}
-
-.curriculum-home__recommend-label {
-  margin: 0 0 var(--space-1);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-}
-
-.curriculum-home__recommend-title {
-  margin: 0 0 var(--space-1);
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.curriculum-home__recommend-desc {
-  margin: 0 0 var(--space-2);
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-.curriculum-home__recommend-progress {
-  margin: 0 0 var(--space-3);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.curriculum-home__recommend-cta {
-  display: inline-block;
-  min-height: var(--touch-target);
-  line-height: var(--touch-target);
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-control);
-  background-color: var(--color-text);
-  color: var(--color-surface);
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-
 .curriculum-home__done-card {
   border-radius: var(--radius-card);
   background-color: var(--color-mint-soft);
