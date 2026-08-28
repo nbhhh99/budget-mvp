@@ -2,6 +2,13 @@
   padding: 0 var(--space-4) var(--space-6);
 }
 
+.curriculum-home__subtitle {
+  margin: 0 0 var(--space-4);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
 .curriculum-home__state {
   text-align: center;
   color: var(--color-text-muted);

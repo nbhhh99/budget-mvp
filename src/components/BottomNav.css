@@ -1,6 +1,13 @@
 .bottom-nav {
   position: sticky;
   bottom: 0;
+  /* z-index를 명시하지 않으면(auto) 홈 화면처럼 position:relative + z-index를
+     쓰는 화면(.home-screen__content 등)의 내부 카드가 스크롤 중 이 바 위로
+     겹쳐 보이는 경우가 있다(특히 모바일 브라우저의 스크롤 합성 처리 차이로
+     발생) — 페이지 콘텐츠보다 항상 위에 그려지도록 z-index를 확실히 높게
+     둔다. 시트·다이얼로그(200)·토스트(100)보다는 낮게 유지해 그 위에 뜨는
+     오버레이는 계속 이 바를 덮을 수 있게 한다. */
+  z-index: 10;
   display: flex;
   justify-content: space-around;
   background-color: var(--color-surface);
