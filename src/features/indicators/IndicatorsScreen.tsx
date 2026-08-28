@@ -7,8 +7,14 @@ import { fetchIndicatorSnapshot } from './indicatorData'
 import { loadCryptoIndicators } from './loadCryptoIndicators'
 import { IndicatorCard } from './IndicatorCard'
 import { IndicatorCardSkeleton } from './IndicatorCardSkeleton'
-import { INDICATOR_SCHEDULE_DISCLAIMER, INDICATOR_SCHEDULE_TIMEZONE_NOTE, INDICATOR_UPDATE_SCHEDULE } from './indicatorSchedule'
 import './IndicatorsScreen.css'
+
+// 업데이트 시각을 일괄 안내하는 대신, 카드별 "업데이트 주기"·"기준일/조회 시각"
+// 표시(IndicatorCard)로 옮겼다 — 이 문구는 그 표시를 읽는 방법만 짧게 알려준다.
+// "예정 시각"이 아니라 실제 표시값(기준일·조회 시각) 이야기이므로, "실시간"이나
+// 수동 새로고침 안내 없이, API 성공을 단정하지 않는 표현으로 한 번만 보여준다.
+const INDICATOR_NOTICE =
+  '표시된 시간은 실제 데이터 기준일과 조회 시각이에요. 지표별 발표 일정과 데이터 제공 상황에 따라 반영이 늦어질 수 있어요.'
 
 // §10 요구대로 6개 섹션 헤더로 묶어 보여준다 — 표시 레이어의 그룹핑일 뿐,
 // IndicatorCategory 타입 자체는 바꾸지 않는다("에너지" = oil+fuel).
@@ -21,11 +27,6 @@ const DISPLAY_SECTIONS: { title: string; categories: IndicatorCategory[] }[] = [
   { title: '주요 거시경제 지표', categories: ['macro'] },
 ]
 
-interface LoadedIndicators {
-  indicators: MarketIndicator[]
-  snapshotGeneratedAt: string | null
-}
-
 // 거시지표(기준금리 등)는 새로 수집하지 않고, 이미 검수된 재무 브리핑에서
 // 값만 파생한다 — 이 화면은 개인 거래·예산·자산 데이터에는 전혀 접근하지 않는다
 // (공개 정적 JSON만 읽는다).
@@ -37,30 +38,25 @@ async function loadMacroIndicators(): Promise<MarketIndicator[]> {
   return deriveMacroIndicators(briefing)
 }
 
-async function loadAllIndicators(): Promise<LoadedIndicators> {
+async function loadAllIndicators(): Promise<MarketIndicator[]> {
   const [{ snapshot }, cryptoIndicators, macroIndicators] = await Promise.all([
     fetchIndicatorSnapshot(),
     loadCryptoIndicators(),
     loadMacroIndicators(),
   ])
-  return {
-    indicators: [...(snapshot?.indicators ?? []), ...cryptoIndicators, ...macroIndicators],
-    snapshotGeneratedAt: snapshot?.generatedAt ?? null,
-  }
+  return [...(snapshot?.indicators ?? []), ...cryptoIndicators, ...macroIndicators]
 }
 
 export function IndicatorsScreen() {
   const [loaded, setLoaded] = useState(false)
   const [indicators, setIndicators] = useState<MarketIndicator[]>([])
-  const [snapshotGeneratedAt, setSnapshotGeneratedAt] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
     async function run() {
       const result = await loadAllIndicators()
       if (cancelled) return
-      setIndicators(result.indicators)
-      setSnapshotGeneratedAt(result.snapshotGeneratedAt)
+      setIndicators(result)
       setLoaded(true)
     }
     run()
@@ -81,28 +77,7 @@ export function IndicatorsScreen() {
       <ScreenHeader title="경제지표" />
       <div className="indicators-screen__body">
         <p className="indicators-screen__subtitle">경제 흐름을 한눈에 확인해 보세요.</p>
-
-        {snapshotGeneratedAt && (
-          <p className="indicators-screen__updated">
-            마지막 업데이트 {new Date(snapshotGeneratedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}
-          </p>
-        )}
-
-        <details className="indicators-screen__schedule">
-          <summary className="indicators-screen__schedule-summary">업데이트 주기 안내</summary>
-          <div className="indicators-screen__schedule-panel">
-            <p className="indicators-screen__schedule-tz">{INDICATOR_SCHEDULE_TIMEZONE_NOTE}</p>
-            {INDICATOR_UPDATE_SCHEDULE.map((group) => (
-              <div key={group.title} className="indicators-screen__schedule-group">
-                <p className="indicators-screen__schedule-title">{group.title}</p>
-                <p className="indicators-screen__schedule-time">{group.time}</p>
-                <p className="indicators-screen__schedule-targets">{group.targets}</p>
-                {group.note && <p className="indicators-screen__schedule-note">{group.note}</p>}
-              </div>
-            ))}
-            <p className="indicators-screen__schedule-disclaimer">{INDICATOR_SCHEDULE_DISCLAIMER}</p>
-          </div>
-        </details>
+        <p className="indicators-screen__notice">{INDICATOR_NOTICE}</p>
 
         {!loaded && (
           <div className="indicators-screen__grid">

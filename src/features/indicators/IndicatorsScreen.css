@@ -11,105 +11,11 @@
   line-height: 1.6;
 }
 
-.indicators-screen__updated {
-  margin: 0 0 var(--space-2);
+/* 카드보다 강조도를 낮춘 차분한 안내문 — 그렇다고 읽기 어려울 만큼 작거나
+   흐리지는 않게, 본문 텍스트보다 한 단계만 작고 옅은 색을 쓴다. */
+.indicators-screen__notice {
+  margin: 0 0 var(--space-4);
   font-size: 0.78rem;
-  color: var(--color-text-muted);
-}
-
-/* ── 업데이트 주기 안내(접기·펼치기) ───────────────────────────── */
-
-.indicators-screen__schedule {
-  border-radius: var(--radius-card);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-card);
-  margin-bottom: var(--space-4);
-  overflow: hidden;
-}
-
-.indicators-screen__schedule-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  min-height: var(--touch-target);
-  padding: 0 var(--space-4);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-text);
-  cursor: pointer;
-  list-style: none;
-}
-
-.indicators-screen__schedule-summary::-webkit-details-marker {
-  display: none;
-}
-
-.indicators-screen__schedule-summary::after {
-  content: '▾';
-  flex-shrink: 0;
-  color: var(--color-text-muted);
-  transition: transform 0.15s ease;
-}
-
-.indicators-screen__schedule[open] > .indicators-screen__schedule-summary::after {
-  transform: rotate(180deg);
-}
-
-.indicators-screen__schedule-summary:focus-visible {
-  outline: 2px solid var(--color-orange);
-  outline-offset: -2px;
-}
-
-.indicators-screen__schedule-panel {
-  padding: 0 var(--space-4) var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.indicators-screen__schedule-tz {
-  margin: 0 0 var(--space-1);
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-}
-
-.indicators-screen__schedule-group {
-  border-radius: var(--radius-control);
-  background-color: var(--color-surface-alt);
-  padding: var(--space-2) var(--space-3);
-}
-
-.indicators-screen__schedule-title {
-  margin: 0 0 2px;
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.indicators-screen__schedule-time {
-  margin: 0 0 2px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--color-orange);
-}
-
-.indicators-screen__schedule-targets {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-.indicators-screen__schedule-note {
-  margin: 4px 0 0;
-  font-size: 0.74rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-.indicators-screen__schedule-disclaimer {
-  margin: var(--space-1) 0 0;
-  font-size: 0.72rem;
   line-height: 1.6;
   color: var(--color-text-muted);
 }

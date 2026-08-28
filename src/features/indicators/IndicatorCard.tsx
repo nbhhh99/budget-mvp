@@ -1,6 +1,18 @@
 import { Link } from 'react-router-dom'
 import type { MarketIndicator } from '../../types/models'
-import { DIRECTION_ICON, FRESHNESS_LABEL, MARKET_STATUS_LABEL, computeFreshness, formatChangeText, formatKstDateTime, getDirection } from '../../domain'
+import {
+  DIRECTION_ICON,
+  FRESHNESS_LABEL,
+  INDICATOR_BASIS_LABEL,
+  MARKET_STATUS_LABEL,
+  UPDATE_SCHEDULE_LABEL,
+  computeFreshness,
+  formatChangeText,
+  formatKstDate,
+  formatKstDateTime,
+  getDirection,
+  getIndicatorBasisKind,
+} from '../../domain'
 import './IndicatorCard.css'
 
 interface IndicatorCardProps {
@@ -13,6 +25,7 @@ export function IndicatorCard({ indicator }: IndicatorCardProps) {
   const freshness = computeFreshness(indicator, now)
   const direction = getDirection(indicator.change)
   const hasValue = indicator.value !== null
+  const basisKind = getIndicatorBasisKind(indicator.category)
 
   const content = (
     <>
@@ -26,7 +39,14 @@ export function IndicatorCard({ indicator }: IndicatorCardProps) {
           <p className={`indicator-card__change indicator-card__change--${direction}`}>
             <span aria-hidden="true">{DIRECTION_ICON[direction]}</span> {formatChangeText(indicator.change, indicator.changeRate)}
           </p>
-          <p className="indicator-card__meta">기준일 {indicator.referenceDate}</p>
+          {/* S&P 500·NASDAQ Composite·국제 금처럼 아직 정식 연동되지 않은 지표는
+              value가 없어 이 hasValue 분기에 들어오지 않는다 — "업데이트 주기"를
+              안내할 실제 일정이 없는 지표는 자연스럽게 걸러진다. */}
+          <p className="indicator-card__schedule">업데이트 주기 · {UPDATE_SCHEDULE_LABEL[indicator.category]}</p>
+          <p className="indicator-card__basis">
+            {INDICATOR_BASIS_LABEL[basisKind]} ·{' '}
+            {basisKind === 'observed' ? formatKstDateTime(indicator.updatedAt) : formatKstDate(indicator.referenceDate)}
+          </p>
         </>
       ) : (
         <p className="indicator-card__pending">{FRESHNESS_LABEL[indicator.freshness]}</p>
@@ -37,9 +57,7 @@ export function IndicatorCard({ indicator }: IndicatorCardProps) {
           <span className="indicator-card__status-badge">{MARKET_STATUS_LABEL[indicator.marketStatus]}</span>
         )}
       </p>
-      <p className="indicator-card__source">
-        출처 {indicator.sourceName} · {formatKstDateTime(indicator.updatedAt)}
-      </p>
+      <p className="indicator-card__source">출처 {indicator.sourceName}</p>
     </>
   )
 

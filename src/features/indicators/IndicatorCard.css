@@ -56,10 +56,22 @@
   color: var(--color-text-muted);
 }
 
-.indicator-card__meta {
-  margin: 0 0 4px;
-  font-size: 0.72rem;
+.indicator-card__schedule {
+  margin: 0 0 2px;
+  font-size: 0.7rem;
   color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.indicator-card__basis {
+  margin: 0 0 4px;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .indicator-card__pending {
