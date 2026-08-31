@@ -53,6 +53,38 @@ describe('collectOpinetFuel', () => {
     expect(result.indicators[0]).toMatchObject({ value: 1650.25, change: 3.5 })
   })
 
+  it('응답에 TRADE_DT(YYYYMMDD)가 있으면 오늘 날짜 대신 그 값을 기준일로 쓴다', async () => {
+    stubFetch({
+      ok: true,
+      text: async () =>
+        JSON.stringify({
+          RESULT: {
+            OIL: [
+              { PRODCD: 'B027', PRICE: '1650.25', DIFF: '3.50', TRADE_DT: '20260825' },
+              { PRODCD: 'D047', PRICE: '1520.10', DIFF: '-1.20', TRADE_DT: '20260825' },
+            ],
+          },
+        }),
+    })
+    const result = await collectOpinetFuel()
+    expect(result.status).toBe('success')
+    if (result.status !== 'success') throw new Error('unreachable')
+    expect(result.indicators.map((i) => i.referenceDate)).toEqual(['2026-08-25', '2026-08-25'])
+  })
+
+  it('TRADE_DT가 없거나 형식이 다르면(추측하지 않고) 오늘 날짜로 대체한다', async () => {
+    stubFetch({
+      ok: true,
+      text: async () => JSON.stringify({ RESULT: { OIL: [{ PRODCD: 'B027', PRICE: '1650.25', DIFF: '3.50', TRADE_DT: '2026-08-25' }] } }),
+    })
+    const result = await collectOpinetFuel()
+    expect(result.status).toBe('success')
+    if (result.status !== 'success') throw new Error('unreachable')
+    const today = new Date()
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    expect(result.indicators[0].referenceDate).toBe(todayIso)
+  })
+
   it('결과가 1건이면 RESULT.OIL이 배열이 아니라 단일 객체로 와도 처리한다', async () => {
     stubFetch({ ok: true, text: async () => JSON.stringify({ RESULT: { OIL: { PRODCD: 'B027', PRICE: '1650.25', DIFF: '3.50' } } }) })
     const result = await collectOpinetFuel()
