@@ -84,10 +84,23 @@ describe('computeFreshness', () => {
     )
   })
 
-  it('거시지표는 월간·분기 통계라 45일까지 fresh로 본다', () => {
-    expect(computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: '2026-07-16', category: 'macro' }, now)).toBe(
-      'fresh',
-    )
+  it('거시지표는 referenceDate가 아니라 검수 시각(updatedAt)으로 신선도를 판단한다 — 금리가 동결 상태라 기준일이 오래돼도 stale이 아니다', () => {
+    // 실제로 만들었다가 되돌린 회귀를 재현한다: 한국은행 기준금리가 7/16 이후
+    // 계속 동결(값이 안 바뀜)이라 referenceDate가 47일 전이어도, 브리핑 자체는
+    // 최근에 검수됐다면(updatedAt) 정상적으로 fresh여야 한다 — 금리가 안 바뀐
+    // 것과 정보가 오래된 것은 다르다.
+    const fortySevenDaysAgoRef = '2026-07-16'
+    const recentlyReviewed = now.toISOString()
+    expect(
+      computeFreshness({ value: 1, updatedAt: recentlyReviewed, referenceDate: fortySevenDaysAgoRef, category: 'macro' }, now),
+    ).toBe('fresh')
+  })
+
+  it('거시지표는 40일 전 검수까지는 fresh, 46일 전 검수부터는 stale이다', () => {
+    const fortyDaysAgo = new Date(now.getTime() - 40 * 24 * 60 * 60 * 1000).toISOString()
+    const fortySixDaysAgo = new Date(now.getTime() - 46 * 24 * 60 * 60 * 1000).toISOString()
+    expect(computeFreshness({ value: 1, updatedAt: fortyDaysAgo, referenceDate: '2026-01-01', category: 'macro' }, now)).toBe('fresh')
+    expect(computeFreshness({ value: 1, updatedAt: fortySixDaysAgo, referenceDate: '2026-01-01', category: 'macro' }, now)).toBe('stale')
   })
 })
 
