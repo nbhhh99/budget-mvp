@@ -124,31 +124,44 @@ export function formatChangeText(change: number | null, changeRate: number | nul
   return `전일 대비 ${parts.join(' ')} ${DIRECTION_LABEL[direction]}`.trim()
 }
 
-// 코인은 예외로 "얼마나 최근에 수집을 시도했는지"(updatedAt)로 신선도를 판단한다
-// — crypto의 referenceDate는 공식 기준일이 아니라 조회한 날짜 그 자체라
-// (loadCryptoIndicators.ts) 날짜 차이로는 신선도를 판단할 수 없다.
-const CRYPTO_FRESHNESS_WINDOW_MS = 15 * 60 * 1000
+// updatedAt이 "표시된 값이 실제로 최신인지"를 그대로 반영하는 두 카테고리는
+// updatedAt 기준으로 판단한다(referenceDate로 바꾸면 오히려 잘못된다):
+//   - crypto: referenceDate가 공식 기준일이 아니라 조회한 날짜 그 자체라
+//     (loadCryptoIndicators.ts) 날짜 차이로는 신선도를 판단할 수 없다. updatedAt
+//     (마지막 조회 시각)이 유일한 신호다.
+//   - macro: updatedAt이 "수집을 시도한 시각"이 아니라 재무 브리핑이 사람에게
+//     검수된 시각이다(briefing.reviewedAt — indicatorMacro.ts). 매 렌더링·매 수집
+//     시도마다 갱신되는 게 아니라 새 브리핑이 검수될 때만 바뀌므로, 다른
+//     카테고리와 달리 "최근에 확인했는지"를 정확히 반영한다. referenceDate(기준
+//     금리가 마지막으로 "바뀐" 날짜)는 금리가 안 바뀌면 몇 달째 그대로인 게
+//     정상이라 — referenceDate로 판단하면 전혀 문제없는 "동결"을 계속 "오래된
+//     정보"로 잘못 표시하게 된다(실제로 이 버그를 이번에 만들었다가 발견해
+//     되돌렸다: 한국은행 기준금리가 7/16 이후 동결 상태라는 이유만으로 stale로
+//     표시됐다).
+const UPDATED_AT_BASED_WINDOW_MS: Partial<Record<IndicatorCategory, number>> = {
+  crypto: 15 * 60 * 1000,
+  macro: 45 * 24 * 60 * 60 * 1000, // 월간·분기 통계라 검수 주기가 길다
+}
 
-// 그 외 카테고리는 실제 값의 기준일(referenceDate)이 오늘로부터 며칠이나
-// 지났는지로 신선도를 판단한다. 예전에는 updatedAt(수집 시도 시각)만 봤는데,
-// "수집기가 최근에 성공적으로 실행됐는지"와 "표시된 값이 실제로 최신인지"는
-// 다른 질문이다 — 실제로 WTI/Brent(EIA) 수집이 매일 성공하면서도(그때마다
-// updatedAt은 갱신됨) 응답의 최신 값 자체는 며칠째 그대로였던 사례가 있었다.
-// updatedAt만 봤을 때는 그 카드가 계속 "최신"으로 잘못 표시됐다.
+// 그 외 카테고리(환율·주식·금·해외유가·기름값)는 실제 값의 기준일(referenceDate)이
+// 오늘로부터 며칠이나 지났는지로 신선도를 판단한다. 이 카테고리들은 updatedAt이
+// "수집기가 마지막으로 성공적으로 실행을 시도한 시각"일 뿐이라(값이 바뀌었든
+// 아니든 매번 갱신됨) "표시된 값이 실제로 최신인지"와는 다른 질문이다 — 실제로
+// WTI/Brent(EIA) 수집이 매일 성공하면서도(그때마다 updatedAt은 갱신됨) 응답의
+// 최신 값 자체는 며칠째 그대로였던 사례가 있었다. updatedAt만 봤을 때는 그
+// 카드가 계속 "최신"으로 잘못 표시됐다.
 //
 // 평일에만 발표되는 지표(환율·주식·금·해외유가)는 금요일 값이 주말 내내, 그리고
 // 다음 영업일 발표 전까지는 정상적으로 "최신"이어야 하므로, 주말(최대 2일)과
 // 발표 지연 여유(1~2일)를 더해 4일을 기준으로 잡는다 — 관측된 지연 이력이 있는
 // 해외유가(oil)도 정확한 공식 SLA를 확인할 방법이 없어 같은 여유를 준다(추측해서
-// 더 좁히지 않는다). 기름값(fuel)은 매일(주말 포함) 발표되므로 더 짧게, 거시지표
-// (macro)는 월간·분기 통계라 발표 주기가 길어 넉넉히 잡는다.
-const FRESHNESS_WINDOW_DAYS: Record<Exclude<IndicatorCategory, 'crypto'>, number> = {
+// 더 좁히지 않는다). 기름값(fuel)은 매일(주말 포함) 발표되므로 더 짧게 잡는다.
+const REFERENCE_DATE_BASED_WINDOW_DAYS: Partial<Record<IndicatorCategory, number>> = {
   exchange: 4,
   stock: 4,
   oil: 4,
   fuel: 2,
   gold: 4,
-  macro: 45,
 }
 
 // referenceDate('YYYY-MM-DD')와 now를 같은 "달력일" 단위로 비교하기 위해, now도
@@ -165,10 +178,11 @@ export function computeFreshness(
 ): IndicatorFreshness {
   if (indicator.value === null) return 'unavailable'
 
-  if (indicator.category === 'crypto') {
+  const updatedAtWindowMs = UPDATED_AT_BASED_WINDOW_MS[indicator.category]
+  if (updatedAtWindowMs !== undefined) {
     const updatedAt = Date.parse(indicator.updatedAt)
     if (Number.isNaN(updatedAt)) return 'unavailable'
-    return now.getTime() - updatedAt <= CRYPTO_FRESHNESS_WINDOW_MS ? 'fresh' : 'stale'
+    return now.getTime() - updatedAt <= updatedAtWindowMs ? 'fresh' : 'stale'
   }
 
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(indicator.referenceDate)
@@ -176,7 +190,8 @@ export function computeFreshness(
   const [, year, month, day] = match
   const refDateMs = Date.UTC(Number(year), Number(month) - 1, Number(day))
   const daysOld = Math.round((toKstDateOnlyMs(now) - refDateMs) / (24 * 60 * 60 * 1000))
-  const windowDays = FRESHNESS_WINDOW_DAYS[indicator.category]
+  const windowDays = REFERENCE_DATE_BASED_WINDOW_DAYS[indicator.category]
+  if (windowDays === undefined) return 'unavailable' // 방어적 기본값 — 새 카테고리가 추가되면 여기서 드러난다
   return daysOld <= windowDays ? 'fresh' : 'stale'
 }
 
