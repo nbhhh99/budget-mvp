@@ -1,4 +1,5 @@
 import { describeFetchError } from './fetchError'
+import { fetchWithRetry, type FetchWithRetryOptions } from './fetchWithRetry'
 
 // 공공데이터포털(data.go.kr) REST API 공통 응답 처리 — fscIndex.ts·fscCommodity.ts가
 // 함께 쓴다(둘 다 apis.data.go.kr 위에 있고, 로그인 후 다운로드한 각 API의
@@ -143,6 +144,7 @@ async function fetchOnce(
   apiKey: string,
   dateStr: string,
   extraParams?: Record<string, string>,
+  retryOptions?: FetchWithRetryOptions,
 ): Promise<DataGoKrFetchResult> {
   const url = new URL(baseUrl)
   url.searchParams.set('serviceKey', normalizeServiceKey(apiKey))
@@ -161,7 +163,12 @@ async function fetchOnce(
 
   let res: Response
   try {
-    res = await fetch(url)
+    // 실제 GitHub Actions 실행에서 apis.data.go.kr에 대한 fetch() 자체가 네트워크
+    // 계층에서 간헐적으로 실패(Connect Timeout Error)하는 사례가 관측됐다 — 같은
+    // 호출이 하루 전엔 정상 응답했으므로 일시적 혼잡으로 보고 몇 차례 재시도한다
+    // (인증 오류·호출 한도 초과 같은 결정적 오류는 fetch()가 정상 응답을 반환한
+    // 뒤 아래에서 판정하므로 여기 재시도 대상이 아니다).
+    res = await fetchWithRetry(url, undefined, retryOptions)
   } catch (err) {
     return { kind: 'error', detail: describeFetchError(err) }
   }
@@ -204,11 +211,12 @@ export async function findLatestDataGoKr(
   startDate: Date,
   maxLookbackDays = 10,
   extraParams?: Record<string, string>,
+  retryOptions?: FetchWithRetryOptions,
 ): Promise<DataGoKrFetchResult> {
   for (let i = 0; i < maxLookbackDays; i++) {
     const d = new Date(startDate.getTime() - i * 24 * 60 * 60 * 1000)
     const dateStr = toKstYyyymmdd(d)
-    const outcome = await fetchOnce(baseUrl, apiKey, dateStr, extraParams)
+    const outcome = await fetchOnce(baseUrl, apiKey, dateStr, extraParams, retryOptions)
     if (outcome.kind !== 'no-data') return outcome
   }
   return { kind: 'no-data' }
