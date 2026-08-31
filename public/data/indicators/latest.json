@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T14:36:19.880Z",
+  "generatedAt": "2026-08-31T14:41:53.207Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -17,7 +17,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-jpy100-krw",
@@ -35,7 +35,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-eur-krw",
@@ -53,7 +53,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kospi",
@@ -70,7 +70,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kosdaq",
@@ -87,7 +87,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-sp500",
@@ -133,13 +133,13 @@
       "change": -2.44,
       "changeRate": -2.83,
       "referenceDate": "2026-08-25",
-      "updatedAt": "2026-08-31T02:05:50.168Z",
+      "updatedAt": "2026-08-31T14:41:53.207Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "oil-brent",
@@ -151,13 +151,13 @@
       "change": -4.47,
       "changeRate": -4.82,
       "referenceDate": "2026-08-25",
-      "updatedAt": "2026-08-31T02:05:50.168Z",
+      "updatedAt": "2026-08-31T14:41:53.207Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-gasoline",
@@ -208,7 +208,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094805/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-international",
