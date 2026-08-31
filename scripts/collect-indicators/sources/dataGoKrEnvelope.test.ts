@@ -165,14 +165,31 @@ describe('findLatestDataGoKr', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1) // 재시도하지 않고 즉시 전파
   })
 
-  it('fetch 자체가 네트워크 계층에서 실패하면 원인(cause)까지 함께 보고한다', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => {
-        throw new Error('fetch failed', { cause: new Error('getaddrinfo ENOTFOUND apis.data.go.kr') })
-      }),
-    )
-    const result = await findLatestDataGoKr('https://example.com', 'key', new Date())
+  it('fetch 자체가 네트워크 계층에서 계속 실패하면(재시도 소진) 원인(cause)까지 함께 보고한다', async () => {
+    const fetchSpy = vi.fn(async () => {
+      throw new Error('fetch failed', { cause: new Error('getaddrinfo ENOTFOUND apis.data.go.kr') })
+    })
+    vi.stubGlobal('fetch', fetchSpy)
+    // delayMs: 0으로 재시도 사이 대기 없이 빠르게 테스트한다 — 재시도 자체는
+    // fetchWithRetry.test.ts에서 이미 검증했으므로, 여기서는 findLatestDataGoKr가
+    // 그 결과를 error로 정확히 옮기는지만 확인한다.
+    const result = await findLatestDataGoKr('https://example.com', 'key', new Date(), 10, undefined, { attempts: 2, delayMs: 0 })
     expect(result).toEqual({ kind: 'error', detail: 'fetch failed: getaddrinfo ENOTFOUND apis.data.go.kr' })
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('네트워크 계층 오류가 일시적이면(재시도 중 성공) 정상 응답으로 복구된다', async () => {
+    // 실제 GitHub Actions 실행에서 관측된 증상을 재현한다: 같은 날짜에 대한 호출이
+    // 처음엔 Connect Timeout Error로 실패했다가 재시도에서 성공한다.
+    let call = 0
+    const fetchSpy = vi.fn(async () => {
+      call += 1
+      if (call === 1) throw new Error('fetch failed', { cause: new Error('Connect Timeout Error') })
+      return { ok: true, status: 200, text: async () => jsonEnvelope('00', 'NORMAL SERVICE.', { item: { basDt: '20260828' } }) }
+    })
+    vi.stubGlobal('fetch', fetchSpy)
+    const result = await findLatestDataGoKr('https://example.com', 'key', new Date(), 10, undefined, { attempts: 3, delayMs: 0 })
+    expect(result).toEqual({ kind: 'ok', dateStr: expect.any(String), rows: [{ basDt: '20260828' }] })
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
   })
 })
