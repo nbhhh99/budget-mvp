@@ -1,5 +1,6 @@
 import type { CollectedIndicator, ProviderResult } from '../types'
 import { describeFetchError } from './fetchError'
+import { yyyymmddToIso } from './dataGoKrEnvelope'
 
 const PROVIDER = 'opinet-fuel'
 
@@ -175,7 +176,7 @@ export async function collectOpinetFuel(): Promise<ProviderResult> {
 
     const rows = outcome.rows
     const today = new Date()
-    const referenceDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
     const items: CollectedIndicator[] = []
     for (const target of TARGET_PRODUCTS) {
@@ -184,6 +185,14 @@ export async function collectOpinetFuel(): Promise<ProviderResult> {
       if (value === null) continue
       const change = toNumber(row?.DIFF)
       const changeRate = change !== null && value !== 0 ? Number(((change / (value - change)) * 100).toFixed(2)) : null
+      // 응답의 TRADE_DT(YYYYMMDD, 실제 가격의 기준일)를 우선 쓴다 — 이전에는 항상
+      // "수집을 실행한 날"을 기준일로 표시해, 오피넷이 실제로 발표를 미루거나
+      // 실패해 값이 며칠째 그대로여도 화면에는 매번 "오늘" 기준으로 보여 신선도를
+      // 오도했다. TRADE_DT는 문서화된 필드가 아니라 optional로 두고, 형식이
+      // 다르거나 없으면 값을 지어내지 않고 지금까지처럼 오늘 날짜로 안전하게
+      // 대체한다.
+      const tradeDt = row?.TRADE_DT
+      const referenceDate = tradeDt && /^\d{8}$/.test(tradeDt) ? yyyymmddToIso(tradeDt) : todayIso
 
       items.push({
         id: target.id,

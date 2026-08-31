@@ -37,27 +37,57 @@ describe('formatChangeText', () => {
 })
 
 describe('computeFreshness', () => {
+  // KST로도 같은 날짜(2026-08-25)라 날짜 경계 문제 없이 단순하게 테스트할 수 있다.
   const now = new Date('2026-08-25T12:00:00.000Z')
 
   it('is unavailable when value is null', () => {
-    expect(computeFreshness({ value: null, updatedAt: now.toISOString(), category: 'exchange' }, now)).toBe('unavailable')
+    expect(computeFreshness({ value: null, updatedAt: now.toISOString(), referenceDate: '2026-08-25', category: 'exchange' }, now)).toBe(
+      'unavailable',
+    )
   })
 
-  it('is fresh within the crypto 15-minute window and stale just past it', () => {
+  it('is unavailable when referenceDate is malformed(non-crypto categories rely on it)', () => {
+    expect(computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: 'not-a-date', category: 'exchange' }, now)).toBe(
+      'unavailable',
+    )
+  })
+
+  it('crypto는 여전히 updatedAt 기준 15분 창을 쓴다(referenceDate가 조회 날짜일 뿐이라 무시)', () => {
     const tenMinAgo = new Date(now.getTime() - 10 * 60 * 1000).toISOString()
     const twentyMinAgo = new Date(now.getTime() - 20 * 60 * 1000).toISOString()
-    expect(computeFreshness({ value: 1, updatedAt: tenMinAgo, category: 'crypto' }, now)).toBe('fresh')
-    expect(computeFreshness({ value: 1, updatedAt: twentyMinAgo, category: 'crypto' }, now)).toBe('stale')
+    expect(computeFreshness({ value: 1, updatedAt: tenMinAgo, referenceDate: '2026-08-25', category: 'crypto' }, now)).toBe('fresh')
+    expect(computeFreshness({ value: 1, updatedAt: twentyMinAgo, referenceDate: '2026-08-25', category: 'crypto' }, now)).toBe('stale')
   })
 
-  it('is fresh within the daily-category window (well under 36h)', () => {
-    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString()
-    expect(computeFreshness({ value: 1, updatedAt: twelveHoursAgo, category: 'exchange' }, now)).toBe('fresh')
+  it('crypto가 아니면 updatedAt이 아무리 최근이어도 referenceDate가 오래됐으면 stale이다(수집 성공 ≠ 데이터가 최신)', () => {
+    // 실제로 관측된 사례를 그대로 재현한다: EIA(WTI/Brent) 수집이 매일 성공해
+    // updatedAt은 계속 "지금"으로 갱신되지만, 응답의 최신 값 자체(referenceDate)는
+    // 며칠째 그대로였다 — updatedAt만 보면 "fresh"로 잘못 표시된다.
+    expect(
+      computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: '2026-08-19', category: 'oil' }, now),
+    ).toBe('stale')
   })
 
-  it('is stale for an exchange indicator updated 3 days ago', () => {
-    const threeDaysAgo = new Date(now.getTime() - 72 * 60 * 60 * 1000).toISOString()
-    expect(computeFreshness({ value: 1, updatedAt: threeDaysAgo, category: 'exchange' }, now)).toBe('stale')
+  it('평일 발표 카테고리(환율·주식·금·해외유가)는 4일까지는 fresh, 5일부터 stale이다', () => {
+    for (const category of ['exchange', 'stock', 'gold', 'oil'] as const) {
+      expect(computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: '2026-08-21', category }, now)).toBe('fresh')
+      expect(computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: '2026-08-20', category }, now)).toBe('stale')
+    }
+  })
+
+  it('기름값(매일 발표)은 2일까지는 fresh, 3일부터 stale이다', () => {
+    expect(computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: '2026-08-23', category: 'fuel' }, now)).toBe(
+      'fresh',
+    )
+    expect(computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: '2026-08-22', category: 'fuel' }, now)).toBe(
+      'stale',
+    )
+  })
+
+  it('거시지표는 월간·분기 통계라 45일까지 fresh로 본다', () => {
+    expect(computeFreshness({ value: 1, updatedAt: now.toISOString(), referenceDate: '2026-07-16', category: 'macro' }, now)).toBe(
+      'fresh',
+    )
   })
 })
 

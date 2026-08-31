@@ -81,7 +81,10 @@ export async function loadCryptoIndicators(): Promise<MarketIndicator[]> {
       sourceName: '업비트',
       sourceUrl: 'https://upbit.com',
       marketStatus: 'unknown', // 24시간 거래되는 시장이라 개장/휴장 개념이 없다(§2)
-      freshness: computeFreshness({ value: source.value, updatedAt: source.fetchedAt, category: 'crypto' }, now),
+      freshness: computeFreshness(
+        { value: source.value, updatedAt: source.fetchedAt, referenceDate: now.toISOString().slice(0, 10), category: 'crypto' },
+        now,
+      ),
     })
   }
   return results

@@ -124,24 +124,60 @@ export function formatChangeText(change: number | null, changeRate: number | nul
   return `전일 대비 ${parts.join(' ')} ${DIRECTION_LABEL[direction]}`.trim()
 }
 
-// 카테고리별 "다음 값이 나오기 전까지 신선하다고 볼 수 있는" 시간(ms). 코인은 15분
-// (§3), 나머지는 하루(다음 영업일 갱신 전까지)를 넉넉히 잡는다.
-const FRESHNESS_WINDOW_MS: Record<IndicatorCategory, number> = {
-  crypto: 15 * 60 * 1000,
-  exchange: 36 * 60 * 60 * 1000,
-  stock: 36 * 60 * 60 * 1000,
-  oil: 36 * 60 * 60 * 1000,
-  fuel: 36 * 60 * 60 * 1000,
-  gold: 36 * 60 * 60 * 1000,
-  macro: 45 * 24 * 60 * 60 * 1000, // 월간·분기 통계라 발표 주기가 길다
+// 코인은 예외로 "얼마나 최근에 수집을 시도했는지"(updatedAt)로 신선도를 판단한다
+// — crypto의 referenceDate는 공식 기준일이 아니라 조회한 날짜 그 자체라
+// (loadCryptoIndicators.ts) 날짜 차이로는 신선도를 판단할 수 없다.
+const CRYPTO_FRESHNESS_WINDOW_MS = 15 * 60 * 1000
+
+// 그 외 카테고리는 실제 값의 기준일(referenceDate)이 오늘로부터 며칠이나
+// 지났는지로 신선도를 판단한다. 예전에는 updatedAt(수집 시도 시각)만 봤는데,
+// "수집기가 최근에 성공적으로 실행됐는지"와 "표시된 값이 실제로 최신인지"는
+// 다른 질문이다 — 실제로 WTI/Brent(EIA) 수집이 매일 성공하면서도(그때마다
+// updatedAt은 갱신됨) 응답의 최신 값 자체는 며칠째 그대로였던 사례가 있었다.
+// updatedAt만 봤을 때는 그 카드가 계속 "최신"으로 잘못 표시됐다.
+//
+// 평일에만 발표되는 지표(환율·주식·금·해외유가)는 금요일 값이 주말 내내, 그리고
+// 다음 영업일 발표 전까지는 정상적으로 "최신"이어야 하므로, 주말(최대 2일)과
+// 발표 지연 여유(1~2일)를 더해 4일을 기준으로 잡는다 — 관측된 지연 이력이 있는
+// 해외유가(oil)도 정확한 공식 SLA를 확인할 방법이 없어 같은 여유를 준다(추측해서
+// 더 좁히지 않는다). 기름값(fuel)은 매일(주말 포함) 발표되므로 더 짧게, 거시지표
+// (macro)는 월간·분기 통계라 발표 주기가 길어 넉넉히 잡는다.
+const FRESHNESS_WINDOW_DAYS: Record<Exclude<IndicatorCategory, 'crypto'>, number> = {
+  exchange: 4,
+  stock: 4,
+  oil: 4,
+  fuel: 2,
+  gold: 4,
+  macro: 45,
 }
 
-export function computeFreshness(indicator: Pick<MarketIndicator, 'value' | 'updatedAt' | 'category'>, now: Date): IndicatorFreshness {
+// referenceDate('YYYY-MM-DD')와 now를 같은 "달력일" 단위로 비교하기 위해, now도
+// 한국시간 기준 날짜로 변환한다(자정 근처에서 UTC 기준으로 비교하면 하루가
+// 밀릴 수 있다 — formatKstDate와 같은 이유).
+function toKstDateOnlyMs(date: Date): number {
+  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000)
+  return Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate())
+}
+
+export function computeFreshness(
+  indicator: Pick<MarketIndicator, 'value' | 'updatedAt' | 'referenceDate' | 'category'>,
+  now: Date,
+): IndicatorFreshness {
   if (indicator.value === null) return 'unavailable'
-  const updatedAt = Date.parse(indicator.updatedAt)
-  if (Number.isNaN(updatedAt)) return 'unavailable'
-  const windowMs = FRESHNESS_WINDOW_MS[indicator.category]
-  return now.getTime() - updatedAt <= windowMs ? 'fresh' : 'stale'
+
+  if (indicator.category === 'crypto') {
+    const updatedAt = Date.parse(indicator.updatedAt)
+    if (Number.isNaN(updatedAt)) return 'unavailable'
+    return now.getTime() - updatedAt <= CRYPTO_FRESHNESS_WINDOW_MS ? 'fresh' : 'stale'
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(indicator.referenceDate)
+  if (!match) return 'unavailable'
+  const [, year, month, day] = match
+  const refDateMs = Date.UTC(Number(year), Number(month) - 1, Number(day))
+  const daysOld = Math.round((toKstDateOnlyMs(now) - refDateMs) / (24 * 60 * 60 * 1000))
+  const windowDays = FRESHNESS_WINDOW_DAYS[indicator.category]
+  return daysOld <= windowDays ? 'fresh' : 'stale'
 }
 
 const KST_DATE_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
