@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T15:15:45.211Z",
+  "generatedAt": "2026-09-01T00:59:18.883Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -17,7 +17,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-jpy100-krw",
@@ -35,7 +35,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-eur-krw",
@@ -53,7 +53,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kospi",
@@ -70,7 +70,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kosdaq",
@@ -87,7 +87,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-sp500",
@@ -163,35 +163,35 @@
       "id": "fuel-gasoline",
       "category": "fuel",
       "name": "전국 평균 휘발유",
-      "value": 1860.58,
+      "value": 1860.31,
       "unit": "원/리터",
-      "change": -0.08,
-      "changeRate": 0,
-      "referenceDate": "2026-08-31",
-      "updatedAt": "2026-08-31T00:12:19.258Z",
+      "change": -0.24,
+      "changeRate": -0.01,
+      "referenceDate": "2026-09-01",
+      "updatedAt": "2026-09-01T00:59:18.883Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-diesel",
       "category": "fuel",
       "name": "전국 평균 경유",
-      "value": 1844.5,
+      "value": 1844.17,
       "unit": "원/리터",
-      "change": -0.2,
-      "changeRate": -0.01,
-      "referenceDate": "2026-08-31",
-      "updatedAt": "2026-08-31T00:12:19.258Z",
+      "change": -0.59,
+      "changeRate": -0.03,
+      "referenceDate": "2026-09-01",
+      "updatedAt": "2026-09-01T00:59:18.883Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "gold-krx",
@@ -208,7 +208,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094805/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-international",
