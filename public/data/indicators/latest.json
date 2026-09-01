@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-01T12:40:46.504Z",
+  "generatedAt": "2026-09-01T23:48:04.472Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -163,35 +163,35 @@
       "id": "fuel-gasoline",
       "category": "fuel",
       "name": "전국 평균 휘발유",
-      "value": 1860.31,
+      "value": 1860.06,
       "unit": "원/리터",
-      "change": -0.24,
+      "change": -0.2,
       "changeRate": -0.01,
-      "referenceDate": "2026-09-01",
-      "updatedAt": "2026-09-01T00:59:18.883Z",
+      "referenceDate": "2026-09-02",
+      "updatedAt": "2026-09-01T23:48:04.472Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-diesel",
       "category": "fuel",
       "name": "전국 평균 경유",
-      "value": 1844.17,
+      "value": 1844.07,
       "unit": "원/리터",
-      "change": -0.59,
-      "changeRate": -0.03,
-      "referenceDate": "2026-09-01",
-      "updatedAt": "2026-09-01T00:59:18.883Z",
+      "change": -0.45,
+      "changeRate": -0.02,
+      "referenceDate": "2026-09-02",
+      "updatedAt": "2026-09-01T23:48:04.472Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "gold-krx",
