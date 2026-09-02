@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T12:13:15.103Z",
+  "generatedAt": "2026-09-02T23:51:45.335Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -70,7 +70,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kosdaq",
@@ -87,7 +87,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-sp500",
@@ -163,35 +163,35 @@
       "id": "fuel-gasoline",
       "category": "fuel",
       "name": "전국 평균 휘발유",
-      "value": 1860.06,
+      "value": 1859.78,
       "unit": "원/리터",
-      "change": -0.2,
+      "change": -0.1,
       "changeRate": -0.01,
-      "referenceDate": "2026-09-02",
-      "updatedAt": "2026-09-01T23:48:04.472Z",
+      "referenceDate": "2026-09-03",
+      "updatedAt": "2026-09-02T23:51:45.335Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-diesel",
       "category": "fuel",
       "name": "전국 평균 경유",
-      "value": 1844.07,
+      "value": 1843.83,
       "unit": "원/리터",
-      "change": -0.45,
-      "changeRate": -0.02,
-      "referenceDate": "2026-09-02",
-      "updatedAt": "2026-09-01T23:48:04.472Z",
+      "change": -0.5,
+      "changeRate": -0.03,
+      "referenceDate": "2026-09-03",
+      "updatedAt": "2026-09-02T23:51:45.335Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "gold-krx",
@@ -208,7 +208,7 @@
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094805/openapi.do",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-international",
