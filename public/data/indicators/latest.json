@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-02T23:51:45.335Z",
+  "generatedAt": "2026-09-03T01:53:28.398Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -128,36 +128,36 @@
       "category": "oil",
       "name": "WTI",
       "symbol": "RWTC",
-      "value": 83.9,
+      "value": 91.48,
       "unit": "달러/배럴",
-      "change": -2.44,
-      "changeRate": -2.83,
-      "referenceDate": "2026-08-25",
-      "updatedAt": "2026-09-02T01:47:21.498Z",
+      "change": 4.45,
+      "changeRate": 5.11,
+      "referenceDate": "2026-09-01",
+      "updatedAt": "2026-09-03T01:53:28.398Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "oil-brent",
       "category": "oil",
       "name": "Brent",
       "symbol": "RBRTE",
-      "value": 88.24,
+      "value": 96.02,
       "unit": "달러/배럴",
-      "change": -4.47,
-      "changeRate": -4.82,
-      "referenceDate": "2026-08-25",
-      "updatedAt": "2026-09-02T01:47:21.498Z",
+      "change": 6.27,
+      "changeRate": 6.99,
+      "referenceDate": "2026-09-01",
+      "updatedAt": "2026-09-03T01:53:28.398Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-gasoline",
@@ -174,7 +174,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-diesel",
@@ -191,7 +191,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-krx",
