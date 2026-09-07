@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T13:37:34.436Z",
+  "generatedAt": "2026-09-07T23:59:44.381Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -17,7 +17,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-jpy100-krw",
@@ -35,7 +35,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fx-eur-krw",
@@ -53,7 +53,7 @@
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "stock-kospi",
@@ -163,35 +163,35 @@
       "id": "fuel-gasoline",
       "category": "fuel",
       "name": "전국 평균 휘발유",
-      "value": 1859.25,
+      "value": 1859.16,
       "unit": "원/리터",
-      "change": -0.08,
-      "changeRate": 0,
-      "referenceDate": "2026-09-07",
-      "updatedAt": "2026-09-06T23:29:11.732Z",
+      "change": -0.15,
+      "changeRate": -0.01,
+      "referenceDate": "2026-09-08",
+      "updatedAt": "2026-09-07T23:59:44.381Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-diesel",
       "category": "fuel",
       "name": "전국 평균 경유",
-      "value": 1843.72,
+      "value": 1843.63,
       "unit": "원/리터",
-      "change": -0.01,
-      "changeRate": 0,
-      "referenceDate": "2026-09-07",
-      "updatedAt": "2026-09-06T23:29:11.732Z",
+      "change": -0.59,
+      "changeRate": -0.03,
+      "referenceDate": "2026-09-08",
+      "updatedAt": "2026-09-07T23:59:44.381Z",
       "timezone": "Asia/Seoul",
       "sourceId": "opinet-fuel",
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "gold-krx",
