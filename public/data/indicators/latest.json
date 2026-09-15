@@ -1,59 +1,59 @@
 {
-  "generatedAt": "2026-09-15T02:15:04.720Z",
+  "generatedAt": "2026-09-15T12:48:02.330Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
       "category": "exchange",
       "name": "원·달러 환율",
       "symbol": "USD",
-      "value": 1346.4,
+      "value": 1345.3,
       "unit": "원",
-      "change": 8.2,
-      "changeRate": 0.61,
-      "referenceDate": "2026-09-14",
-      "updatedAt": "2026-09-14T14:18:43.762Z",
+      "change": -1.1,
+      "changeRate": -0.08,
+      "referenceDate": "2026-09-15",
+      "updatedAt": "2026-09-15T12:48:02.330Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fx-jpy100-krw",
       "category": "exchange",
       "name": "원·100엔 환율",
       "symbol": "JPY(100)",
-      "value": 876.25,
+      "value": 872.07,
       "unit": "원",
-      "change": 9.76,
-      "changeRate": 1.13,
-      "referenceDate": "2026-09-14",
-      "updatedAt": "2026-09-14T14:18:43.762Z",
+      "change": -4.18,
+      "changeRate": -0.48,
+      "referenceDate": "2026-09-15",
+      "updatedAt": "2026-09-15T12:48:02.330Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fx-eur-krw",
       "category": "exchange",
       "name": "원·유로 환율",
       "symbol": "EUR",
-      "value": 1560.81,
+      "value": 1554.09,
       "unit": "원",
-      "change": 7.29,
-      "changeRate": 0.47,
-      "referenceDate": "2026-09-14",
-      "updatedAt": "2026-09-14T14:18:43.762Z",
+      "change": -6.72,
+      "changeRate": -0.43,
+      "referenceDate": "2026-09-15",
+      "updatedAt": "2026-09-15T12:48:02.330Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "stock-kospi",
@@ -139,7 +139,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "oil-brent",
@@ -157,7 +157,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-gasoline",
