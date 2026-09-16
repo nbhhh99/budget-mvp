@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-15T23:57:53.624Z",
+  "generatedAt": "2026-09-16T02:08:06.291Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -133,13 +133,13 @@
       "change": 3.05,
       "changeRate": 3.24,
       "referenceDate": "2026-09-09",
-      "updatedAt": "2026-09-15T02:15:04.720Z",
+      "updatedAt": "2026-09-16T02:08:06.291Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "oil-brent",
@@ -151,13 +151,13 @@
       "change": 3.39,
       "changeRate": 3.19,
       "referenceDate": "2026-09-09",
-      "updatedAt": "2026-09-15T02:15:04.720Z",
+      "updatedAt": "2026-09-16T02:08:06.291Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-gasoline",
@@ -174,7 +174,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-diesel",
@@ -191,7 +191,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-krx",
