@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-17T00:06:21.387Z",
+  "generatedAt": "2026-09-17T02:11:38.124Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -128,36 +128,36 @@
       "category": "oil",
       "name": "WTI",
       "symbol": "RWTC",
-      "value": 97.26,
+      "value": 107.02,
       "unit": "달러/배럴",
-      "change": 3.05,
-      "changeRate": 3.24,
-      "referenceDate": "2026-09-09",
-      "updatedAt": "2026-09-16T02:08:06.291Z",
+      "change": 4.6,
+      "changeRate": 4.49,
+      "referenceDate": "2026-09-15",
+      "updatedAt": "2026-09-17T02:11:38.124Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "oil-brent",
       "category": "oil",
       "name": "Brent",
       "symbol": "RBRTE",
-      "value": 109.51,
+      "value": 130.8,
       "unit": "달러/배럴",
-      "change": 3.39,
-      "changeRate": 3.19,
-      "referenceDate": "2026-09-09",
-      "updatedAt": "2026-09-16T02:08:06.291Z",
+      "change": 9.55,
+      "changeRate": 7.88,
+      "referenceDate": "2026-09-15",
+      "updatedAt": "2026-09-17T02:11:38.124Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-gasoline",
@@ -174,7 +174,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-diesel",
@@ -191,7 +191,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-krx",
