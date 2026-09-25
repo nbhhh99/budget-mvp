@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-25T02:17:03.682Z",
+  "generatedAt": "2026-09-25T12:51:47.561Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -11,13 +11,13 @@
       "change": -24.3,
       "changeRate": -1.76,
       "referenceDate": "2026-09-23",
-      "updatedAt": "2026-09-24T12:49:37.340Z",
+      "updatedAt": "2026-09-25T12:51:47.561Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fx-jpy100-krw",
@@ -29,13 +29,13 @@
       "change": -16.16,
       "changeRate": -1.84,
       "referenceDate": "2026-09-23",
-      "updatedAt": "2026-09-24T12:49:37.340Z",
+      "updatedAt": "2026-09-25T12:51:47.561Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fx-eur-krw",
@@ -47,13 +47,13 @@
       "change": -30.17,
       "changeRate": -1.9,
       "referenceDate": "2026-09-23",
-      "updatedAt": "2026-09-24T12:49:37.340Z",
+      "updatedAt": "2026-09-25T12:51:47.561Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eximbank-fx",
       "sourceName": "한국수출입은행",
       "sourceUrl": "https://www.koreaexim.go.kr",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "stock-kospi",
@@ -64,13 +64,13 @@
       "change": 10.19,
       "changeRate": 0.15,
       "referenceDate": "2026-09-22",
-      "updatedAt": "2026-09-24T12:49:37.340Z",
+      "updatedAt": "2026-09-25T12:51:47.561Z",
       "timezone": "Asia/Seoul",
       "sourceId": "fsc-index",
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "stock-kosdaq",
@@ -81,13 +81,13 @@
       "change": -1.89,
       "changeRate": -0.23,
       "referenceDate": "2026-09-22",
-      "updatedAt": "2026-09-24T12:49:37.340Z",
+      "updatedAt": "2026-09-25T12:51:47.561Z",
       "timezone": "Asia/Seoul",
       "sourceId": "fsc-index",
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "stock-sp500",
@@ -139,7 +139,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "oil-brent",
@@ -157,7 +157,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-gasoline",
@@ -202,13 +202,13 @@
       "change": -4250,
       "changeRate": -2.2,
       "referenceDate": "2026-09-22",
-      "updatedAt": "2026-09-24T12:49:37.340Z",
+      "updatedAt": "2026-09-25T12:51:47.561Z",
       "timezone": "Asia/Seoul",
       "sourceId": "fsc-gold",
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094805/openapi.do",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "gold-international",
