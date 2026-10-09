@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T03:28:20.997Z",
+  "generatedAt": "2026-10-09T14:28:59.683Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -64,13 +64,13 @@
       "change": -137.49,
       "changeRate": -1.98,
       "referenceDate": "2026-10-07",
-      "updatedAt": "2026-10-08T14:45:48.512Z",
+      "updatedAt": "2026-10-09T14:28:59.683Z",
       "timezone": "Asia/Seoul",
       "sourceId": "fsc-index",
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "stock-kosdaq",
@@ -81,13 +81,13 @@
       "change": -21.49,
       "changeRate": -2.34,
       "referenceDate": "2026-10-07",
-      "updatedAt": "2026-10-08T14:45:48.512Z",
+      "updatedAt": "2026-10-09T14:28:59.683Z",
       "timezone": "Asia/Seoul",
       "sourceId": "fsc-index",
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094807/openapi.do",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "stock-sp500",
@@ -139,7 +139,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "oil-brent",
@@ -157,7 +157,7 @@
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-gasoline",
@@ -202,13 +202,13 @@
       "change": -250,
       "changeRate": -0.14,
       "referenceDate": "2026-10-07",
-      "updatedAt": "2026-10-08T14:45:48.512Z",
+      "updatedAt": "2026-10-09T14:28:59.683Z",
       "timezone": "Asia/Seoul",
       "sourceId": "fsc-gold",
       "sourceName": "금융위원회(한국거래소 제공)",
       "sourceUrl": "https://www.data.go.kr/data/15094805/openapi.do",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "gold-international",
