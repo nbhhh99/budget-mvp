@@ -1,9 +1,5 @@
 [
   {
-    "referenceDate": "2026-08-31",
-    "value": 1594.47
-  },
-  {
     "referenceDate": "2026-09-04",
     "value": 1580.35
   },
@@ -118,5 +114,9 @@
   {
     "referenceDate": "2026-10-20",
     "value": 1493.48
+  },
+  {
+    "referenceDate": "2026-10-21",
+    "value": 1491.14
   }
 ]
