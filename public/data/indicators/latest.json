@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T02:55:54.470Z",
+  "generatedAt": "2026-11-19T04:52:45.280Z",
   "indicators": [
     {
       "id": "fx-usd-krw",
@@ -128,36 +128,36 @@
       "category": "oil",
       "name": "WTI",
       "symbol": "RWTC",
-      "value": 89.62,
+      "value": 89.53,
       "unit": "달러/배럴",
-      "change": 0,
-      "changeRate": 0,
-      "referenceDate": "2026-11-11",
-      "updatedAt": "2026-11-18T04:58:22.391Z",
+      "change": 0.29,
+      "changeRate": 0.32,
+      "referenceDate": "2026-11-17",
+      "updatedAt": "2026-11-19T04:52:45.280Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "oil-brent",
       "category": "oil",
       "name": "Brent",
       "symbol": "RBRTE",
-      "value": 92.14,
+      "value": 92.94,
       "unit": "달러/배럴",
-      "change": 1.98,
-      "changeRate": 2.2,
-      "referenceDate": "2026-11-11",
-      "updatedAt": "2026-11-18T04:58:22.391Z",
+      "change": 0.04,
+      "changeRate": 0.04,
+      "referenceDate": "2026-11-17",
+      "updatedAt": "2026-11-19T04:52:45.280Z",
       "timezone": "Asia/Seoul",
       "sourceId": "eia",
       "sourceName": "U.S. Energy Information Administration",
       "sourceUrl": "https://www.eia.gov/opendata",
       "marketStatus": "closed",
-      "freshness": "stale"
+      "freshness": "fresh"
     },
     {
       "id": "fuel-gasoline",
@@ -174,7 +174,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "fuel-diesel",
@@ -191,7 +191,7 @@
       "sourceName": "한국석유공사 오피넷",
       "sourceUrl": "https://www.opinet.co.kr",
       "marketStatus": "unknown",
-      "freshness": "fresh"
+      "freshness": "stale"
     },
     {
       "id": "gold-krx",
